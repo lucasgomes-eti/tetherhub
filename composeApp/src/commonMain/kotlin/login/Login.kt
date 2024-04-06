@@ -1,3 +1,5 @@
+package login
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,19 +39,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import registration.RegistrationScreen
 
 @Composable
 fun Login(
-    loginUiState: LoginScreenModel.LoginUiState,
-    onLoginAction: (LoginScreenModel.LoginAction) -> Unit
+    loginUiState: LoginUiState,
+    onLoginAction: (LoginAction) -> Unit
 ) {
 
     val navigator = LocalNavigator.currentOrThrow
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
     when (loginUiState.event) {
-        LoginScreenModel.LoginEvent.NONE -> Unit
-        LoginScreenModel.LoginEvent.SUCCESS -> TODO("Navigate to home")
+        LoginEvent.NONE -> Unit
+        LoginEvent.SUCCESS -> TODO("Navigate to home")
     }
 
     Column(
@@ -68,7 +71,7 @@ fun Login(
             TextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = loginUiState.email,
-                onValueChange = { onLoginAction(LoginScreenModel.LoginAction.EmailChanged(it)) },
+                onValueChange = { onLoginAction(LoginAction.EmailChanged(it)) },
                 isError = loginUiState.errorMsg.isNotEmpty(),
                 singleLine = true,
                 label = { Text("email") },
@@ -78,7 +81,7 @@ fun Login(
             TextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = loginUiState.password,
-                onValueChange = { onLoginAction(LoginScreenModel.LoginAction.PasswordChanged(it)) },
+                onValueChange = { onLoginAction(LoginAction.PasswordChanged(it)) },
                 isError = loginUiState.errorMsg.isNotEmpty(),
                 singleLine = true,
                 label = { Text("password") },
@@ -92,7 +95,7 @@ fun Login(
                     }
                 },
                 keyboardActions = KeyboardActions(onDone = {
-                    onLoginAction(LoginScreenModel.LoginAction.Login)
+                    onLoginAction(LoginAction.Login)
                     defaultKeyboardAction(ImeAction.Done)
                 })
             )
@@ -108,7 +111,7 @@ fun Login(
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !loginUiState.isLoading,
-                onClick = { onLoginAction(LoginScreenModel.LoginAction.Login) }) {
+                onClick = { onLoginAction(LoginAction.Login) }) {
                 if (loginUiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(with(LocalDensity.current) { typography.bodyMedium.fontSize.toDp() })

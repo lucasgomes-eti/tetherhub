@@ -1,3 +1,5 @@
+package login
+
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.delay
@@ -8,25 +10,15 @@ import kotlinx.coroutines.launch
 
 class LoginScreenModel : ScreenModel {
 
-    data class LoginUiState(
-        val email: String,
-        val password: String,
-        val errorMsg: String,
-        val isLoading: Boolean,
-        val event: LoginEvent
+    private val _uiState = MutableStateFlow(
+        LoginUiState(
+            email = "",
+            password = "",
+            errorMsg = "",
+            isLoading = false,
+            event = LoginEvent.NONE
+        )
     )
-
-    sealed class LoginAction {
-        data class EmailChanged(val value: String) : LoginAction()
-
-        data class PasswordChanged(val value: String) : LoginAction()
-
-        data object Login : LoginAction()
-    }
-
-    enum class LoginEvent { NONE, SUCCESS }
-
-    private val _uiState = MutableStateFlow(LoginUiState("", "", "", false, LoginEvent.NONE))
     val uiState = _uiState.asStateFlow()
 
     fun onAction(loginAction: LoginAction) {
