@@ -1,3 +1,4 @@
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -5,14 +6,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -24,19 +28,29 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 
 @Composable
-fun Login() {
+fun Login(
+    loginUiState: LoginScreenModel.LoginUiState,
+    onLoginAction: (LoginScreenModel.LoginAction) -> Unit
+) {
 
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+    val navigator = LocalNavigator.currentOrThrow
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
+
+    when (loginUiState.event) {
+        LoginScreenModel.LoginEvent.NONE -> Unit
+        LoginScreenModel.LoginEvent.SUCCESS -> TODO("Navigate to home")
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -53,8 +67,9 @@ fun Login() {
             Spacer(modifier = Modifier.height(48.dp))
             TextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = email,
-                onValueChange = { email = it },
+                value = loginUiState.email,
+                onValueChange = { onLoginAction(LoginScreenModel.LoginAction.EmailChanged(it)) },
+                isError = loginUiState.errorMsg.isNotEmpty(),
                 singleLine = true,
                 label = { Text("email") },
                 placeholder = { Text("example@provider.com") },
@@ -62,8 +77,10 @@ fun Login() {
             )
             TextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = password,
-                onValueChange = { password = it },
+                value = loginUiState.password,
+                onValueChange = { onLoginAction(LoginScreenModel.LoginAction.PasswordChanged(it)) },
+                isError = loginUiState.errorMsg.isNotEmpty(),
+                singleLine = true,
                 label = { Text("password") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                 visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
@@ -74,14 +91,37 @@ fun Login() {
                         Icon(imageVector = visibilityIcon, contentDescription = description)
                     }
                 },
-                keyboardActions = KeyboardActions(onDone = { defaultKeyboardAction(ImeAction.Done) })
+                keyboardActions = KeyboardActions(onDone = {
+                    onLoginAction(LoginScreenModel.LoginAction.Login)
+                    defaultKeyboardAction(ImeAction.Done)
+                })
             )
-            Button(modifier = Modifier.fillMaxWidth(), onClick = {}) { Text("Login") }
+            AnimatedVisibility(visible = loginUiState.errorMsg.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = loginUiState.errorMsg,
+                    textAlign = TextAlign.Left,
+                    style = typography.bodyMedium,
+                    color = colorScheme.error
+                )
+            }
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !loginUiState.isLoading,
+                onClick = { onLoginAction(LoginScreenModel.LoginAction.Login) }) {
+                if (loginUiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(with(LocalDensity.current) { typography.bodyMedium.fontSize.toDp() })
+                    )
+                } else {
+                    Text("Login", style = typography.bodyMedium)
+                }
+            }
             Spacer(Modifier.height(48.dp))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("Don't have an account?")
-                OutlinedButton(onClick = {}) {
-                    Text("Create an account")
+                Text("Don't have an account?", style = typography.bodyLarge)
+                OutlinedButton(onClick = { navigator.push(RegistrationScreen) }) {
+                    Text("Create an account", style = typography.bodyMedium)
                 }
             }
         }

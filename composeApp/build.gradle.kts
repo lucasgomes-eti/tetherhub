@@ -39,6 +39,10 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
             implementation(compose.materialIconsExtended)
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.screenModel)
+            implementation(libs.voyager.tabNavigator)
+            implementation(libs.voyager.transitions)
         }
     }
 }

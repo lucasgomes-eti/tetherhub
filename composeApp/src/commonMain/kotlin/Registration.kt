@@ -31,10 +31,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Registration() {
+
+    val navigator = LocalNavigator.currentOrThrow
 
     var email by rememberSaveable { mutableStateOf("") }
     var username by rememberSaveable { mutableStateOf("") }
@@ -53,7 +57,7 @@ fun Registration() {
                 ),
                 title = { Text("Registration") },
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { navigator.pop() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             "Navigate back"
@@ -81,8 +85,8 @@ fun Registration() {
                 )
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = email,
-                    onValueChange = { email = it },
+                    value = username,
+                    onValueChange = { username = it },
                     singleLine = true,
                     label = { Text("username") },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
