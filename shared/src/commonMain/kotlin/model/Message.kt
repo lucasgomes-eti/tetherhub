@@ -1,6 +1,6 @@
 package model
 
-data class Message(
+open class Message(
     val id: String,
     val sender: User,
     val content: String,
