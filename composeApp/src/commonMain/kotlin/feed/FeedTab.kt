@@ -15,7 +15,7 @@ object FeedTab : Tab {
     override fun Content() {
         val feedScreenModel = rememberScreenModel { FeedScreenModel() }
         val feedUiState by feedScreenModel.uiState.collectAsState()
-        Feed(feedUiState)
+        Feed(feedUiState, feedScreenModel::onAction)
     }
 
     override val options: TabOptions
