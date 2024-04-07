@@ -1,4 +1,6 @@
-data class Author(
+package model
+
+data class User(
     val id: String,
     val username: String
 )

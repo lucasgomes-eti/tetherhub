@@ -13,10 +13,11 @@ import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import feed.FeedTab
+import messages.MessagesTab
 
 @Composable
 fun Home() {
-    TabNavigator(FeedTab) {
+    TabNavigator(MessagesTab) {
         Scaffold(bottomBar = {
             NavigationBar {
                 TabItem(FeedTab)

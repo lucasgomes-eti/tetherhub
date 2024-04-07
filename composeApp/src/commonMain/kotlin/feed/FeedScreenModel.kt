@@ -1,24 +1,13 @@
 package feed
 
-import Author
-import Post
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-data class FeedUiState(
-    val posts: List<LocalPost>
-)
-
-data class LocalPost(private val post: Post, val isLiked: Boolean) :
-    Post(post.id, post.author, post.content, post.likes)
-
-sealed class FeedAction {
-    data class Like(val postId: String) : FeedAction()
-}
+import model.Post
+import model.User
 
 class FeedScreenModel : ScreenModel {
 
@@ -28,7 +17,7 @@ class FeedScreenModel : ScreenModel {
                 LocalPost(
                     Post(
                         "1",
-                        Author("1", "scary"),
+                        User("1", "scary"),
                         "We are currently aware of an issue that these balance changes are only reflected in a game mode that appears in the arcade. So we’re gonna call it “Balanced Overwatch” for now. Sorry for any confusion.",
                         3
                     ), true
@@ -36,7 +25,7 @@ class FeedScreenModel : ScreenModel {
                 LocalPost(
                     Post(
                         "2",
-                        Author("1", "scary"),
+                        User("1", "scary"),
                         "There are also some new challenges that are granting some of our developer’s doodles as sprays. We’re not sure why that is happening, but they are really cool looking.",
                         0
                     ), false

@@ -1,21 +1,21 @@
-package home
+package messages
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 
 object MessagesTab : Tab {
     @Composable
     override fun Content() {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Messages") }
+        val conversationsScreenModel = rememberScreenModel { ConversationsScreenModel() }
+        val conversationsUiState by conversationsScreenModel.uiState.collectAsState()
+        Conversations(conversationsUiState)
     }
 
     override val options: TabOptions
