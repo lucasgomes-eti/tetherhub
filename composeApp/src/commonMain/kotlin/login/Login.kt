@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import home.HomeScreen
 import registration.RegistrationScreen
 
 @Composable
@@ -52,7 +53,7 @@ fun Login(
 
     when (loginUiState.event) {
         LoginEvent.NONE -> Unit
-        LoginEvent.SUCCESS -> TODO("Navigate to home")
+        LoginEvent.SUCCESS -> navigator.replace(HomeScreen)
     }
 
     Column(

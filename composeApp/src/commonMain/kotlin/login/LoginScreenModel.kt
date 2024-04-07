@@ -40,8 +40,10 @@ class LoginScreenModel : ScreenModel {
     private fun onLogin() {
         screenModelScope.launch {
             _uiState.update { state -> state.copy(isLoading = true) }
-            delay(2_000)
+            delay(1_000)
             _uiState.update { state -> state.copy(isLoading = false, errorMsg = "email or password are incorrect") }
+            delay(1_000)
+            _uiState.update { state -> state.copy(errorMsg = "", event = LoginEvent.SUCCESS) }
         }
     }
 }
