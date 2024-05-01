@@ -25,10 +25,11 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import feed.FeedTab
 import messages.MessagesTab
+import profile.ProfileTab
 
 @Composable
 fun Home() {
-    TabNavigator(MessagesTab) {
+    TabNavigator(ProfileTab) {
 
         val navigationAppBar = remember { NavigationAppBar(mutableStateOf(true)) }
 
