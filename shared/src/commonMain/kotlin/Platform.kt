@@ -1,5 +1,9 @@
 interface Platform {
-    val name: String
+    val os: OS
+}
+
+enum class OS {
+    ANDROID, IOS, JVM
 }
 
 expect fun getPlatform(): Platform

@@ -12,6 +12,6 @@ object ChatScreen : Screen {
     override fun Content() {
         val chatScreenModel = rememberScreenModel { ChatScreenModel() }
         val chatUiState by chatScreenModel.uiState.collectAsState()
-        Chat(chatUiState)
+        Chat(chatUiState, chatScreenModel::onChatAction)
     }
 }

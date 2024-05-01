@@ -31,7 +31,7 @@ fun Message(message: LocalMessage) {
                         bottomEnd = if (message.isFromMe) 0f else 48f
                     )
                 )
-                .background(if (message.isFromMe) colorScheme.primaryContainer else colorScheme.surfaceContainer)
+                .background(if (message.isFromMe) colorScheme.primaryContainer else colorScheme.surfaceVariant)
                 .padding(16.dp)
         ) {
             Text(message.content, style = typography.bodyMedium)
