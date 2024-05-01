@@ -55,6 +55,9 @@ class ChatScreenModel : ScreenModel {
 
     private fun onSend() {
         screenModelScope.launch {
+            if (_uiState.value.draft.isEmpty()) {
+                return@launch
+            }
             val messages = _uiState.value.messages.toMutableList().apply {
                 add(
                     LocalMessage(
