@@ -1,6 +1,6 @@
 package model
 
-data class User(
-    val id: String,
-    val username: String
+open class User(
+    open val id: String,
+    open val username: String
 )
