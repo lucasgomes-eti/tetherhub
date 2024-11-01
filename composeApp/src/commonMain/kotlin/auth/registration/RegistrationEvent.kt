@@ -1,3 +1,3 @@
-package registration
+package auth.registration
 
 enum class RegistrationEvent { NONE, SUCCESS }

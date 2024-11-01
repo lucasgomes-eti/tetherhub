@@ -1,4 +1,4 @@
-package login
+package auth.login
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState

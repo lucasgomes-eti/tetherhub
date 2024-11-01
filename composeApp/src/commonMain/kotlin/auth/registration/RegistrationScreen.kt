@@ -1,4 +1,4 @@
-package registration
+package auth.registration
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState

@@ -1,4 +1,4 @@
-package login
+package auth.login
 
 sealed class LoginAction {
     data class EmailChanged(val value: String) : LoginAction()

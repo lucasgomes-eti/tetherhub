@@ -23,12 +23,18 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun Post(post: LocalPost, onPostLiked: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             Text(post.author.username, style = typography.labelMedium)
             Text(post.content, style = typography.bodyLarge)
         }
         TextButton(modifier = Modifier.fillMaxWidth(), onClick = onPostLiked) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 Text("Like", style = typography.bodyMedium)
                 BadgedBox(badge = { if (post.likes > 0) Badge { Text(post.likes.toString()) } }) {
                     Icon(
@@ -40,3 +46,10 @@ fun Post(post: LocalPost, onPostLiked: () -> Unit) {
         }
     }
 }
+
+open class Post(
+    val id: String,
+    val author: User,
+    val content: String,
+    val likes: Int
+)

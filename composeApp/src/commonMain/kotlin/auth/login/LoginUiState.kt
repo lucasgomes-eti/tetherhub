@@ -1,4 +1,4 @@
-package login
+package auth.login
 
 data class LoginUiState(
     val email: String,

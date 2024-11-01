@@ -1,4 +1,4 @@
-package registration
+package auth.registration
 
 sealed class RegistrationAction {
     data class EmailChanged(val value: String) : RegistrationAction()

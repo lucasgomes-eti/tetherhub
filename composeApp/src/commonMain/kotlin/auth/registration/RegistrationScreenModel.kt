@@ -1,4 +1,4 @@
-package registration
+package auth.registration
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -31,7 +31,10 @@ class RegistrationScreenModel : ScreenModel {
             is RegistrationAction.EmailChanged -> onEmailChanged(registrationAction.value)
             is RegistrationAction.UsernameChanged -> onUsernameChanged(registrationAction.value)
             is RegistrationAction.PasswordChanged -> onPasswordChanged(registrationAction.value)
-            is RegistrationAction.PasswordConfirmationChanged -> onPasswordConfirmationChanged(registrationAction.value)
+            is RegistrationAction.PasswordConfirmationChanged -> onPasswordConfirmationChanged(
+                registrationAction.value
+            )
+
             is RegistrationAction.CreateAccount -> onCreateAccount()
         }
     }
@@ -45,7 +48,13 @@ class RegistrationScreenModel : ScreenModel {
     }
 
     private fun onPasswordChanged(value: String) {
-        _uiState.update { state -> state.copy(password = value, passwordError = "", passwordConfirmationError = "") }
+        _uiState.update { state ->
+            state.copy(
+                password = value,
+                passwordError = "",
+                passwordConfirmationError = ""
+            )
+        }
     }
 
     private fun onPasswordConfirmationChanged(value: String) {
@@ -64,7 +73,12 @@ class RegistrationScreenModel : ScreenModel {
             screenModelScope.launch {
                 _uiState.update { state -> state.copy(isLoading = true) }
                 delay(2_000)
-                _uiState.update { state -> state.copy(isLoading = false, event = RegistrationEvent.SUCCESS) }
+                _uiState.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        event = RegistrationEvent.SUCCESS
+                    )
+                }
             }
         }
     }
@@ -119,7 +133,12 @@ class RegistrationScreenModel : ScreenModel {
         }
         if (password != passwordConfirmation) {
             val error = "passwords do not match"
-            _uiState.update { state -> state.copy(passwordError = error, passwordConfirmationError = error) }
+            _uiState.update { state ->
+                state.copy(
+                    passwordError = error,
+                    passwordConfirmationError = error
+                )
+            }
             return false
         }
         return true

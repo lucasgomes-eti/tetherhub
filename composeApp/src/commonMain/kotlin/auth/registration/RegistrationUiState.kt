@@ -1,4 +1,4 @@
-package registration
+package auth.registration
 
 data class RegistrationUiState(
     val email: String,

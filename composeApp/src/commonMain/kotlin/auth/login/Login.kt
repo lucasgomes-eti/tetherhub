@@ -1,4 +1,4 @@
-package login
+package auth.login
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -37,10 +37,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import auth.registration.RegistrationScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import home.HomeScreen
-import registration.RegistrationScreen
 
 @Composable
 fun Login(
@@ -61,7 +61,10 @@ fun Login(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = "Login",
@@ -77,7 +80,10 @@ fun Login(
                 singleLine = true,
                 label = { Text("email") },
                 placeholder = { Text("example@provider.com") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                )
             )
             TextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -86,11 +92,15 @@ fun Login(
                 isError = loginUiState.errorMsg.isNotEmpty(),
                 singleLine = true,
                 label = { Text("password") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
                 visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
                 trailingIcon = {
                     IconButton(onClick = { passwordHidden = !passwordHidden }) {
-                        val visibilityIcon = if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val visibilityIcon =
+                            if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                         val description = if (passwordHidden) "Show password" else "Hide password"
                         Icon(imageVector = visibilityIcon, contentDescription = description)
                     }

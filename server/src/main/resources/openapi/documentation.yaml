@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: TetherHub API
+  version: 1.0.0
+  description: |
+    This Swagger documentation file outlines the API specifications for a Social Network application built with Ktor and MongoDB.
+    - [TetherHub GitHub repository](https://github.com/lucasgomes-eti/tetherhub)
+paths:
+  /user:
+    post:
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              example: [ ]
+  /login:
+    post:
+      summary: Get a token for an user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailUserCredentials'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example: [ ]
+
+components:
+  schemas:
+    CreateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - username
+        - password
+    EmailUserCredentials:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password

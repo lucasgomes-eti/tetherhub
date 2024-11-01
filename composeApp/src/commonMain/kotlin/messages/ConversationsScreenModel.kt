@@ -3,8 +3,6 @@ package messages
 import cafe.adriel.voyager.core.model.ScreenModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import model.Conversation
-import model.Message
 import model.User
 
 data class ConversationsUiState(

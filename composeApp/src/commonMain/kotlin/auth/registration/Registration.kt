@@ -1,4 +1,4 @@
-package registration
+package auth.registration
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,7 +44,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Registration(registrationUiState: RegistrationUiState, onRegistrationAction: (RegistrationAction) -> Unit) {
+fun Registration(
+    registrationUiState: RegistrationUiState,
+    onRegistrationAction: (RegistrationAction) -> Unit
+) {
 
     val navigator = LocalNavigator.currentOrThrow
 
@@ -85,7 +88,11 @@ fun Registration(registrationUiState: RegistrationUiState, onRegistrationAction:
             ) {
                 TextField(
                     modifier = Modifier.fillMaxWidth()
-                        .semantics { if (registrationUiState.emailError.isNotEmpty()) error(registrationUiState.emailError) },
+                        .semantics {
+                            if (registrationUiState.emailError.isNotEmpty()) error(
+                                registrationUiState.emailError
+                            )
+                        },
                     isError = registrationUiState.emailError.isNotEmpty(),
                     value = registrationUiState.email,
                     onValueChange = { onRegistrationAction(RegistrationAction.EmailChanged(it)) },
@@ -95,11 +102,18 @@ fun Registration(registrationUiState: RegistrationUiState, onRegistrationAction:
                     supportingText = {
                         if (registrationUiState.emailError.isNotEmpty()) Text(registrationUiState.emailError)
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    )
                 )
                 TextField(
                     modifier = Modifier.fillMaxWidth()
-                        .semantics { if (registrationUiState.usernameError.isNotEmpty()) error(registrationUiState.usernameError) },
+                        .semantics {
+                            if (registrationUiState.usernameError.isNotEmpty()) error(
+                                registrationUiState.usernameError
+                            )
+                        },
                     isError = registrationUiState.usernameError.isNotEmpty(),
                     value = registrationUiState.username,
                     onValueChange = { onRegistrationAction(RegistrationAction.UsernameChanged(it)) },
@@ -112,30 +126,46 @@ fun Registration(registrationUiState: RegistrationUiState, onRegistrationAction:
                 )
                 TextField(
                     modifier = Modifier.fillMaxWidth()
-                        .semantics { if (registrationUiState.passwordError.isNotEmpty()) error(registrationUiState.passwordError) },
+                        .semantics {
+                            if (registrationUiState.passwordError.isNotEmpty()) error(
+                                registrationUiState.passwordError
+                            )
+                        },
                     value = registrationUiState.password,
                     onValueChange = { onRegistrationAction(RegistrationAction.PasswordChanged(it)) },
                     isError = registrationUiState.passwordError.isNotEmpty(),
                     label = { Text(if (registrationUiState.passwordError.isNotEmpty()) "password*" else "password") },
                     supportingText = { Text(registrationUiState.passwordError.ifEmpty { "min length is 8 and should have at least one number and letter" }) },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Next
+                    ),
                     visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
                     trailingIcon = {
                         IconButton(onClick = { passwordHidden = !passwordHidden }) {
                             val visibilityIcon =
                                 if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                            val description = if (passwordHidden) "Show password" else "Hide password"
+                            val description =
+                                if (passwordHidden) "Show password" else "Hide password"
                             Icon(imageVector = visibilityIcon, contentDescription = description)
                         }
                     }
                 )
                 TextField(
                     modifier = Modifier.fillMaxWidth().semantics {
-                        if (registrationUiState.passwordConfirmationError.isNotEmpty()) error(registrationUiState.passwordConfirmationError)
+                        if (registrationUiState.passwordConfirmationError.isNotEmpty()) error(
+                            registrationUiState.passwordConfirmationError
+                        )
                     },
                     value = registrationUiState.passwordConfirmation,
-                    onValueChange = { onRegistrationAction(RegistrationAction.PasswordConfirmationChanged(it)) },
+                    onValueChange = {
+                        onRegistrationAction(
+                            RegistrationAction.PasswordConfirmationChanged(
+                                it
+                            )
+                        )
+                    },
                     isError = registrationUiState.passwordConfirmationError.isNotEmpty(),
                     label = { Text(if (registrationUiState.passwordConfirmationError.isNotEmpty()) "confirm password*" else "confirm password") },
                     supportingText = {
@@ -144,10 +174,15 @@ fun Registration(registrationUiState: RegistrationUiState, onRegistrationAction:
                         )
                     },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
                     visualTransformation = if (passwordConfirmationHidden) PasswordVisualTransformation() else VisualTransformation.None,
                     trailingIcon = {
-                        IconButton(onClick = { passwordConfirmationHidden = !passwordConfirmationHidden }) {
+                        IconButton(onClick = {
+                            passwordConfirmationHidden = !passwordConfirmationHidden
+                        }) {
                             val visibilityIcon =
                                 if (passwordConfirmationHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                             val description =

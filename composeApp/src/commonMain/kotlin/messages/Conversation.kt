@@ -10,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import model.Conversation
 
 @Composable
 fun Conversation(conversation: Conversation, onClick: () -> Unit) {
@@ -22,9 +21,18 @@ fun Conversation(conversation: Conversation, onClick: () -> Unit) {
                 users.append(", ")
             }
         }
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             Text(users.toString(), style = typography.labelMedium)
             Text(conversation.lastMessage.content, style = typography.bodyMedium)
         }
     }
 }
+
+open class Conversation(
+    val id: String,
+    val users: List<User>,
+    val lastMessage: Message
+)

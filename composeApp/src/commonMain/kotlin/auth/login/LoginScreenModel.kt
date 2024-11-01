@@ -1,4 +1,4 @@
-package login
+package auth.login
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -41,7 +41,12 @@ class LoginScreenModel : ScreenModel {
         screenModelScope.launch {
             _uiState.update { state -> state.copy(isLoading = true) }
             delay(1_000)
-            _uiState.update { state -> state.copy(isLoading = false, errorMsg = "email or password are incorrect") }
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    errorMsg = "email or password are incorrect"
+                )
+            }
             delay(1_000)
             _uiState.update { state -> state.copy(errorMsg = "", event = LoginEvent.SUCCESS) }
         }
