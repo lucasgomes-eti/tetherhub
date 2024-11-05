@@ -7,7 +7,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt
 import com.mongodb.MongoException
 import com.mongodb.client.model.Filters
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
-import io.ktor.util.*
+import io.ktor.util.toCharArray
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonObjectId
 import org.bson.types.ObjectId

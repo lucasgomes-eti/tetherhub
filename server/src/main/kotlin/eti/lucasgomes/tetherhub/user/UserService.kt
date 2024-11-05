@@ -12,12 +12,15 @@ class UserService(private val userRepository: UserRepository, private val userMa
     suspend fun saveUser(createUserRequest: CreateUserRequest): Either<TetherHubError, CreateUserResponse> =
         either {
             ensure(createUserRequest.email.isValid()) { UserErrors.InvalidEmail }
-            ensure(createUserRequest.username.isNotEmpty()) { UserErrors.EmptyUsername }
+            ensure(emailIsUnique(createUserRequest.email.value)) { UserErrors.EmailNotUnique }
+            ensure(createUserRequest.username.value.isNotEmpty()) { UserErrors.EmptyUsername }
             ensure(createUserRequest.password.isValid()) { UserErrors.InvalidPassword }
 
 
             when (val insertUserResult =
-                userRepository.insertOne(userMapper.buildUserDomain(createUserRequest).toEntity())) {
+                userRepository.insertOne(
+                    userMapper.buildUserDomain(createUserRequest).toEntity()
+                )) {
                 is Either.Left -> raise(UserErrors.CreateUserError)
                 is Either.Right -> {
                     val createdUserResponse =
@@ -28,9 +31,13 @@ class UserService(private val userRepository: UserRepository, private val userMa
             }
         }
 
-    suspend fun findUserByCredentials(credentials: EmailPasswordCredentials): Either<TetherHubError, User> = either {
-        val userResult = userRepository.findUserByCredentials(credentials)
-        ensure(userResult != null) { UserErrors.UserNotFound }
-        userResult.toDomain()
-    }
+    suspend fun findUserByCredentials(credentials: EmailPasswordCredentials): Either<TetherHubError, User> =
+        either {
+            val userResult = userRepository.findUserByCredentials(credentials)
+            ensure(userResult != null) { UserErrors.UserNotFound }
+            userResult.toDomain()
+        }
+
+    private suspend fun emailIsUnique(email: String): Boolean =
+        userRepository.findUserByEmail(email) == null
 }

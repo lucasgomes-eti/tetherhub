@@ -1,7 +1,7 @@
 package eti.lucasgomes.tetherhub.user
 
 import eti.lucasgomes.tetherhub.exception.TetherHubError
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 
 object UserErrors {
     data object InvalidEmail : TetherHubError(
@@ -41,5 +41,11 @@ object UserErrors {
         HttpStatusCode.InternalServerError.value,
         "TH-006",
         "Could not found the user on database"
+    )
+
+    data object EmailNotUnique : TetherHubError(
+        HttpStatusCode.BadRequest.value,
+        "TH-007",
+        "This email already exists on database"
     )
 }

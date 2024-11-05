@@ -13,7 +13,7 @@ class UserMapper(private val userRepository: UserRepository) {
         return User(
             id = UserId(ObjectId()),
             email = Email(userRequest.email.value),
-            username = Username(userRequest.username),
+            username = Username(userRequest.username.value),
             passwordHash = PasswordHash(passwordHash)
         )
     }

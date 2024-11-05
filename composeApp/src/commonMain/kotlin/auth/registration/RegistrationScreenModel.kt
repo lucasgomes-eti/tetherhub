@@ -1,14 +1,19 @@
 package auth.registration
 
+import auth.registration.network.RegistrationClient
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import request.CreateUserRequest
+import request.Email
+import request.Password
+import request.Username
+import util.Result
 
-class RegistrationScreenModel : ScreenModel {
+class RegistrationScreenModel(private val registrationClient: RegistrationClient) : ScreenModel {
 
     private val _uiState = MutableStateFlow(
         RegistrationUiState(
@@ -21,7 +26,8 @@ class RegistrationScreenModel : ScreenModel {
             passwordConfirmation = "",
             passwordConfirmationError = "",
             isLoading = false,
-            event = RegistrationEvent.NONE
+            event = RegistrationEvent.NONE,
+            requestResult = "request not sent"
         )
     )
     val uiState = _uiState.asStateFlow()
@@ -72,12 +78,33 @@ class RegistrationScreenModel : ScreenModel {
         if (isUiStateValid(uiStateSnapshot)) {
             screenModelScope.launch {
                 _uiState.update { state -> state.copy(isLoading = true) }
-                delay(2_000)
-                _uiState.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        event = RegistrationEvent.SUCCESS
+                val response = registrationClient.submitNewUser(
+                    CreateUserRequest(
+                        Email(uiStateSnapshot.email),
+                        Username(uiStateSnapshot.username),
+                        Password(uiStateSnapshot.password)
                     )
+                )
+                when (response) {
+                    is Result.Success -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                isLoading = false,
+                                event = RegistrationEvent.SUCCESS,
+                                requestResult = "New user created with id: ${response.data.id}"
+                            )
+                        }
+                    }
+
+                    is Result.Error -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                isLoading = false,
+                                event = RegistrationEvent.NONE,
+                                requestResult = "Error: ${response.error.name}"
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -1,4 +1,4 @@
-package auth
+package profile
 
 data class User(
     val id: String,

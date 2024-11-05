@@ -204,6 +204,7 @@ fun Registration(
                         Text("Create an account", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
+                Text(registrationUiState.requestResult)
             }
         }
     }
