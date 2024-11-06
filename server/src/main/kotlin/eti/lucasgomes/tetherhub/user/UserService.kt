@@ -3,9 +3,9 @@ package eti.lucasgomes.tetherhub.user
 import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensure
-import eti.lucasgomes.tetherhub.exception.TetherHubError
 import request.CreateUserRequest
 import response.CreateUserResponse
+import response.TetherHubError
 
 class UserService(private val userRepository: UserRepository, private val userMapper: UserMapper) {
 

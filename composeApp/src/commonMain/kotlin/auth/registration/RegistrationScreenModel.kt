@@ -17,17 +17,18 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
 
     private val _uiState = MutableStateFlow(
         RegistrationUiState(
-            email = "",
+            email = "lucas@eti.com",
             emailError = "",
-            username = "",
+            username = "lucas_eti",
             usernameError = "",
-            password = "",
+            password = "@Pass123",
             passwordError = "",
-            passwordConfirmation = "",
+            passwordConfirmation = "@Pass123",
             passwordConfirmationError = "",
             isLoading = false,
             event = RegistrationEvent.NONE,
-            requestResult = "request not sent"
+            clientErrorMessage = "",
+            shouldShowClientError = false
         )
     )
     val uiState = _uiState.asStateFlow()
@@ -42,6 +43,7 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
             )
 
             is RegistrationAction.CreateAccount -> onCreateAccount()
+            is RegistrationAction.DismissError -> onDismissError()
         }
     }
 
@@ -90,8 +92,7 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
                         _uiState.update { state ->
                             state.copy(
                                 isLoading = false,
-                                event = RegistrationEvent.SUCCESS,
-                                requestResult = "New user created with id: ${response.data.id}"
+                                event = RegistrationEvent.SUCCESS
                             )
                         }
                     }
@@ -101,12 +102,21 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
                             state.copy(
                                 isLoading = false,
                                 event = RegistrationEvent.NONE,
-                                requestResult = "Error: ${response.error.name}"
+                                clientErrorMessage = "${response.error.internalCode} - ${response.error.message}",
+                                shouldShowClientError = true
                             )
                         }
                     }
                 }
             }
+        }
+    }
+
+    private fun onDismissError() {
+        _uiState.update { state ->
+            state.copy(
+                shouldShowClientError = false
+            )
         }
     }
 

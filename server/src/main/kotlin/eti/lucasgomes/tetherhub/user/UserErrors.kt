@@ -1,7 +1,7 @@
 package eti.lucasgomes.tetherhub.user
 
-import eti.lucasgomes.tetherhub.exception.TetherHubError
 import io.ktor.http.HttpStatusCode
+import response.TetherHubError
 
 object UserErrors {
     data object InvalidEmail : TetherHubError(

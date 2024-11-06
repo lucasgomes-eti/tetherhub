@@ -1,5 +1,6 @@
 package auth.registration
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,9 +18,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -27,6 +32,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,8 +46,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import auth.login.LoginScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import components.ErrorBanner
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,13 +66,38 @@ fun Registration(
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
     var passwordConfirmationHidden by rememberSaveable { mutableStateOf(true) }
 
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     when (registrationUiState.event) {
         RegistrationEvent.NONE -> Unit
-        RegistrationEvent.SUCCESS -> Unit
+        RegistrationEvent.SUCCESS -> {
+            scope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = "Account successfully created!",
+                    actionLabel = "Login",
+                    duration = SnackbarDuration.Short
+                )
+                when (result) {
+                    SnackbarResult.Dismissed -> {
+                        navigator.replace(LoginScreen)
+                        cancel()
+                    }
+
+                    SnackbarResult.ActionPerformed -> {
+                        navigator.replace(LoginScreen)
+                        cancel()
+                    }
+                }
+                delay(4000L)
+                navigator.replace(LoginScreen)
+            }
+        }
     }
 
     Scaffold(
         modifier = Modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -192,19 +229,23 @@ fun Registration(
                     },
                     keyboardActions = KeyboardActions(onDone = { defaultKeyboardAction(ImeAction.Done) })
                 )
+                AnimatedVisibility(visible = registrationUiState.shouldShowClientError) {
+                    ErrorBanner(message = registrationUiState.clientErrorMessage) {
+                        onRegistrationAction(RegistrationAction.DismissError)
+                    }
+                }
                 Button(
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !registrationUiState.isLoading,
+                    enabled = !registrationUiState.isLoading && registrationUiState.event != RegistrationEvent.SUCCESS,
                     onClick = { onRegistrationAction(RegistrationAction.CreateAccount) }) {
                     if (registrationUiState.isLoading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(with(LocalDensity.current) { MaterialTheme.typography.bodyMedium.fontSize.toDp() })
+                            modifier = Modifier.size(with(LocalDensity.current) { typography.bodyMedium.fontSize.toDp() })
                         )
                     } else {
-                        Text("Create an account", style = MaterialTheme.typography.bodyMedium)
+                        Text("Create an account", style = typography.bodyMedium)
                     }
                 }
-                Text(registrationUiState.requestResult)
             }
         }
     }

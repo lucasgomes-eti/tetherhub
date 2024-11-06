@@ -38,14 +38,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import auth.registration.RegistrationScreen
-import auth.registration.network.RegistrationClient
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import home.HomeScreen
 
 @Composable
 fun Login(
-    registrationClient: RegistrationClient,
     loginUiState: LoginUiState,
     onLoginAction: (LoginAction) -> Unit
 ) {
@@ -136,7 +134,7 @@ fun Login(
             Spacer(Modifier.height(48.dp))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text("Don't have an account?", style = typography.bodyLarge)
-                OutlinedButton(onClick = { navigator.push(RegistrationScreen(registrationClient)) }) {
+                OutlinedButton(onClick = { navigator.push(RegistrationScreen) }) {
                     Text("Create an account", style = typography.bodyMedium)
                 }
             }

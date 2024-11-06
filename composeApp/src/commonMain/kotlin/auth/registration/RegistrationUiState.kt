@@ -11,5 +11,6 @@ data class RegistrationUiState(
     val passwordConfirmationError: String,
     val isLoading: Boolean,
     val event: RegistrationEvent,
-    val requestResult: String
+    val clientErrorMessage: String,
+    val shouldShowClientError: Boolean
 )
