@@ -1,3 +1,5 @@
+import auth.login.LoginScreenModel
+import auth.login.network.LoginClient
 import auth.registration.RegistrationScreenModel
 import auth.registration.network.RegistrationClient
 import org.koin.core.context.startKoin
@@ -10,7 +12,9 @@ expect val platformModule: Module
 
 val authModule = module {
     singleOf(::RegistrationClient)
+    singleOf(::LoginClient)
     factory { RegistrationScreenModel(get()) }
+    factory { LoginScreenModel(get()) }
 }
 
 fun initKoin(config: KoinAppDeclaration? = null) {

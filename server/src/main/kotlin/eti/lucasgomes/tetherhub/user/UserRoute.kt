@@ -3,14 +3,16 @@ package eti.lucasgomes.tetherhub.user
 import arrow.core.Either
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.post
 import org.koin.ktor.ext.inject
 import request.CreateUserRequest
-import java.util.*
+import response.AuthResponse
+import java.util.Date
 
 fun Route.userRoutes() {
     val userMapper by inject<UserMapper>()
@@ -48,11 +50,12 @@ fun Route.userRoutes() {
 
             is Either.Right -> {
                 val expiresAt = System.currentTimeMillis() + expiration.toInt()
-                val token = JWT.create().withIssuer(issuer).withClaim("email", result.value.email.value)
-                    .withExpiresAt(
-                        Date(expiresAt)
-                    ).sign(Algorithm.HMAC256(secret))
-                call.respond(hashMapOf("token" to token, "expiration" to expiresAt))
+                val token =
+                    JWT.create().withIssuer(issuer).withClaim("email", result.value.email.value)
+                        .withExpiresAt(
+                            Date(expiresAt)
+                        ).sign(Algorithm.HMAC256(secret))
+                call.respond(AuthResponse(token, expiresAt))
             }
         }
     }

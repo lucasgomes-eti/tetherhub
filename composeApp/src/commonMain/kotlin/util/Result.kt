@@ -7,6 +7,20 @@ sealed interface Result<out D> {
     data class Error(val error: TetherHubError) : Result<Nothing>
 }
 
+fun unexpectedErrorWithException(e: Exception) =
+    TetherHubError(
+        -1,
+        "TH-0",
+        "Unexpected error during request. Cause: ${e.message}"
+    )
+
+fun unexpectedErrorWithHttpStatusCode(statusCode: Int) =
+    TetherHubError(
+        statusCode,
+        "TH-0",
+        "Unexpected http error. Code: ${statusCode}"
+    )
+
 //inline fun <T, E : Error, R> Result<T, E>.map(map: (T) -> R): Result<R, E> {
 //    return when (this) {
 //        is Result.Error -> Result.Error(error)

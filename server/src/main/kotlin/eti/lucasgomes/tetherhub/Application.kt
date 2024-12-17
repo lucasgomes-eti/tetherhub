@@ -3,16 +3,25 @@ package eti.lucasgomes.tetherhub
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.mongodb.kotlin.client.coroutine.MongoClient
-import eti.lucasgomes.tetherhub.user.*
-import io.ktor.serialization.gson.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.swagger.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import eti.lucasgomes.tetherhub.user.UserMapper
+import eti.lucasgomes.tetherhub.user.UserRepository
+import eti.lucasgomes.tetherhub.user.UserService
+import eti.lucasgomes.tetherhub.user.toDomain
+import eti.lucasgomes.tetherhub.user.userRoutes
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.netty.EngineMain
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.swagger.swaggerUI
+import io.ktor.server.response.respond
+import io.ktor.server.routing.get
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
 import org.koin.dsl.module
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
@@ -21,7 +30,7 @@ import org.koin.logger.slf4jLogger
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 fun Application.module() {
-    install(ContentNegotiation) { gson { } }
+    install(ContentNegotiation) { json() }
 
     install(Koin) {
         slf4jLogger()

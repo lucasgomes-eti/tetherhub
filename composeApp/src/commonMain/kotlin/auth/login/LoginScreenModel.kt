@@ -1,22 +1,26 @@
 package auth.login
 
+import RegexConstants
+import auth.login.network.LoginClient
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import util.Result
 
-class LoginScreenModel : ScreenModel {
+class LoginScreenModel(private val loginClient: LoginClient) : ScreenModel {
 
     private val _uiState = MutableStateFlow(
         LoginUiState(
-            email = "",
-            password = "",
+            email = "lucas@eti.com",
+            password = "@Pass123",
             errorMsg = "",
             isLoading = false,
-            event = LoginEvent.NONE
+            event = LoginEvent.NONE,
+            emailError = "",
+            passwordError = ""
         )
     )
     val uiState = _uiState.asStateFlow()
@@ -39,16 +43,64 @@ class LoginScreenModel : ScreenModel {
 
     private fun onLogin() {
         screenModelScope.launch {
-            _uiState.update { state -> state.copy(isLoading = true) }
-            delay(1_000)
-            _uiState.update { state ->
-                state.copy(
-                    isLoading = false,
-                    errorMsg = "email or password are incorrect"
+            val uiStateSnapshot = _uiState.value
+            if (isUiStateValid(uiStateSnapshot)) {
+                _uiState.update { state ->
+                    state.copy(
+                        isLoading = true,
+                        errorMsg = "",
+                        emailError = "",
+                        passwordError = ""
+                    )
+                }
+                val result = loginClient.authenticateWithCredentials(
+                    uiStateSnapshot.email,
+                    uiStateSnapshot.password
                 )
+                when (result) {
+                    is Result.Success -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                isLoading = false,
+                                event = LoginEvent.SUCCESS
+                            )
+                        }
+                    }
+
+                    is Result.Error -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                isLoading = false,
+                                event = LoginEvent.NONE,
+                                errorMsg = "${result.error.internalCode} - ${result.error.message}"
+                            )
+                        }
+                    }
+                }
             }
-            delay(1_000)
-            _uiState.update { state -> state.copy(errorMsg = "", event = LoginEvent.SUCCESS) }
         }
+    }
+
+    private fun isUiStateValid(uiStateSnapshot: LoginUiState) =
+        isEmailValid(uiStateSnapshot.email) and isPasswordValid(uiStateSnapshot.password)
+
+    private fun isEmailValid(email: String): Boolean {
+        if (email.isEmpty()) {
+            _uiState.update { state -> state.copy(emailError = "email must not be empty") }
+            return false
+        }
+        if (!email.matches(RegexConstants.EMAIL)) {
+            _uiState.update { state -> state.copy(emailError = "email must have valid format") }
+            return false
+        }
+        return true
+    }
+
+    private fun isPasswordValid(password: String): Boolean {
+        if (password.isEmpty()) {
+            _uiState.update { state -> state.copy(passwordError = "password must not be empty") }
+            return false
+        }
+        return true
     }
 }

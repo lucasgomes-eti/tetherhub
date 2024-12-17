@@ -76,20 +76,23 @@ fun Login(
                 modifier = Modifier.fillMaxWidth(),
                 value = loginUiState.email,
                 onValueChange = { onLoginAction(LoginAction.EmailChanged(it)) },
-                isError = loginUiState.errorMsg.isNotEmpty(),
+                isError = loginUiState.errorMsg.isNotEmpty() || loginUiState.emailError.isNotEmpty(),
                 singleLine = true,
                 label = { Text("email") },
                 placeholder = { Text("example@provider.com") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
-                )
+                ),
+                supportingText = {
+                    if (loginUiState.emailError.isNotEmpty()) Text(loginUiState.emailError)
+                }
             )
             TextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = loginUiState.password,
                 onValueChange = { onLoginAction(LoginAction.PasswordChanged(it)) },
-                isError = loginUiState.errorMsg.isNotEmpty(),
+                isError = loginUiState.errorMsg.isNotEmpty() || loginUiState.passwordError.isNotEmpty(),
                 singleLine = true,
                 label = { Text("password") },
                 keyboardOptions = KeyboardOptions(
@@ -108,7 +111,10 @@ fun Login(
                 keyboardActions = KeyboardActions(onDone = {
                     onLoginAction(LoginAction.Login)
                     defaultKeyboardAction(ImeAction.Done)
-                })
+                }),
+                supportingText = {
+                    if (loginUiState.passwordError.isNotEmpty()) Text(loginUiState.passwordError)
+                }
             )
             AnimatedVisibility(visible = loginUiState.errorMsg.isNotEmpty()) {
                 Text(

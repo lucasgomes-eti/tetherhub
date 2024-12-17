@@ -1,5 +1,6 @@
 package auth.registration
 
+import RegexConstants
 import auth.registration.network.RegistrationClient
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -132,7 +133,7 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
             _uiState.update { state -> state.copy(emailError = "email must not be empty") }
             return false
         }
-        if (!email.matches(EMAIL_REGEX)) {
+        if (!email.matches(RegexConstants.EMAIL)) {
             _uiState.update { state -> state.copy(emailError = "email must have valid format") }
             return false
         }
@@ -144,7 +145,7 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
             _uiState.update { state -> state.copy(usernameError = "username must not be empty") }
             return false
         }
-        if (!username.matches(USERNAME_REGEX)) {
+        if (!username.matches(RegexConstants.USERNAME)) {
             _uiState.update { state -> state.copy(usernameError = "username must not contain spaces or capital letters") }
             return false
         }
@@ -164,7 +165,7 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
             _uiState.update { state -> state.copy(passwordError = "password must not contain spaces") }
             return false
         }
-        if (!password.matches(PASSWORD_REGEX)) {
+        if (!password.matches(RegexConstants.PASSWORD)) {
             _uiState.update { state -> state.copy(passwordError = "password must have letters and numbers") }
             return false
         }
@@ -179,11 +180,5 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
             return false
         }
         return true
-    }
-
-    companion object {
-        private val EMAIL_REGEX = "^[\\w-]+@([\\w-]+\\.)+[\\w-]{2,4}\$".toRegex()
-        private val USERNAME_REGEX = "^[a-z0-9_!@#\$%^&*()-+=]+\$".toRegex()
-        private val PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d).+\$".toRegex()
     }
 }

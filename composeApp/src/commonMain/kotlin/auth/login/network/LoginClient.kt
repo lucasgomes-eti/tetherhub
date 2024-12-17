@@ -1,4 +1,4 @@
-package auth.registration.network
+package auth.login.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -7,22 +7,23 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.CancellationException
-import request.CreateUserRequest
-import response.CreateUserResponse
+import response.AuthResponse
 import response.TetherHubError
 import util.Result
 import util.unexpectedErrorWithException
 import util.unexpectedErrorWithHttpStatusCode
 
-class RegistrationClient(
+class LoginClient(
     private val httpClient: HttpClient
 ) {
-
-    suspend fun submitNewUser(request: CreateUserRequest): Result<CreateUserResponse> {
+    suspend fun authenticateWithCredentials(
+        email: String,
+        password: String
+    ): Result<AuthResponse> {
         val response = try {
-            httpClient.post("/user") {
+            httpClient.post("/login") {
                 contentType(ContentType.Application.Json)
-                setBody(request)
+                setBody(hashMapOf("email" to email, "password" to password))
             }
         } catch (e: Exception) {
             if (e is CancellationException) {
@@ -33,7 +34,7 @@ class RegistrationClient(
 
         return when (response.status.value) {
             in 200..299 -> {
-                val result = response.body<CreateUserResponse>()
+                val result = response.body<AuthResponse>()
                 Result.Success(result)
             }
 
