@@ -15,7 +15,6 @@ import response.AuthResponse
 import java.util.Date
 
 fun Route.userRoutes() {
-    val userMapper by inject<UserMapper>()
     val userService by inject<UserService>()
     val secret = environment?.config?.propertyOrNull("ktor.auth.secret")?.getString()
         ?: throw RuntimeException("Secret not set")

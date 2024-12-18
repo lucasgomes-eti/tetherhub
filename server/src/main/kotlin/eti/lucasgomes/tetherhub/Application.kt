@@ -3,11 +3,15 @@ package eti.lucasgomes.tetherhub
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.mongodb.kotlin.client.coroutine.MongoClient
+import eti.lucasgomes.tetherhub.profile.ProfileMapper
+import eti.lucasgomes.tetherhub.profile.ProfileService
+import eti.lucasgomes.tetherhub.profile.profileRoutes
 import eti.lucasgomes.tetherhub.user.UserMapper
 import eti.lucasgomes.tetherhub.user.UserRepository
 import eti.lucasgomes.tetherhub.user.UserService
 import eti.lucasgomes.tetherhub.user.toDomain
 import eti.lucasgomes.tetherhub.user.userRoutes
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -17,7 +21,9 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.netty.EngineMain
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.plugins.swagger.swaggerUI
+import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
@@ -53,9 +59,11 @@ fun Application.module() {
             },
             module { // Mapper module
                 single { UserMapper(get()) }
+                single { ProfileMapper() }
             },
             module { // Service module
                 single { UserService(get(), get()) }
+                single { ProfileService(get(), get()) }
             }
         )
     }
@@ -82,12 +90,22 @@ fun Application.module() {
         }
     }
 
+    install(StatusPages) {
+        status(HttpStatusCode.Unauthorized) { call, _ ->
+            call.respond(
+                status = HttpStatusCode.Unauthorized,
+                message = ApplicationErrors.Unauthorized(call.request.uri)
+            )
+        }
+    }
+
     routing {
         swaggerUI(path = "swagger-ui", swaggerFile = "openapi/documentation.yaml") {
             version = "4.15.5"
         }
         userRoutes()
         authenticate {
+            profileRoutes()
             route("feed") {
                 get {
                     call.respond(

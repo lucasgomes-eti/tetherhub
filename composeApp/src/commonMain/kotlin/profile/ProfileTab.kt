@@ -6,16 +6,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 
 object ProfileTab : Tab {
     @Composable
     override fun Content() {
-        val profileScreenModel = rememberScreenModel { ProfileScreenModel() }
+        val profileScreenModel = getScreenModel<ProfileScreenModel>()
         val profileUiState by profileScreenModel.uiState.collectAsState()
-        Profile(profileUiState)
+        Profile(profileUiState, profileScreenModel::onAction)
     }
 
     override val options: TabOptions

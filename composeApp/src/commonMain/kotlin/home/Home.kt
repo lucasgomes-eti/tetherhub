@@ -29,7 +29,7 @@ import profile.ProfileTab
 
 @Composable
 fun Home() {
-    TabNavigator(ProfileTab) {
+    TabNavigator(FeedTab) {
 
         val navigationAppBar = remember { NavigationAppBar(mutableStateOf(true)) }
 
@@ -53,7 +53,8 @@ fun Home() {
     }
 }
 
-internal val LocalNavigationAppBar = compositionLocalOf<NavigationAppBar> { error("No NavigationBar provided") }
+internal val LocalNavigationAppBar =
+    compositionLocalOf<NavigationAppBar> { error("No NavigationBar provided") }
 
 class NavigationAppBar(val isNavigationBarVisible: MutableState<Boolean>) {
     fun show() {
@@ -69,7 +70,11 @@ class NavigationAppBar(val isNavigationBarVisible: MutableState<Boolean>) {
 private fun RowScope.TabItem(tab: Tab) {
     val tabNavigator = LocalTabNavigator.current
 
-    NavigationBarItem(selected = tabNavigator.current == tab, onClick = { tabNavigator.current = tab }, icon = {
-        tab.options.icon?.let { Icon(it, contentDescription = tab.options.title) }
-    }, label = { Text(tab.options.title, style = typography.bodyMedium) })
+    NavigationBarItem(
+        selected = tabNavigator.current == tab,
+        onClick = { tabNavigator.current = tab },
+        icon = {
+            tab.options.icon?.let { Icon(it, contentDescription = tab.options.title) }
+        },
+        label = { Text(tab.options.title, style = typography.bodyMedium) })
 }

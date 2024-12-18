@@ -7,6 +7,8 @@ import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
+import profile.ProfileClient
+import profile.ProfileScreenModel
 
 expect val platformModule: Module
 
@@ -17,9 +19,14 @@ val authModule = module {
     factory { LoginScreenModel(get()) }
 }
 
+val profileModule = module {
+    singleOf(::ProfileClient)
+    factory { ProfileScreenModel(get()) }
+}
+
 fun initKoin(config: KoinAppDeclaration? = null) {
     startKoin {
         config?.invoke(this)
-        modules(platformModule, authModule)
+        modules(platformModule, authModule, profileModule)
     }
 }

@@ -1,7 +1,6 @@
 package components
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -21,12 +20,11 @@ fun ErrorBanner(message: String, onDismissed: () -> Unit) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer
         ),
-        modifier = Modifier.fillMaxWidth()
     ) {
         Row {
             Text(
                 text = message,
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(16.dp).weight(1f),
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onErrorContainer)
             )
             IconButton(onClick = onDismissed, content = {

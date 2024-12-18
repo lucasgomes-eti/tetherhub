@@ -1,6 +1,6 @@
 package auth.registration.network
 
-import io.ktor.client.HttpClient
+import HttpClientManager
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -15,12 +15,12 @@ import util.unexpectedErrorWithException
 import util.unexpectedErrorWithHttpStatusCode
 
 class RegistrationClient(
-    private val httpClient: HttpClient
+    private val httpClientManager: HttpClientManager
 ) {
 
     suspend fun submitNewUser(request: CreateUserRequest): Result<CreateUserResponse> {
         val response = try {
-            httpClient.post("/user") {
+            httpClientManager.client.post("/user") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }

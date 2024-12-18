@@ -1,6 +1,6 @@
 package auth.login.network
 
-import io.ktor.client.HttpClient
+import HttpClientManager
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -14,14 +14,14 @@ import util.unexpectedErrorWithException
 import util.unexpectedErrorWithHttpStatusCode
 
 class LoginClient(
-    private val httpClient: HttpClient
+    private val httpClientManager: HttpClientManager
 ) {
     suspend fun authenticateWithCredentials(
         email: String,
         password: String
     ): Result<AuthResponse> {
         val response = try {
-            httpClient.post("/login") {
+            httpClientManager.client.post("/login") {
                 contentType(ContentType.Application.Json)
                 setBody(hashMapOf("email" to email, "password" to password))
             }
@@ -35,6 +35,7 @@ class LoginClient(
         return when (response.status.value) {
             in 200..299 -> {
                 val result = response.body<AuthResponse>()
+                createUserSession(result)
                 Result.Success(result)
             }
 
@@ -45,5 +46,9 @@ class LoginClient(
 
             else -> Result.Error(unexpectedErrorWithHttpStatusCode(response.status.value))
         }
+    }
+
+    private fun createUserSession(auth: AuthResponse) {
+        httpClientManager.installAuth(auth.token)
     }
 }
