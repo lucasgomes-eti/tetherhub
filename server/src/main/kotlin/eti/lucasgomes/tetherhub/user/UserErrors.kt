@@ -48,4 +48,10 @@ object UserErrors {
         "TH-007",
         "This email already exists on database"
     )
+
+    data class UserNotFoundByEmail(private val email: String) : TetherHubError(
+        HttpStatusCode.BadRequest.value,
+        "TH-008",
+        "Could not found user with this email: $email"
+    )
 }

@@ -6,57 +6,73 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import profile.User
+import util.Result
 
-class FeedScreenModel : ScreenModel {
+class FeedScreenModel(private val feedClient: FeedClient) : ScreenModel {
 
-    private val _uiState = MutableStateFlow(
-        FeedUiState(
-            listOf(
-                LocalPost(
-                    Post(
-                        "1",
-                        User("1", "scary"),
-                        "We are currently aware of an issue that these balance changes are only reflected in a game mode that appears in the arcade. So we’re gonna call it “Balanced Overwatch” for now. Sorry for any confusion.",
-                        3
-                    ), true
-                ),
-                LocalPost(
-                    Post(
-                        "2",
-                        User("1", "scary"),
-                        "There are also some new challenges that are granting some of our developer’s doodles as sprays. We’re not sure why that is happening, but they are really cool looking.",
-                        0
-                    ), false
-                )
-            )
-        )
-    )
+    private val _uiState =
+        MutableStateFlow(FeedUiState(posts = emptyList(), isLoading = false, errorMsg = ""))
     val uiState = _uiState.asStateFlow()
+
+    init {
+        fetchPosts()
+    }
+
+    private fun fetchPosts() {
+        screenModelScope.launch {
+            _uiState.update { state -> state.copy(isLoading = true) }
+            when (val response = feedClient.getPosts()) {
+                is Result.Success -> {
+                    _uiState.update { state ->
+                        state.copy(
+                            posts = response.data,
+                            isLoading = false,
+                            errorMsg = ""
+                        )
+                    }
+                }
+
+                is Result.Error -> {
+                    _uiState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            errorMsg = "${response.error.internalCode} - ${response.error.message}"
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     fun onAction(feedAction: FeedAction) {
         when (feedAction) {
             is FeedAction.Like -> onPostLiked(feedAction.postId)
+            is FeedAction.DismissError -> onDismissError()
+            is FeedAction.Refresh -> fetchPosts()
         }
     }
 
     private fun onPostLiked(postId: String) {
-        screenModelScope.launch {
-            _uiState.update { state ->
-                state.copy(posts = _uiState.value.posts.map {
-                    val isLiked = if (it.id == postId) !it.isLiked else it.isLiked
-                    it.copy(
-                        post = Post(
-                            id = it.id,
-                            author = it.author,
-                            content = it.content,
-                            likes = if (it.id == postId) if (isLiked) it.likes + 1 else it.likes - 1 else it.likes
-                        ),
-                        isLiked = isLiked
-                    )
-                })
-            }
-        }
+//        screenModelScope.launch {
+//            _uiState.update { state ->
+//                state.copy(posts = _uiState.value.posts.map {
+//                    val isLiked = if (it.id == postId) !it.isLiked else it.isLiked
+//                    it.copy(
+//                        post = Post(
+//                            id = it.id,
+//                            author = it.author,
+//                            content = it.content,
+//                            likes = if (it.id == postId) if (isLiked) it.likes + 1 else it.likes - 1 else it.likes
+//                        ),
+//                        isLiked = isLiked
+//                    )
+//                })
+//            }
+//        }
+    }
+
+    private fun onDismissError() {
+        _uiState.update { state -> state.copy(errorMsg = "") }
     }
 
 }

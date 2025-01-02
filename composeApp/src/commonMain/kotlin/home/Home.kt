@@ -19,6 +19,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
@@ -57,6 +58,7 @@ internal val LocalNavigationAppBar =
     compositionLocalOf<NavigationAppBar> { error("No NavigationBar provided") }
 
 class NavigationAppBar(val isNavigationBarVisible: MutableState<Boolean>) {
+    val ContainerHeight = 80.0.dp
     fun show() {
         isNavigationBarVisible.value = true
     }

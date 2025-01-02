@@ -3,6 +3,10 @@ package eti.lucasgomes.tetherhub
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.mongodb.kotlin.client.coroutine.MongoClient
+import eti.lucasgomes.tetherhub.feed.FeedMapper
+import eti.lucasgomes.tetherhub.feed.FeedRepository
+import eti.lucasgomes.tetherhub.feed.FeedService
+import eti.lucasgomes.tetherhub.feed.feedRoutes
 import eti.lucasgomes.tetherhub.profile.ProfileMapper
 import eti.lucasgomes.tetherhub.profile.ProfileService
 import eti.lucasgomes.tetherhub.profile.profileRoutes
@@ -14,7 +18,6 @@ import eti.lucasgomes.tetherhub.user.userRoutes
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
-import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
@@ -25,8 +28,6 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
-import io.ktor.server.routing.get
-import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import org.koin.dsl.module
 import org.koin.ktor.ext.inject
@@ -56,14 +57,17 @@ fun Application.module() {
             },
             module {// Repository module
                 single { UserRepository(get()) }
+                single { FeedRepository(get()) }
             },
             module { // Mapper module
                 single { UserMapper(get()) }
                 single { ProfileMapper() }
+                single { FeedMapper() }
             },
             module { // Service module
                 single { UserService(get(), get()) }
                 single { ProfileService(get(), get()) }
+                single { FeedService(get(), get(), get()) }
             }
         )
     }
@@ -106,25 +110,7 @@ fun Application.module() {
         userRoutes()
         authenticate {
             profileRoutes()
-            route("feed") {
-                get {
-                    call.respond(
-                        listOf<String>(
-//                            Post(
-//                                "1",
-//                                User("1", "scary"),
-//                                "We are currently aware of an issue that these balance changes are only reflected in a game mode that appears in the arcade. So we’re gonna call it “Balanced Overwatch” for now. Sorry for any confusion.",
-//                                3
-//                            ), Post(
-//                                "2",
-//                                User("1", "scary"),
-//                                "There are also some new challenges that are granting some of our developer’s doodles as sprays. We’re not sure why that is happening, but they are really cool looking.",
-//                                0
-//                            )
-                        )
-                    )
-                }
-            }
+            feedRoutes()
         }
     }
 }
