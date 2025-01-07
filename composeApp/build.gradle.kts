@@ -50,6 +50,7 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.voyager.koin)
             implementation(libs.stately.common)
+            implementation(libs.kotlinx.datetime)
         }
         androidMain.dependencies {
             implementation(compose.preview)

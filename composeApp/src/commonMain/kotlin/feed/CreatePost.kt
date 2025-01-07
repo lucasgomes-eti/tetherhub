@@ -1,6 +1,7 @@
 package feed
 
 import LocalEventBus
+import PUBLICATION_WORD_LIMIT
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -82,13 +83,17 @@ fun CreatePost(uiState: CreatePostUiState, onCreatePostAction: (CreatePostAction
                 onValueChange = { onCreatePostAction(CreatePostAction.PublicationChanged(it)) },
                 label = { Text("Publication") },
                 placeholder = { Text("What's in your mind?") },
-                supportingText = { if (uiState.publicationFieldError.isNotEmpty()) Text(uiState.publicationFieldError) },
+                supportingText = {
+                    if (uiState.publicationFieldError.isNotEmpty()) Text(uiState.publicationFieldError) else Text(
+                        "${uiState.publication.length}/${PUBLICATION_WORD_LIMIT}"
+                    )
+                },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Default
                 ),
                 isError = uiState.publicationFieldError.isNotEmpty(),
-                minLines = 12
+                minLines = 10
             )
             AnimatedVisibility(uiState.errorMsg.isNotEmpty()) {
                 ErrorBanner(uiState.errorMsg) {

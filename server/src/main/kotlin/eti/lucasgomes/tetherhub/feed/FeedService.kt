@@ -1,5 +1,6 @@
 package eti.lucasgomes.tetherhub.feed
 
+import PUBLICATION_WORD_LIMIT
 import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensure
@@ -22,6 +23,7 @@ class FeedService(
         either {
             val user = userRepository.findUserByEmail(authorEmail)
             ensure(user != null) { UserErrors.UserNotFoundByEmail(authorEmail) }
+            ensure(createPostRequest.content.length <= PUBLICATION_WORD_LIMIT) { FeedErrors.PostIsTooLong }
             when (val insertResult =
                 feedRepository.insertOne(feedMapper.buildPost(createPostRequest, user.username))) {
                 is Either.Left -> {

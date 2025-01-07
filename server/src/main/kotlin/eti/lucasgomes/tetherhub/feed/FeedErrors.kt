@@ -1,5 +1,6 @@
 package eti.lucasgomes.tetherhub.feed
 
+import PUBLICATION_WORD_LIMIT
 import io.ktor.http.HttpStatusCode
 import response.TetherHubError
 
@@ -7,7 +8,7 @@ object FeedErrors {
     data class PostNotCreated(private val exception: Exception) : TetherHubError(
         HttpStatusCode.InternalServerError.value,
         "TH-201",
-        "Error while saving the user on the database. Cause: ${exception.message}"
+        "Error while saving the post on the database. Cause: ${exception.message}"
     )
 
     data class PostByIdNotFound(private val id: String) : TetherHubError(
@@ -20,5 +21,11 @@ object FeedErrors {
         HttpStatusCode.BadRequest.value,
         "TH-203",
         "Invalid parameters for this request"
+    )
+
+    data object PostIsTooLong : TetherHubError(
+        HttpStatusCode.BadRequest.value,
+        "TH-204",
+        "Post is too long, the maximum number of allowed characters is: $PUBLICATION_WORD_LIMIT"
     )
 }

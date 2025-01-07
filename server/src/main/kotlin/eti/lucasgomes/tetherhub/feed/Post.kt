@@ -1,5 +1,16 @@
 package eti.lucasgomes.tetherhub.feed
 
+import kotlinx.datetime.Instant
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
 
-data class PostEntity(val id: ObjectId, val author: String, val content: String, val likes: Int)
+@Serializable
+data class PostEntity(
+    @Contextual
+    val id: ObjectId,
+    val author: String,
+    val content: String,
+    val likes: Int,
+    val createdAt: Instant
+)

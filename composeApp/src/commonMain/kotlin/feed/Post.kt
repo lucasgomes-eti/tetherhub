@@ -1,5 +1,6 @@
 package feed
 
+import DATE_TIME_PRESENTATION_FORMAT
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +18,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.toLocalDateTime
 import profile.User
 import response.PostResponse
 
@@ -28,7 +33,15 @@ fun Post(post: PostResponse, onPostLiked: () -> Unit) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(post.author, style = typography.labelMedium)
+            Column {
+                Text(post.author, style = typography.labelMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    post.createdAt
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .format(DATE_TIME_PRESENTATION_FORMAT),
+                    style = typography.labelSmall
+                )
+            }
             Text(post.content, style = typography.bodyLarge)
         }
         TextButton(modifier = Modifier.fillMaxWidth(), onClick = onPostLiked) {

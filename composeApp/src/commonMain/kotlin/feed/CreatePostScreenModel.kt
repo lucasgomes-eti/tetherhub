@@ -1,5 +1,6 @@
 package feed
 
+import PUBLICATION_WORD_LIMIT
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,13 +76,25 @@ class CreatePostScreenModel(private val feedClient: FeedClient) : ScreenModel {
 
     private fun isPublicationContentValid(publication: String): Boolean {
         if (publication.isEmpty()) {
-            _uiState.update { state -> state.copy(publicationFieldError = "Can't publish an empty post!") }
+            _uiState.update { state ->
+                state.copy(
+                    publicationFieldError = "Can't publish an empty post!",
+                    isLoading = false
+                )
+            }
             return false
         }
         return true
     }
 
     private fun onPublicationChanged(value: String) {
-        _uiState.update { state -> state.copy(publication = value, publicationFieldError = "") }
+        if (value.length <= PUBLICATION_WORD_LIMIT) {
+            _uiState.update { state ->
+                state.copy(
+                    publication = value,
+                    publicationFieldError = ""
+                )
+            }
+        }
     }
 }
