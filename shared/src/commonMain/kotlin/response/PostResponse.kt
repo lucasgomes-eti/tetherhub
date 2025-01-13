@@ -9,5 +9,6 @@ data class PostResponse(
     val author: String,
     val content: String,
     val likes: Int,
-    val createdAt: Instant
+    val createdAt: Instant,
+    val isLiked: Boolean
 )

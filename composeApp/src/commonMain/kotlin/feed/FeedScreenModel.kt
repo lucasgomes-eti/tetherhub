@@ -53,22 +53,26 @@ class FeedScreenModel(private val feedClient: FeedClient) : ScreenModel {
     }
 
     private fun onPostLiked(postId: String) {
-//        screenModelScope.launch {
-//            _uiState.update { state ->
-//                state.copy(posts = _uiState.value.posts.map {
-//                    val isLiked = if (it.id == postId) !it.isLiked else it.isLiked
-//                    it.copy(
-//                        post = Post(
-//                            id = it.id,
-//                            author = it.author,
-//                            content = it.content,
-//                            likes = if (it.id == postId) if (isLiked) it.likes + 1 else it.likes - 1 else it.likes
-//                        ),
-//                        isLiked = isLiked
-//                    )
-//                })
-//            }
-//        }
+        screenModelScope.launch {
+            when (val result = feedClient.toggleLike(postId)) {
+                is Result.Success -> {
+                    _uiState.update { state ->
+                        val postIndex = state.posts.indexOfFirst { it.id == postId }
+                        state.copy(posts = state.posts.toMutableList().apply {
+                            set(postIndex, result.data)
+                        }.toList())
+                    }
+                }
+
+                is Result.Error -> {
+                    _uiState.update { state ->
+                        state.copy(
+                            errorMsg = "${result.error.internalCode} - ${result.error.message}"
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun onDismissError() {

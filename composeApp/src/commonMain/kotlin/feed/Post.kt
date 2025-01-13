@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -23,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
-import profile.User
 import response.PostResponse
 
 @Composable
@@ -52,7 +52,7 @@ fun Post(post: PostResponse, onPostLiked: () -> Unit) {
                 Text("Like", style = typography.bodyMedium)
                 BadgedBox(badge = { if (post.likes > 0) Badge { Text(post.likes.toString()) } }) {
                     Icon(
-                        /*if (post.isLiked) Icons.Filled.ThumbUp else */Icons.Outlined.ThumbUp,
+                        if (post.isLiked) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
                         contentDescription = "Like Button"
                     )
                 }
@@ -60,10 +60,3 @@ fun Post(post: PostResponse, onPostLiked: () -> Unit) {
         }
     }
 }
-
-open class Post(
-    val id: String,
-    val author: User,
-    val content: String,
-    val likes: Int
-)

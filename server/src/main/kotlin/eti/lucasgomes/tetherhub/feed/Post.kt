@@ -11,6 +11,7 @@ data class PostEntity(
     val id: ObjectId,
     val author: String,
     val content: String,
-    val likes: Int,
+    @Serializable
+    val likes: List<String>,
     val createdAt: Instant
 )

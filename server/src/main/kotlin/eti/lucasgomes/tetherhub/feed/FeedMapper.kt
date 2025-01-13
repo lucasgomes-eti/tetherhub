@@ -11,15 +11,16 @@ class FeedMapper {
             id = ObjectId(),
             author = author,
             content = request.content,
-            likes = 0,
+            likes = emptyList(),
             createdAt = Clock.System.now()
         )
 
-    fun fromEntityToPostResponse(postEntity: PostEntity) = PostResponse(
+    fun fromEntityToPostResponse(postEntity: PostEntity, userId: ObjectId) = PostResponse(
         id = postEntity.id.toString(),
         author = postEntity.author,
         content = postEntity.content,
-        likes = postEntity.likes,
-        createdAt = postEntity.createdAt
+        likes = postEntity.likes.size,
+        createdAt = postEntity.createdAt,
+        isLiked = postEntity.likes.contains(userId.toString())
     )
 }

@@ -2,6 +2,7 @@ package eti.lucasgomes.tetherhub.feed
 
 import arrow.core.Either
 import eti.lucasgomes.tetherhub.userEmail
+import eti.lucasgomes.tetherhub.userId
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -10,6 +11,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
 import request.CreatePostRequest
 
@@ -33,7 +35,23 @@ fun Route.feedRoutes() {
             }
         }
         get {
-            call.respond(feedService.findAll())
+            call.respond(feedService.findAll(userId))
+        }
+        post("{postId}/toggle_like") {
+            val postId = try {
+                ObjectId(call.parameters["postId"])
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, FeedErrors.InvalidParameters)
+                return@post
+            }
+            when (val result = feedService.toggleLike(postId = postId, userId = userId)) {
+                is Either.Left -> call.respond(
+                    HttpStatusCode.fromValue(result.value.httCode),
+                    result.value
+                )
+
+                is Either.Right -> call.respond(result.value)
+            }
         }
     }
 }

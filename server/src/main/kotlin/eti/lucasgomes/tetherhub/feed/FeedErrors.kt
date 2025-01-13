@@ -28,4 +28,16 @@ object FeedErrors {
         "TH-204",
         "Post is too long, the maximum number of allowed characters is: $PUBLICATION_WORD_LIMIT"
     )
+
+    data class PostNotUpdated(private val exception: Exception) : TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-205",
+        "Error while updating the post on the database. Cause: ${exception.message}"
+    )
+
+    data object PostNotUpdatedWithoutException : TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-206",
+        "Error while updating the post on the database."
+    )
 }

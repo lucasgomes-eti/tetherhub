@@ -64,5 +64,29 @@ class FeedClient(private val httpClientManager: HttpClientManager) {
 
             else -> Result.Error(unexpectedErrorWithHttpStatusCode(response.status.value))
         }
+
+    }
+
+    suspend fun toggleLike(postId: String): Result<PostResponse> {
+        val response = try {
+            httpClientManager.client.post("/feed/$postId/toggle_like")
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                throw e
+            }
+            return Result.Error(unexpectedErrorWithException(e))
+        }
+
+        return when (response.status.value) {
+            in 200..299 -> {
+                Result.Success(response.body<PostResponse>())
+            }
+
+            in 400..599 -> {
+                Result.Error(response.body<TetherHubError>())
+            }
+
+            else -> Result.Error(unexpectedErrorWithHttpStatusCode(response.status.value))
+        }
     }
 }
