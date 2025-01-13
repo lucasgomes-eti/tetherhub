@@ -1,6 +1,7 @@
 package eti.lucasgomes.tetherhub.user
 
 import at.favre.lib.crypto.bcrypt.BCrypt
+import org.bson.BsonObjectId
 import org.bson.types.ObjectId
 import request.CreateUserRequest
 import response.CreateUserResponse
@@ -18,7 +19,7 @@ class UserMapper(private val userRepository: UserRepository) {
         )
     }
 
-    suspend fun buildCreateUserResponse(userId: ObjectId): CreateUserResponse? {
+    suspend fun buildCreateUserResponse(userId: BsonObjectId): CreateUserResponse? {
         val user = userRepository.findById(userId)
         user ?: return null
         return user.run { CreateUserResponse(id.toString(), email, username) }

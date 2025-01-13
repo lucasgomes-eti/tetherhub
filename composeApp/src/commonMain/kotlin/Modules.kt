@@ -24,7 +24,7 @@ val authModule = module {
 
 val profileModule = module {
     singleOf(::ProfileClient)
-    factory { ProfileScreenModel(get()) }
+    factory { ProfileScreenModel(get(), get()) }
 }
 
 val feedModule = module {

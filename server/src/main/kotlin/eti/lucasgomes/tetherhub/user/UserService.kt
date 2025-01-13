@@ -24,7 +24,7 @@ class UserService(private val userRepository: UserRepository, private val userMa
                 is Either.Left -> raise(UserErrors.CreateUserError)
                 is Either.Right -> {
                     val createdUserResponse =
-                        userMapper.buildCreateUserResponse(insertUserResult.value.value)
+                        userMapper.buildCreateUserResponse(insertUserResult.value)
                     createdUserResponse ?: raise(UserErrors.UserNotFoundAfterCreatingIt)
                     createdUserResponse
                 }

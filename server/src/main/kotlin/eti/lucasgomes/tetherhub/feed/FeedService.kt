@@ -64,5 +64,11 @@ class FeedService(
             }
         }
     }
+
+    suspend fun findPostsByAuthor(userId: ObjectId): List<PostResponse> {
+        val user = userRepository.findById(userId) ?: error("User with id: $userId not found!")
+        return feedRepository.findByAuthor(user.username)
+            .map { feedMapper.fromEntityToPostResponse(it, userId) }
+    }
 }
 

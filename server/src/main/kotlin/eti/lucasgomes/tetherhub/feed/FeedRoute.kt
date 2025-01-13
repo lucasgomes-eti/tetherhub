@@ -53,5 +53,8 @@ fun Route.feedRoutes() {
                 is Either.Right -> call.respond(result.value)
             }
         }
+        get("/my_posts") {
+            call.respond(feedService.findPostsByAuthor(userId))
+        }
     }
 }

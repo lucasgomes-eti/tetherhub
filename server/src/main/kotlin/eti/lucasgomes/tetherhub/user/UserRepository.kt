@@ -51,10 +51,20 @@ class UserRepository(private val mongoDatabase: MongoDatabase) {
         return user
     }
 
-    suspend fun findById(userId: ObjectId): UserEntity? {
+    suspend fun findById(userId: BsonObjectId): UserEntity? {
         return try {
             mongoDatabase.getCollection<UserEntity>(USER_COLLECTION).withDocumentClass<UserEntity>()
                 .find(Filters.eq("_id", userId))
+                .firstOrNull()
+        } catch (e: MongoException) {
+            null
+        }
+    }
+
+    suspend fun findById(userId: ObjectId): UserEntity? {
+        return try {
+            mongoDatabase.getCollection<UserEntity>(USER_COLLECTION).withDocumentClass<UserEntity>()
+                .find(Filters.eq("id", userId))
                 .firstOrNull()
         } catch (e: MongoException) {
             null

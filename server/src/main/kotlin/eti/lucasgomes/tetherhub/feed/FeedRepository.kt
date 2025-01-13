@@ -72,4 +72,15 @@ class FeedRepository(private val mongoDatabase: MongoDatabase) {
             e.left()
         }
     }
+
+    suspend fun findByAuthor(author: String): List<PostEntity> {
+        return try {
+            mongoDatabase.getCollection<PostEntity>(POST_COLLECTION).withDocumentClass<PostEntity>()
+                .find(Filters.eq("author", author))
+                .sort(Sorts.descending(PostEntity::createdAt.name))
+                .toList()
+        } catch (e: MongoException) {
+            emptyList()
+        }
+    }
 }
