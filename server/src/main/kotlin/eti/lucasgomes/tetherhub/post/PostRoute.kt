@@ -1,0 +1,119 @@
+package eti.lucasgomes.tetherhub.post
+
+import arrow.core.Either
+import eti.lucasgomes.tetherhub.userEmail
+import eti.lucasgomes.tetherhub.userId
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
+import org.bson.types.ObjectId
+import org.koin.ktor.ext.inject
+import request.CreatePostRequest
+import request.PatchPostContentRequest
+
+fun Route.postRoutes() {
+    val postService by inject<PostService>()
+    route("posts") {
+        post {
+            val createPostRequest = try {
+                call.receive<CreatePostRequest>()
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, PostErrors.InvalidParameters)
+                return@post
+            }
+            when (val createResponse = postService.savePost(createPostRequest, userEmail)) {
+                is Either.Left -> call.respond(
+                    HttpStatusCode.fromValue(createResponse.value.httCode),
+                    createResponse.value
+                )
+
+                is Either.Right -> call.respond(HttpStatusCode.Created, createResponse.value)
+            }
+        }
+        get {
+            call.respond(postService.findAll(userId))
+        }
+        get("{postId}") {
+            val postId = try {
+                ObjectId(call.parameters["postId"])
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, PostErrors.InvalidParameters)
+                return@get
+            }
+            postService.findById(postId = postId, userId = userId)
+                .onLeft {
+                    call.respond(HttpStatusCode.fromValue(it.httCode), it)
+                }.onRight {
+                    call.respond(it)
+                }
+        }
+        post("{postId}/toggle_like") {
+            val postId = try {
+                ObjectId(call.parameters["postId"])
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, PostErrors.InvalidParameters)
+                return@post
+            }
+            when (val result = postService.toggleLike(postId = postId, userId = userId)) {
+                is Either.Left -> call.respond(
+                    HttpStatusCode.fromValue(result.value.httCode),
+                    result.value
+                )
+
+                is Either.Right -> call.respond(result.value)
+            }
+        }
+        get("my_posts") {
+            call.respond(postService.findPostsByAuthor(userId))
+        }
+        patch("{postId}") {
+            val postId = try {
+                ObjectId(call.parameters["postId"])
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, PostErrors.InvalidParameters)
+                return@patch
+            }
+            val newContent = try {
+                call.receive<PatchPostContentRequest>().content
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, PostErrors.InvalidParameters)
+                return@patch
+            }
+            when (val result = postService.editContent(
+                postId = postId,
+                userId = userId,
+                newContent = newContent
+            )) {
+                is Either.Left -> call.respond(
+                    HttpStatusCode.fromValue(result.value.httCode),
+                    result.value
+                )
+
+                is Either.Right -> call.respond(result.value)
+            }
+        }
+        delete("{postId}") {
+            val postId = try {
+                ObjectId(call.parameters["postId"])
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, PostErrors.InvalidParameters)
+                return@delete
+            }
+            when (val result = postService.deletePost(postId, userId = userId)) {
+                is Either.Left -> call.respond(
+                    HttpStatusCode.fromValue(result.value.httCode),
+                    result.value
+                )
+
+                is Either.Right -> call.respond(status = HttpStatusCode.NoContent, Unit)
+            }
+        }
+    }
+}

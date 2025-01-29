@@ -3,10 +3,10 @@ package eti.lucasgomes.tetherhub
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.mongodb.kotlin.client.coroutine.MongoClient
-import eti.lucasgomes.tetherhub.feed.FeedMapper
-import eti.lucasgomes.tetherhub.feed.FeedRepository
-import eti.lucasgomes.tetherhub.feed.FeedService
-import eti.lucasgomes.tetherhub.feed.feedRoutes
+import eti.lucasgomes.tetherhub.post.PostMapper
+import eti.lucasgomes.tetherhub.post.PostRepository
+import eti.lucasgomes.tetherhub.post.PostService
+import eti.lucasgomes.tetherhub.post.postRoutes
 import eti.lucasgomes.tetherhub.profile.ProfileMapper
 import eti.lucasgomes.tetherhub.profile.ProfileService
 import eti.lucasgomes.tetherhub.profile.profileRoutes
@@ -57,17 +57,17 @@ fun Application.module() {
             },
             module {// Repository module
                 single { UserRepository(get()) }
-                single { FeedRepository(get()) }
+                single { PostRepository(get()) }
             },
             module { // Mapper module
                 single { UserMapper(get()) }
                 single { ProfileMapper() }
-                single { FeedMapper() }
+                single { PostMapper() }
             },
             module { // Service module
                 single { UserService(get(), get()) }
                 single { ProfileService(get(), get()) }
-                single { FeedService(get(), get(), get()) }
+                single { PostService(get(), get(), get()) }
             }
         )
     }
@@ -110,7 +110,7 @@ fun Application.module() {
         userRoutes()
         authenticate {
             profileRoutes()
-            feedRoutes()
+            postRoutes()
         }
     }
 }

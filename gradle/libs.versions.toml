@@ -13,7 +13,7 @@ koin = "4.0.0"
 mongodb = "4.10.1"
 logback = "1.5.3"
 statelyCommon = "2.0.5"
-voyager = "1.0.0"
+voyager = "1.1.0-beta03"
 kotlinx-datetime = "0.6.1"
 
 [libraries]

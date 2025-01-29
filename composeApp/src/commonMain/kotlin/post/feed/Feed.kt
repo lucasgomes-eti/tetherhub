@@ -1,6 +1,5 @@
-package feed
+package post.feed
 
-import LocalEventBus
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +20,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import components.ErrorBanner
 import home.LocalNavigationAppBar
+import post.detail.CreatePostScreen
+import post.detail.Post
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,11 +29,6 @@ fun Feed(feedUiState: FeedUiState, onFeedAction: (FeedAction) -> Unit) {
 
     val navigationAppBar = LocalNavigationAppBar.current
     val navigator = LocalNavigator.currentOrThrow
-    val eventBus = LocalEventBus.current
-
-    eventBus.subscribe<PostCreated> {
-        onFeedAction(FeedAction.Refresh)
-    }
 
     Scaffold(
         modifier = Modifier.padding(bottom = navigationAppBar.ContainerHeight),

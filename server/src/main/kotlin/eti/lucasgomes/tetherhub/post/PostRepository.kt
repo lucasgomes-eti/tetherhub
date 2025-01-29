@@ -1,4 +1,4 @@
-package eti.lucasgomes.tetherhub.feed
+package eti.lucasgomes.tetherhub.post
 
 import arrow.core.Either
 import arrow.core.left
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.toList
 import org.bson.BsonObjectId
 import org.bson.types.ObjectId
 
-class FeedRepository(private val mongoDatabase: MongoDatabase) {
+class PostRepository(private val mongoDatabase: MongoDatabase) {
     companion object {
         const val POST_COLLECTION = "post"
     }
@@ -62,7 +62,8 @@ class FeedRepository(private val mongoDatabase: MongoDatabase) {
         return try {
             val updates = Updates.combine(
                 Updates.set(PostEntity::content.name, post.content),
-                Updates.set(PostEntity::likes.name, post.likes)
+                Updates.set(PostEntity::likes.name, post.likes),
+                Updates.set(PostEntity::updatedAt.name, post.updatedAt)
             )
             mongoDatabase.getCollection<PostEntity>(POST_COLLECTION)
                 .updateOne(Filters.eq("id", post.id), updates).modifiedCount.let {
@@ -81,6 +82,17 @@ class FeedRepository(private val mongoDatabase: MongoDatabase) {
                 .toList()
         } catch (e: MongoException) {
             emptyList()
+        }
+    }
+
+    suspend fun deleteOne(postId: ObjectId): Either<Exception, Boolean> {
+        return try {
+            mongoDatabase.getCollection<PostEntity>(POST_COLLECTION)
+                .deleteOne(Filters.eq("id", postId)).deletedCount.let {
+                    (it == 1L).right()
+                }
+        } catch (e: Exception) {
+            e.left()
         }
     }
 }

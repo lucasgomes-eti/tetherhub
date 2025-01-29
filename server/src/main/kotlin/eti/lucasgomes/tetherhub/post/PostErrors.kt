@@ -1,10 +1,10 @@
-package eti.lucasgomes.tetherhub.feed
+package eti.lucasgomes.tetherhub.post
 
 import PUBLICATION_WORD_LIMIT
 import io.ktor.http.HttpStatusCode
 import response.TetherHubError
 
-object FeedErrors {
+object PostErrors {
     data class PostNotCreated(private val exception: Exception) : TetherHubError(
         HttpStatusCode.InternalServerError.value,
         "TH-201",
@@ -39,5 +39,23 @@ object FeedErrors {
         HttpStatusCode.InternalServerError.value,
         "TH-206",
         "Error while updating the post on the database."
+    )
+
+    data class PostNotDeleted(private val exception: Exception) : TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-207",
+        "Error while deleting the post on the database. Cause: ${exception.message}"
+    )
+
+    data object PostNotDeletedWithoutException : TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-208",
+        "Error while deleting the post on the database."
+    )
+
+    data object NoPermissionToDelete : TetherHubError(
+        HttpStatusCode.Forbidden.value,
+        "TH-209",
+        "You can only delete your own post!"
     )
 }

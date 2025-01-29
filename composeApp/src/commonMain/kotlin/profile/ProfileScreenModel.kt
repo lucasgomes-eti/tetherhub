@@ -1,17 +1,26 @@
 package profile
 
+import EventBus
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import feed.FeedClient
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import util.Result
+import navigation.NavigationAction
+import network.Resource
+import network.onError
+import network.onSuccess
+import post.PostClient
+import post.detail.EditPostScreen
+import post.detail.PostUpdated
 
 class ProfileScreenModel(
     private val profileClient: ProfileClient,
-    private val feedClient: FeedClient
+    private val postClient: PostClient,
+    private val eventBus: EventBus
 ) : ScreenModel {
 
     private val _uiState = MutableStateFlow(
@@ -20,20 +29,66 @@ class ProfileScreenModel(
             email = "-",
             isLoading = false,
             errorMsg = "",
-            myPosts = emptyList()
+            myPosts = emptyList(),
+            event = ProfileEvent.None
         )
     )
     val uiState = _uiState.asStateFlow()
 
+    private val _navigationActions = Channel<NavigationAction>()
+    val navigationActions = _navigationActions.receiveAsFlow()
+
     init {
         fetchProfile()
         fetchMyPosts()
+        subscribeToPostUpdates()
+    }
+
+    private fun subscribeToPostUpdates() {
+        screenModelScope.launch {
+            eventBus.subscribe<PostUpdated> {
+                fetchMyPosts()
+            }
+        }
     }
 
     fun onAction(action: ProfileAction) {
         when (action) {
             is ProfileAction.LikeMyPost -> onPostLiked(action.postId)
-            ProfileAction.DismissError -> onDismissError()
+            is ProfileAction.DismissError -> onDismissError()
+            is ProfileAction.DeleteMyPost -> onDeleteMyPost(action.postId)
+            is ProfileAction.EditMyPost -> onEditMyPost(action.postId)
+        }
+    }
+
+    private fun onEditMyPost(postId: String) {
+        screenModelScope.launch {
+            _navigationActions.send(
+                NavigationAction.Push(
+                    EditPostScreen(
+                        postId
+                    )
+                )
+            )
+        }
+    }
+
+    private fun onDeleteMyPost(postId: String) {
+        screenModelScope.launch {
+            _uiState.update { state -> state.copy(isLoading = true) }
+            postClient.deleteMyPost(postId)
+                .onSuccess {
+                    _uiState.update { state -> state.copy(isLoading = false) }
+                    eventBus.publish(PostUpdated)
+                }
+                .onError {
+                    _uiState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            errorMsg = it.formatedMessage
+                        )
+                    }
+                }
         }
     }
 
@@ -45,7 +100,7 @@ class ProfileScreenModel(
         screenModelScope.launch {
             _uiState.update { state -> state.copy(isLoading = true) }
             when (val response = profileClient.getProfile()) {
-                is Result.Success -> {
+                is Resource.Success -> {
                     _uiState.update { state ->
                         state.copy(
                             username = response.data.username,
@@ -55,7 +110,7 @@ class ProfileScreenModel(
                     }
                 }
 
-                is Result.Error -> {
+                is Resource.Error -> {
                     _uiState.update { state ->
                         state.copy(
                             username = "-",
@@ -72,8 +127,8 @@ class ProfileScreenModel(
     private fun fetchMyPosts() {
         screenModelScope.launch {
             _uiState.update { state -> state.copy(isLoading = true) }
-            when (val response = feedClient.getMyPosts()) {
-                is Result.Success -> {
+            when (val response = postClient.getMyPosts()) {
+                is Resource.Success -> {
                     _uiState.update { state ->
                         state.copy(
                             myPosts = response.data,
@@ -83,7 +138,7 @@ class ProfileScreenModel(
                     }
                 }
 
-                is Result.Error -> {
+                is Resource.Error -> {
                     _uiState.update { state ->
                         state.copy(
                             isLoading = false,
@@ -97,8 +152,8 @@ class ProfileScreenModel(
 
     private fun onPostLiked(postId: String) {
         screenModelScope.launch {
-            when (val result = feedClient.toggleLike(postId)) {
-                is Result.Success -> {
+            when (val result = postClient.toggleLike(postId)) {
+                is Resource.Success -> {
                     _uiState.update { state ->
                         val postIndex = state.myPosts.indexOfFirst { it.id == postId }
                         state.copy(myPosts = state.myPosts.toMutableList().apply {
@@ -107,7 +162,7 @@ class ProfileScreenModel(
                     }
                 }
 
-                is Result.Error -> {
+                is Resource.Error -> {
                     _uiState.update { state ->
                         state.copy(
                             errorMsg = "${result.error.internalCode} - ${result.error.message}"

@@ -2,16 +2,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import auth.login.LoginScreen
 import cafe.adriel.voyager.navigator.Navigator
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
+import org.koin.compose.koinInject
 
 @Composable
 @Preview
@@ -19,7 +17,7 @@ fun App() {
     MaterialTheme {
         KoinContext {
             val scope = rememberCoroutineScope()
-            val eventBus = remember { EventBus(scope) }
+            val eventBus = koinInject<EventBus>()
             CompositionLocalProvider(LocalEventBus provides eventBus) {
                 Navigator(LoginScreen)
             }
@@ -29,17 +27,16 @@ fun App() {
 
 internal val LocalEventBus = compositionLocalOf<EventBus> { error("No EventBus provided") }
 
-class EventBus(val scope: CoroutineScope) {
+class EventBus {
     val events = MutableSharedFlow<Event>()
 
-    fun publish(event: Event) {
-        scope.launch { events.emit(event) }
+    suspend fun publish(event: Event) {
+        events.emit(event)
     }
 
-    inline fun <reified T : Event> subscribe(crossinline block: (T) -> Unit) {
-        scope.launch { events.filterIsInstance<T>().collect { block(it) } }
+    suspend inline fun <reified T : Event> subscribe(crossinline block: (T) -> Unit) {
+        events.filterIsInstance<T>().collect { block(it) }
     }
-
 }
 
 interface Event

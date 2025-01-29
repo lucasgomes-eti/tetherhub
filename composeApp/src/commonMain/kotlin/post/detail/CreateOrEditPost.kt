@@ -1,6 +1,5 @@
-package feed
+package post.detail
 
-import LocalEventBus
 import PUBLICATION_WORD_LIMIT
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
@@ -38,24 +37,18 @@ import home.LocalNavigationAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreatePost(uiState: CreatePostUiState, onCreatePostAction: (CreatePostAction) -> Unit) {
+fun CreateOrEditPost(
+    uiState: CreateOrEditPostUiState,
+    onCreatePostAction: (CreateOrEditPostAction) -> Unit
+) {
 
     val navigator = LocalNavigator.currentOrThrow
     val navigationAppBar = LocalNavigationAppBar.current
-    val eventBus = LocalEventBus.current
 
     DisposableEffect(Unit) {
         navigationAppBar.hide()
         onDispose {
             navigationAppBar.show()
-        }
-    }
-
-    when (uiState.event) {
-        CreatePostEvent.NONE -> Unit
-        CreatePostEvent.SUCCESS -> {
-            navigator.pop()
-            eventBus.publish(PostCreated)
         }
     }
 
@@ -65,7 +58,7 @@ fun CreatePost(uiState: CreatePostUiState, onCreatePostAction: (CreatePostAction
                 containerColor = colorScheme.primaryContainer,
                 titleContentColor = colorScheme.primary,
             ),
-            title = { Text("New Post") },
+            title = { Text(uiState.topAppBarTitle) },
             actions = {
                 IconButton(onClick = { navigator.pop() }) {
                     Icon(
@@ -80,7 +73,7 @@ fun CreatePost(uiState: CreatePostUiState, onCreatePostAction: (CreatePostAction
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
                 value = uiState.publication,
-                onValueChange = { onCreatePostAction(CreatePostAction.PublicationChanged(it)) },
+                onValueChange = { onCreatePostAction(CreateOrEditPostAction.PublicationChanged(it)) },
                 label = { Text("Publication") },
                 placeholder = { Text("What's in your mind?") },
                 supportingText = {
@@ -97,14 +90,14 @@ fun CreatePost(uiState: CreatePostUiState, onCreatePostAction: (CreatePostAction
             )
             AnimatedVisibility(uiState.errorMsg.isNotEmpty()) {
                 ErrorBanner(uiState.errorMsg) {
-                    onCreatePostAction(CreatePostAction.DismissError)
+                    onCreatePostAction(CreateOrEditPostAction.DismissError)
                 }
             }
             Box(Modifier.weight(1f))
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
-                onClick = { onCreatePostAction(CreatePostAction.PublishPost) }) {
+                onClick = { onCreatePostAction(CreateOrEditPostAction.PublishOrEditPost) }) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(with(LocalDensity.current) { typography.bodyMedium.fontSize.toDp() })

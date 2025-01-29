@@ -1,17 +1,17 @@
 package auth.login.network
 
-import HttpClientManager
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.CancellationException
+import network.HttpClientManager
+import network.Resource
+import network.unexpectedErrorWithException
+import network.unexpectedErrorWithHttpStatusCode
 import response.AuthResponse
 import response.TetherHubError
-import util.Result
-import util.unexpectedErrorWithException
-import util.unexpectedErrorWithHttpStatusCode
 
 class LoginClient(
     private val httpClientManager: HttpClientManager
@@ -19,7 +19,7 @@ class LoginClient(
     suspend fun authenticateWithCredentials(
         email: String,
         password: String
-    ): Result<AuthResponse> {
+    ): Resource<AuthResponse> {
         val response = try {
             httpClientManager.client.post("/login") {
                 contentType(ContentType.Application.Json)
@@ -29,22 +29,22 @@ class LoginClient(
             if (e is CancellationException) {
                 throw e
             }
-            return Result.Error(unexpectedErrorWithException(e))
+            return Resource.Error(unexpectedErrorWithException(e))
         }
 
         return when (response.status.value) {
             in 200..299 -> {
                 val result = response.body<AuthResponse>()
                 createUserSession(result)
-                Result.Success(result)
+                Resource.Success(result)
             }
 
             in 400..599 -> {
                 val errorResponse = response.body<TetherHubError>()
-                Result.Error(errorResponse)
+                Resource.Error(errorResponse)
             }
 
-            else -> Result.Error(unexpectedErrorWithHttpStatusCode(response.status.value))
+            else -> Resource.Error(unexpectedErrorWithHttpStatusCode(response.status.value))
         }
     }
 

@@ -7,5 +7,6 @@ data class ProfileUiState(
     val email: String,
     val isLoading: Boolean,
     val errorMsg: String,
-    val myPosts: List<PostResponse>
+    val myPosts: List<PostResponse>,
+    val event: ProfileEvent
 )

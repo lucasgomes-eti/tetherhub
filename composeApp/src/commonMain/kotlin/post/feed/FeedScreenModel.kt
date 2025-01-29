@@ -1,14 +1,20 @@
-package feed
+package post.feed
 
+import EventBus
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import util.Result
+import network.Resource
+import post.PostClient
+import post.detail.PostUpdated
 
-class FeedScreenModel(private val feedClient: FeedClient) : ScreenModel {
+class FeedScreenModel(
+    private val postClient: PostClient,
+    private val eventBus: EventBus
+) : ScreenModel {
 
     private val _uiState =
         MutableStateFlow(FeedUiState(posts = emptyList(), isLoading = false, errorMsg = ""))
@@ -16,13 +22,22 @@ class FeedScreenModel(private val feedClient: FeedClient) : ScreenModel {
 
     init {
         fetchPosts()
+        subscribeToPostUpdates()
+    }
+
+    private fun subscribeToPostUpdates() {
+        screenModelScope.launch {
+            eventBus.subscribe<PostUpdated> {
+                fetchPosts()
+            }
+        }
     }
 
     private fun fetchPosts() {
         screenModelScope.launch {
             _uiState.update { state -> state.copy(isLoading = true) }
-            when (val response = feedClient.getPosts()) {
-                is Result.Success -> {
+            when (val response = postClient.getPosts()) {
+                is Resource.Success -> {
                     _uiState.update { state ->
                         state.copy(
                             posts = response.data,
@@ -32,7 +47,7 @@ class FeedScreenModel(private val feedClient: FeedClient) : ScreenModel {
                     }
                 }
 
-                is Result.Error -> {
+                is Resource.Error -> {
                     _uiState.update { state ->
                         state.copy(
                             isLoading = false,
@@ -54,8 +69,8 @@ class FeedScreenModel(private val feedClient: FeedClient) : ScreenModel {
 
     private fun onPostLiked(postId: String) {
         screenModelScope.launch {
-            when (val result = feedClient.toggleLike(postId)) {
-                is Result.Success -> {
+            when (val result = postClient.toggleLike(postId)) {
+                is Resource.Success -> {
                     _uiState.update { state ->
                         val postIndex = state.posts.indexOfFirst { it.id == postId }
                         state.copy(posts = state.posts.toMutableList().apply {
@@ -64,7 +79,7 @@ class FeedScreenModel(private val feedClient: FeedClient) : ScreenModel {
                     }
                 }
 
-                is Result.Error -> {
+                is Resource.Error -> {
                     _uiState.update { state ->
                         state.copy(
                             errorMsg = "${result.error.internalCode} - ${result.error.message}"

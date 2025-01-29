@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import network.Resource
 import request.CreateUserRequest
 import request.Email
 import request.Password
 import request.Username
-import util.Result
 
 class RegistrationScreenModel(private val registrationClient: RegistrationClient) : ScreenModel {
 
@@ -89,7 +89,7 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
                     )
                 )
                 when (response) {
-                    is Result.Success -> {
+                    is Resource.Success -> {
                         _uiState.update { state ->
                             state.copy(
                                 isLoading = false,
@@ -98,7 +98,7 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
                         }
                     }
 
-                    is Result.Error -> {
+                    is Resource.Error -> {
                         _uiState.update { state ->
                             state.copy(
                                 isLoading = false,

@@ -2,40 +2,67 @@ package profile
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import components.ErrorBanner
-import feed.Post
+import post.detail.EditPostScreen
+import post.detail.MyPost
 
 @Composable
 fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> Unit) {
-    LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        item {
-            AboutMe(profileUiState, onProfileAction)
-        }
+    val navigator = LocalNavigator.currentOrThrow
+    when (profileUiState.event) {
+        is ProfileEvent.None -> Unit
+        is ProfileEvent.EditMyPost -> navigator.push(EditPostScreen(profileUiState.event.postId))
+    }
+    val openAlertDialog = remember { mutableStateOf(DeleteDialogData(false, "")) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            item {
+                AboutMe(profileUiState, onProfileAction)
+            }
 
-        item {
-            Text("My Posts", style = typography.titleMedium)
-        }
+            item {
+                Text("My Posts", style = typography.titleMedium)
+            }
 
-        items(profileUiState.myPosts, key = { it.id }) {
-            Post(it) { onProfileAction(ProfileAction.LikeMyPost(it.id)) }
+            items(profileUiState.myPosts, key = { it.id }) {
+                MyPost(
+                    post = it,
+                    onLikeClicked = { onProfileAction(ProfileAction.LikeMyPost(it.id)) },
+                    onEditClicked = { onProfileAction(ProfileAction.EditMyPost(it.id)) },
+                    onDeleteClicked = { openAlertDialog.value = DeleteDialogData(true, it.id) },
+                )
+            }
+        }
+        DeletePostDialog(openAlertDialog) {
+            onProfileAction(ProfileAction.DeleteMyPost(openAlertDialog.value.postId))
         }
     }
 }
@@ -81,3 +108,46 @@ fun AboutMe(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> 
         }
     }
 }
+
+@Composable
+private fun DeletePostDialog(
+    openAlertDialog: MutableState<DeleteDialogData>,
+    onDeleteConfirmed: () -> Unit
+) {
+    when {
+        openAlertDialog.value.isShown -> {
+            AlertDialog(
+                title = {
+                    Text(text = "Delete Post?")
+                },
+                text = {
+                    Text(text = "You can't undo the deletion!")
+                },
+                onDismissRequest = {
+                    openAlertDialog.value = openAlertDialog.value.copy(isShown = false)
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            onDeleteConfirmed()
+                            openAlertDialog.value = openAlertDialog.value.copy(isShown = false)
+                        }
+                    ) {
+                        Text("Delete", color = colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            openAlertDialog.value = openAlertDialog.value.copy(isShown = false)
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+    }
+}
+
+private data class DeleteDialogData(val isShown: Boolean, val postId: String)

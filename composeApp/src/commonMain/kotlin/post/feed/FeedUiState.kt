@@ -1,4 +1,4 @@
-package feed
+package post.feed
 
 import response.PostResponse
 

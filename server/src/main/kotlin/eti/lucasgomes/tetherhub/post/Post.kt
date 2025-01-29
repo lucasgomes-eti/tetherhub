@@ -1,4 +1,4 @@
-package eti.lucasgomes.tetherhub.feed
+package eti.lucasgomes.tetherhub.post
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Contextual
@@ -13,5 +13,6 @@ data class PostEntity(
     val content: String,
     @Serializable
     val likes: List<String>,
-    val createdAt: Instant
+    val createdAt: Instant,
+    val updatedAt: Instant?
 )

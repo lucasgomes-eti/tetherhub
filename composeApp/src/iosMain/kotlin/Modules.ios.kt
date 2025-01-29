@@ -1,4 +1,5 @@
 import io.ktor.client.engine.darwin.Darwin
+import network.HttpClientManager
 import org.koin.dsl.module
 
 actual val platformModule = module {

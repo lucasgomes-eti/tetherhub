@@ -1,37 +1,37 @@
 package profile
 
-import HttpClientManager
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import kotlinx.coroutines.CancellationException
+import network.HttpClientManager
+import network.Resource
+import network.unexpectedErrorWithException
+import network.unexpectedErrorWithHttpStatusCode
 import response.ProfileResponse
 import response.TetherHubError
-import util.Result
-import util.unexpectedErrorWithException
-import util.unexpectedErrorWithHttpStatusCode
 
 class ProfileClient(private val httpClientManager: HttpClientManager) {
 
-    suspend fun getProfile(): Result<ProfileResponse> {
+    suspend fun getProfile(): Resource<ProfileResponse> {
         val response = try {
             httpClientManager.client.get("/profile")
         } catch (e: Exception) {
             if (e is CancellationException) {
                 throw e
             }
-            return Result.Error(unexpectedErrorWithException(e))
+            return Resource.Error(unexpectedErrorWithException(e))
         }
 
         return when (response.status.value) {
             in 200..299 -> {
-                Result.Success(response.body<ProfileResponse>())
+                Resource.Success(response.body<ProfileResponse>())
             }
 
             in 400..599 -> {
-                Result.Error(response.body<TetherHubError>())
+                Resource.Error(response.body<TetherHubError>())
             }
 
-            else -> Result.Error(unexpectedErrorWithHttpStatusCode(response.status.value))
+            else -> Resource.Error(unexpectedErrorWithHttpStatusCode(response.status.value))
         }
     }
 }

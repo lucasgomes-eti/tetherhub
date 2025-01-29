@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import util.Result
+import network.Resource
 
 class LoginScreenModel(private val loginClient: LoginClient) : ScreenModel {
 
@@ -58,7 +58,7 @@ class LoginScreenModel(private val loginClient: LoginClient) : ScreenModel {
                     uiStateSnapshot.password
                 )
                 when (result) {
-                    is Result.Success -> {
+                    is Resource.Success -> {
                         _uiState.update { state ->
                             state.copy(
                                 isLoading = false,
@@ -67,7 +67,7 @@ class LoginScreenModel(private val loginClient: LoginClient) : ScreenModel {
                         }
                     }
 
-                    is Result.Error -> {
+                    is Resource.Error -> {
                         _uiState.update { state ->
                             state.copy(
                                 isLoading = false,
