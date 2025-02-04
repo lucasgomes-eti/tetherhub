@@ -1,4 +1,4 @@
-package eti.lucasgomes.tetherhub
+package eti.lucasgomes.tetherhub.dsl
 
 import eti.lucasgomes.tetherhub.user.User
 import io.ktor.server.application.ApplicationCall

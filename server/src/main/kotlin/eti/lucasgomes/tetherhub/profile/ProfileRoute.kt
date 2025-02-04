@@ -1,7 +1,7 @@
 package eti.lucasgomes.tetherhub.profile
 
 import arrow.core.Either
-import eti.lucasgomes.tetherhub.userEmail
+import eti.lucasgomes.tetherhub.dsl.userEmail
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond

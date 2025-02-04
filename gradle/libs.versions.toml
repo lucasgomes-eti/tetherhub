@@ -35,6 +35,7 @@ ktor-server-statusPages = { module = "io.ktor:ktor-server-status-pages", version
 ktor-server-koin = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
 ktor-server-koin-logger = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin" }
 ktor-server-bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
+ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }

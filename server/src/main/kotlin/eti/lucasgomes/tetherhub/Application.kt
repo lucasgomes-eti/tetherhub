@@ -3,6 +3,9 @@ package eti.lucasgomes.tetherhub
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.mongodb.kotlin.client.coroutine.MongoClient
+import eti.lucasgomes.tetherhub.chat.ChatRepository
+import eti.lucasgomes.tetherhub.chat.ChatService
+import eti.lucasgomes.tetherhub.chat.chatRoutes
 import eti.lucasgomes.tetherhub.post.PostMapper
 import eti.lucasgomes.tetherhub.post.PostRepository
 import eti.lucasgomes.tetherhub.post.PostService
@@ -16,6 +19,7 @@ import eti.lucasgomes.tetherhub.user.UserService
 import eti.lucasgomes.tetherhub.user.toDomain
 import eti.lucasgomes.tetherhub.user.userRoutes
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -29,10 +33,16 @@ import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
+import io.ktor.server.websocket.pingPeriod
+import io.ktor.server.websocket.timeout
+import kotlinx.serialization.json.Json
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
+import java.time.Duration
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
@@ -58,6 +68,7 @@ fun Application.module() {
             module {// Repository module
                 single { UserRepository(get()) }
                 single { PostRepository(get()) }
+                singleOf(::ChatRepository)
             },
             module { // Mapper module
                 single { UserMapper(get()) }
@@ -68,6 +79,7 @@ fun Application.module() {
                 single { UserService(get(), get()) }
                 single { ProfileService(get(), get()) }
                 single { PostService(get(), get(), get()) }
+                singleOf(::ChatService)
             }
         )
     }
@@ -103,6 +115,14 @@ fun Application.module() {
         }
     }
 
+    install(WebSockets) {
+        contentConverter = KotlinxWebsocketSerializationConverter(Json)
+        pingPeriod = Duration.ofSeconds(15)
+        timeout = Duration.ofSeconds(15)
+        maxFrameSize = Long.MAX_VALUE
+        masking = false
+    }
+
     routing {
         swaggerUI(path = "swagger-ui", swaggerFile = "openapi/documentation.yaml") {
             version = "4.15.5"
@@ -111,6 +131,7 @@ fun Application.module() {
         authenticate {
             profileRoutes()
             postRoutes()
+            chatRoutes()
         }
     }
 }
