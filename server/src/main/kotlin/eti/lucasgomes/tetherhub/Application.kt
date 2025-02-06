@@ -3,6 +3,7 @@ package eti.lucasgomes.tetherhub
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.mongodb.kotlin.client.coroutine.MongoClient
+import eti.lucasgomes.tetherhub.chat.ChatMapper
 import eti.lucasgomes.tetherhub.chat.ChatRepository
 import eti.lucasgomes.tetherhub.chat.ChatService
 import eti.lucasgomes.tetherhub.chat.chatRoutes
@@ -74,6 +75,7 @@ fun Application.module() {
                 single { UserMapper(get()) }
                 single { ProfileMapper() }
                 single { PostMapper() }
+                singleOf(::ChatMapper)
             },
             module { // Service module
                 single { UserService(get(), get()) }

@@ -35,6 +35,13 @@ suspend inline fun <reified E : Any> MongoDatabase.insertOne(entity: E) =
 
 suspend inline fun <reified E : Any> MongoDatabase.findById(id: ObjectId) = withCollection<E, E> {
     withDocumentClass<E>()
-        .find(Filters.eq(id::class.simpleName!!, id))
+        .find(Filters.eq("id", id))
         .firstOrNull()!!
 }
+
+suspend inline fun <reified E : Any> MongoDatabase.findById(id: BsonObjectId) =
+    withCollection<E, E> {
+        withDocumentClass<E>()
+            .find(Filters.eq("_id", id))
+            .firstOrNull()!!
+    }
