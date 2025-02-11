@@ -46,6 +46,13 @@ class ChatService(
 //            }
         }
 
+    suspend fun findById(chatId: ObjectId): Either<TetherHubError, CreateChatResponse> = either {
+        val entity =
+            chatRepository.findById(chatId).mapLeft { ChatErrors.ChatNotFound(chatId.toString()) }
+                .bind()
+        chatMapper.fromEntityToResponse(entity)
+    }
+
     private suspend fun usersAreInDb(users: List<ObjectId>): Boolean {
         if (users.isEmpty()) {
             return false

@@ -1,6 +1,7 @@
 package eti.lucasgomes.tetherhub.chat
 
 import Message
+import eti.lucasgomes.tetherhub.dsl.userId
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -12,15 +13,24 @@ import io.ktor.server.websocket.WebSocketServerSession
 import io.ktor.server.websocket.receiveDeserialized
 import io.ktor.server.websocket.sendSerialized
 import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.CloseReason
+import io.ktor.websocket.close
 import io.ktor.websocket.send
+import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
 import request.CreateChatRequest
+import response.CreateChatResponse
 import java.util.Collections
+
+data class ServerRooms(
+    val chat: CreateChatResponse,
+    val connectedSessions: MutableList<WebSocketServerSession>
+)
 
 fun Route.chatRoutes() {
     val chatService by inject<ChatService>()
     route("chats") {
-        val sessions = Collections.synchronizedList<WebSocketServerSession>(ArrayList())
+        val serverRooms = Collections.synchronizedList<ServerRooms>(ArrayList())
 
         post {
             val createChatRequest = try {
@@ -35,14 +45,43 @@ fun Route.chatRoutes() {
         }
 
         webSocket("{chatId}") {
-            sessions.add(this)
 
-            send(call.parameters["chatId"] ?: "no id provided")
+            val chatId = call.parameters["chatId"]?.let { ObjectId(it) } ?: run {
+                close(CloseReason(CloseReason.Codes.NORMAL, "Missing parameter chatId"))
+                return@webSocket
+            }
 
-            while (true) {
-                val newMessage = receiveDeserialized<Message>()
-                for (session in sessions) {
-                    session.sendSerialized(newMessage)
+            chatService.findById(chatId).onLeft {
+                close(CloseReason(CloseReason.Codes.NORMAL, it.message))
+            }.onRight { chat ->
+                send("You joined the room: ${chat.roomName}")
+
+                val roomIndex =
+                    serverRooms.indexOfFirst { it.chat.chatId == chatId.toString() }.let {
+                        return@let if (it != -1) {
+                            serverRooms[it].connectedSessions.add(this)
+                            it
+                        } else {
+                            serverRooms.addLast(ServerRooms(chat, mutableListOf(this)))
+                            serverRooms.lastIndex
+                        }
+                    }
+
+                send("Online members: ${serverRooms[roomIndex].connectedSessions.size}")
+
+                while (true) {
+                    val newMessage = receiveDeserialized<Message>()
+                    for (session in serverRooms[roomIndex].connectedSessions) {
+                        session.sendSerialized(newMessage)
+
+                        val offlineUsers = mutableListOf<String>()
+                        chat.users.forEach {
+                            if (!serverRooms[roomIndex].connectedSessions.map { session.call.userId }.contains(ObjectId(it))) {
+                                offlineUsers.add(it)
+                            }
+                        }
+                        // TODO: send notification to offline users
+                    }
                 }
             }
         }

@@ -13,3 +13,6 @@ val PipelineContext<*, ApplicationCall>.userEmail: String
 
 val PipelineContext<*, ApplicationCall>.userId: ObjectId
     get() = call.principal<User>()?.id?.value ?: throw AuthenticationException()
+
+val ApplicationCall.userId: ObjectId
+    get() = principal<User>()?.id?.value ?: throw AuthenticationException()
