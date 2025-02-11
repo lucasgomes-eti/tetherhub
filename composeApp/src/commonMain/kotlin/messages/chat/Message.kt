@@ -1,4 +1,4 @@
-package messages
+package messages.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import profile.User
 
 @Composable
-fun Message(message: LocalMessage) {
+fun ChatItem(message: LocalMessage) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (message.isFromMe) Arrangement.End else Arrangement.Start

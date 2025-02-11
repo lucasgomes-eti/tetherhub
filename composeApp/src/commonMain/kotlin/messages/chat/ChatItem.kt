@@ -1,4 +1,4 @@
-package messages
+package messages.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -122,7 +122,7 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
             contentPadding = PaddingValues(16.dp),
         ) {
             items(chatUiState.messages, key = { it.id }) {
-                Message(it)
+                ChatItem(it)
             }
         }
     }

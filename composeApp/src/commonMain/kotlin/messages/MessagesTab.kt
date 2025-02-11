@@ -7,11 +7,12 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import messages.rooms.RoomsScreen
 
 object MessagesTab : Tab {
     @Composable
     override fun Content() {
-        Navigator(ConversationsScreen)
+        Navigator(RoomsScreen)
     }
 
     override val options: TabOptions

@@ -1,4 +1,4 @@
-package messages
+package messages.chat
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope

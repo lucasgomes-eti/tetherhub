@@ -7,6 +7,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.websocket.WebSocketServerSession
@@ -44,6 +45,12 @@ fun Route.chatRoutes() {
             }.onRight { call.respond(HttpStatusCode.Created, it) }
         }
 
+        get {
+            chatService.findRoomsByUserId(userId).onLeft {
+                call.respond(HttpStatusCode.fromValue(it.httCode), it)
+            }.onRight { call.respond(it) }
+        }
+
         webSocket("{chatId}") {
 
             val chatId = call.parameters["chatId"]?.let { ObjectId(it) } ?: run {
@@ -76,7 +83,8 @@ fun Route.chatRoutes() {
 
                         val offlineUsers = mutableListOf<String>()
                         chat.users.forEach {
-                            if (!serverRooms[roomIndex].connectedSessions.map { session.call.userId }.contains(ObjectId(it))) {
+                            if (!serverRooms[roomIndex].connectedSessions.map { session.call.userId }
+                                    .contains(ObjectId(it))) {
                                 offlineUsers.add(it)
                             }
                         }

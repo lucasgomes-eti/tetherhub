@@ -2,8 +2,11 @@ import auth.login.LoginScreenModel
 import auth.login.network.LoginClient
 import auth.registration.RegistrationScreenModel
 import auth.registration.network.RegistrationClient
+import messages.ChatClient
+import messages.rooms.RoomsScreenModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
@@ -31,15 +34,20 @@ val profileModule = module {
     factory { ProfileScreenModel(get(), get(), get()) }
 }
 
-val feedModule = module {
+val postsModule = module {
     singleOf(::PostClient)
     factory { FeedScreenModel(get(), get()) }
     factory { params -> CreateOrEditPostScreenModel(get(), get(), params.getOrNull()) }
 }
 
+val messagesModule = module {
+    singleOf(::ChatClient)
+    factoryOf(::RoomsScreenModel)
+}
+
 fun initKoin(config: KoinAppDeclaration? = null) {
     startKoin {
         config?.invoke(this)
-        modules(platformModule, appModule, authModule, profileModule, feedModule)
+        modules(platformModule, appModule, authModule, profileModule, postsModule, messagesModule)
     }
 }

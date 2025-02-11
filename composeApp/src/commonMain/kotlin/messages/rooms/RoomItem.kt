@@ -1,4 +1,4 @@
-package messages
+package messages.rooms
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,14 +10,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import profile.User
+import response.CreateChatResponse
 
 @Composable
-fun Conversation(conversation: Conversation, onClick: () -> Unit) {
+fun RoomItem(conversation: CreateChatResponse, onClick: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth(), onClick = onClick) {
         val users = StringBuilder()
         conversation.users.forEachIndexed { index, user ->
-            users.append(user.username)
+            users.append(user)
             if (index != conversation.users.lastIndex) {
                 users.append(", ")
             }
@@ -27,13 +27,7 @@ fun Conversation(conversation: Conversation, onClick: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(users.toString(), style = typography.labelMedium)
-            Text(conversation.lastMessage.content, style = typography.bodyMedium)
+            Text(conversation.roomName, style = typography.bodyMedium)
         }
     }
 }
-
-open class Conversation(
-    val id: String,
-    val users: List<User>,
-    val lastMessage: Message
-)

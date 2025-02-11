@@ -133,7 +133,7 @@ fun Application.module() {
         authenticate {
             profileRoutes()
             postRoutes()
+            chatRoutes()
         }
-        chatRoutes()
     }
 }

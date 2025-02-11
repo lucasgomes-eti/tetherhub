@@ -1,4 +1,4 @@
-package messages
+package messages.rooms
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,15 +8,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import messages.chat.ChatScreen
 
 @Composable
-fun Conversations(conversationsUiState: ConversationsUiState) {
+fun Rooms(roomsUiState: RoomsUiState) {
 
     val navigator = LocalNavigator.currentOrThrow
 
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(16.dp)) {
-        items(conversationsUiState.conversations, key = { it.id }) {
-            Conversation(it) { navigator.push(ChatScreen) }
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        items(roomsUiState.rooms) {
+            RoomItem(it) { navigator.push(ChatScreen) }
         }
     }
 }

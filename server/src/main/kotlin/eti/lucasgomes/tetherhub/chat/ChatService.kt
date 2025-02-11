@@ -62,4 +62,10 @@ class ChatService(
         }
         return true
     }
+
+    suspend fun findRoomsByUserId(userId: ObjectId): Either<TetherHubError, List<CreateChatResponse>> =
+        either {
+            chatRepository.findByUserId(userId).mapLeft { ChatErrors.ErrorWhileFetchingRooms(it) }
+                .map { it.map { entity -> chatMapper.fromEntityToResponse(entity) } }.bind()
+        }
 }

@@ -40,4 +40,10 @@ object ChatErrors {
         "TH-306",
         "Invalid body for this request"
     )
+
+    data class ErrorWhileFetchingRooms(val exception: Exception) : TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-307",
+        "Error while fetching rooms. Cause: ${exception.message}"
+    )
 }
