@@ -52,7 +52,7 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
 
     val users = StringBuilder()
     chatUiState.users.forEachIndexed { index, user ->
-        users.append(user.username)
+        users.append(user.takeLast(3))
         if (index != chatUiState.users.lastIndex) {
             users.append(", ")
         }
@@ -121,7 +121,7 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.Bottom),
             contentPadding = PaddingValues(16.dp),
         ) {
-            items(chatUiState.messages, key = { it.id }) {
+            items(chatUiState.messages) {
                 ChatItem(it)
             }
         }

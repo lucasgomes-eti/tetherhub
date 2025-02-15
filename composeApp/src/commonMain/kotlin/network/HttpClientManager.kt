@@ -10,13 +10,15 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.statement.HttpResponse
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import response.TetherHubError
 import kotlin.coroutines.cancellation.CancellationException
 
-class HttpClientManager(private val engine: HttpClientEngine, private val baseUrl: String) {
+class HttpClientManager(private val engine: HttpClientEngine, val baseUrl: BaseUrl) {
     private var _httpClient: HttpClient? = null
 
     // TODO: token needs to be saved in the local storage
@@ -32,18 +34,19 @@ class HttpClientManager(private val engine: HttpClientEngine, private val baseUr
 
     private fun createHttpClient(): HttpClient {
         return HttpClient(engine) {
+            val contentSerializer = Json {
+                ignoreUnknownKeys = true
+            }
             install(Logging) {
                 level = LogLevel.ALL
             }
             install(ContentNegotiation) {
                 json(
-                    json = Json {
-                        ignoreUnknownKeys = true
-                    }
+                    json = contentSerializer
                 )
             }
             defaultRequest {
-                url(baseUrl)
+                url(baseUrl.path)
             }
 
             authToken?.let { token ->
@@ -54,6 +57,10 @@ class HttpClientManager(private val engine: HttpClientEngine, private val baseUr
                         }
                     }
                 }
+            }
+
+            install(WebSockets) {
+                contentConverter = KotlinxWebsocketSerializationConverter(contentSerializer)
             }
         }
     }

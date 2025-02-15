@@ -3,6 +3,7 @@ import auth.login.network.LoginClient
 import auth.registration.RegistrationScreenModel
 import auth.registration.network.RegistrationClient
 import messages.ChatClient
+import messages.chat.ChatScreenModel
 import messages.rooms.RoomsScreenModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -43,6 +44,7 @@ val postsModule = module {
 val messagesModule = module {
     singleOf(::ChatClient)
     factoryOf(::RoomsScreenModel)
+    factoryOf(::ChatScreenModel)
 }
 
 fun initKoin(config: KoinAppDeclaration? = null) {

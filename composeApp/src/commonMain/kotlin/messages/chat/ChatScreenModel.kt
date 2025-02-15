@@ -1,16 +1,18 @@
 package messages.chat
 
+import Message
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import profile.User
+import messages.ChatClient
 
 data class ChatUiState(
-    val users: List<User>,
-    val messages: List<LocalMessage>,
+    val users: List<String>,
+    val messages: List<Message>,
     val draft: String
 )
 
@@ -19,25 +21,37 @@ sealed class ChatAction {
     data object Send : ChatAction()
 }
 
-data class LocalMessage(private val message: Message, val isFromMe: Boolean) :
-    Message(message.id, message.sender, message.content)
+//data class LocalMessage(private val message: Message, val isFromMe: Boolean) :
+//    Message(message.id, message.sender, message.content)
 
-class ChatScreenModel : ScreenModel {
+class ChatScreenModel(private val chatId: String, private val chatClient: ChatClient) :
+    ScreenModel {
 
     private val _uiState = MutableStateFlow(
         ChatUiState(
-            users = listOf(
-                User("1", "scary"),
-                User("2", "terry")
-            ),
-            messages = listOf(
-                LocalMessage(Message("1", User("1", "scary"), "let's do smt later"), true),
-                LocalMessage(Message("2", User("2", "terry"), "see you on the park"), false)
-            ),
+            users = emptyList(),
+            messages = listOf(Message("chatId: $chatId")),
             ""
         )
     )
     val uiState = _uiState.asStateFlow()
+
+    private var chatListenerJob: Job? = null
+
+    init {
+        subscribeToChat()
+    }
+
+    private fun subscribeToChat() {
+        chatListenerJob = screenModelScope.launch {
+            chatClient.connectToChat(chatId).collect {
+                val messages = _uiState.value.messages.toMutableList().apply {
+                    add(it)
+                }
+                _uiState.update { state -> state.copy(messages = messages) }
+            }
+        }
+    }
 
     fun onChatAction(chatAction: ChatAction) {
         when (chatAction) {
@@ -57,15 +71,13 @@ class ChatScreenModel : ScreenModel {
             if (_uiState.value.draft.isEmpty()) {
                 return@launch
             }
-            val messages = _uiState.value.messages.toMutableList().apply {
-                add(
-                    LocalMessage(
-                        Message((size + 1).toString(), User("1", "scary"), _uiState.value.draft),
-                        true
-                    )
-                )
-            }
-            _uiState.update { state -> state.copy(draft = "", messages = messages) }
+            chatClient.sendMessage(Message(_uiState.value.draft))
+            _uiState.update { state -> state.copy(draft = "") }
         }
+    }
+
+    override fun onDispose() {
+        super.onDispose()
+        chatListenerJob?.cancel()
     }
 }

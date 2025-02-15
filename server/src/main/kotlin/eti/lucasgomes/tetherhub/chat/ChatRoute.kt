@@ -11,12 +11,13 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.websocket.WebSocketServerSession
-import io.ktor.server.websocket.receiveDeserialized
 import io.ktor.server.websocket.sendSerialized
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.CloseReason
+import io.ktor.websocket.Frame
 import io.ktor.websocket.close
-import io.ktor.websocket.send
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
 import request.CreateChatRequest
@@ -61,7 +62,7 @@ fun Route.chatRoutes() {
             chatService.findById(chatId).onLeft {
                 close(CloseReason(CloseReason.Codes.NORMAL, it.message))
             }.onRight { chat ->
-                send("You joined the room: ${chat.roomName}")
+                sendSerialized(Message("You joined the room: ${chat.roomName}"))
 
                 val roomIndex =
                     serverRooms.indexOfFirst { it.chat.chatId == chatId.toString() }.let {
@@ -74,22 +75,30 @@ fun Route.chatRoutes() {
                         }
                     }
 
-                send("Online members: ${serverRooms[roomIndex].connectedSessions.size}")
+                sendSerialized(Message("Online members: ${serverRooms[roomIndex].connectedSessions.size}"))
 
-                while (true) {
-                    val newMessage = receiveDeserialized<Message>()
-                    for (session in serverRooms[roomIndex].connectedSessions) {
-                        session.sendSerialized(newMessage)
-
-                        val offlineUsers = mutableListOf<String>()
-                        chat.users.forEach {
-                            if (!serverRooms[roomIndex].connectedSessions.map { session.call.userId }
-                                    .contains(ObjectId(it))) {
-                                offlineUsers.add(it)
+                for (frame in incoming) {
+                    frame as? Frame.Text ?: continue
+                    launch {
+                        val serializedMessage = frame.data.toString(Charsets.UTF_8)
+                        val newMessage = Json.decodeFromString<Message>(serializedMessage)
+                        for (session in serverRooms[roomIndex].connectedSessions) {
+                            session.sendSerialized(newMessage)
+                            val offlineUsers = mutableListOf<String>()
+                            chat.users.forEach {
+                                if (!serverRooms[roomIndex].connectedSessions.map { session.call.userId }
+                                        .contains(ObjectId(it))) {
+                                    offlineUsers.add(it)
+                                }
                             }
+                            // TODO: send notification to offline users
                         }
-                        // TODO: send notification to offline users
                     }
+                } // once socket is closed, the loop will complete
+                if (serverRooms[roomIndex].connectedSessions.size > 1) {
+                    serverRooms[roomIndex].connectedSessions.remove(this)
+                } else {
+                    serverRooms.removeAt(roomIndex)
                 }
             }
         }

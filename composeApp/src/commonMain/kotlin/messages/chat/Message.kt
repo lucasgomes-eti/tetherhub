@@ -1,5 +1,6 @@
 package messages.chat
 
+import Message
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,13 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import profile.User
 
 @Composable
-fun ChatItem(message: LocalMessage) {
+fun ChatItem(message: Message) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (message.isFromMe) Arrangement.End else Arrangement.Start
+        horizontalArrangement = /*if (message.isFromMe)*/ Arrangement.End /*else Arrangement.Start*/
     ) {
         Column(
             modifier = Modifier
@@ -28,11 +28,11 @@ fun ChatItem(message: LocalMessage) {
                     RoundedCornerShape(
                         topStart = 48f,
                         topEnd = 48f,
-                        bottomStart = if (message.isFromMe) 48f else 0f,
-                        bottomEnd = if (message.isFromMe) 0f else 48f
+                        bottomStart = /*if (message.isFromMe)*/ 48f /*else 0f*/,
+                        bottomEnd = /*if (message.isFromMe)*/ 0f /*else 48f*/
                     )
                 )
-                .background(if (message.isFromMe) colorScheme.primaryContainer else colorScheme.surfaceVariant)
+                .background(/*if (message.isFromMe)*/ colorScheme.primaryContainer /*else colorScheme.surfaceVariant*/)
                 .padding(16.dp)
         ) {
             Text(message.content, style = typography.bodyMedium)
@@ -41,8 +41,8 @@ fun ChatItem(message: LocalMessage) {
 
 }
 
-open class Message(
-    val id: String,
-    val sender: User,
-    val content: String,
-)
+//open class Message(
+//    val id: String,
+//    val sender: User,
+//    val content: String,
+//)

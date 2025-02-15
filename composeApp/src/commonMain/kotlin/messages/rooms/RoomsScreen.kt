@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import navigation.ObserveNavigationEvents
 
 object RoomsScreen : Screen {
 
@@ -12,6 +13,7 @@ object RoomsScreen : Screen {
     override fun Content() {
         val roomsScreenModel = koinScreenModel<RoomsScreenModel>()
         val conversationsUiState by roomsScreenModel.uiState.collectAsState()
-        Rooms(conversationsUiState)
+        ObserveNavigationEvents(roomsScreenModel.navigationActions)
+        Rooms(conversationsUiState, roomsScreenModel::onAction)
     }
 }
