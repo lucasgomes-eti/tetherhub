@@ -15,13 +15,13 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import network.HttpClientManager
 import network.Resource
-import response.CreateChatResponse
+import response.ChatResponse
 
 class ChatClient(private val httpClientManager: HttpClientManager) {
 
     private val outgoingMessage = Channel<Message>()
 
-    suspend fun getRooms(): Resource<List<CreateChatResponse>> = httpClientManager.withApiResource {
+    suspend fun getRooms(): Resource<List<ChatResponse>> = httpClientManager.withApiResource {
         get("chats")
     }
 
@@ -46,4 +46,9 @@ class ChatClient(private val httpClientManager: HttpClientManager) {
             }
         }
     }
+
+    suspend fun getChatById(chatId: String): Resource<ChatResponse> =
+        httpClientManager.withApiResource {
+            get("chats/$chatId")
+        }
 }

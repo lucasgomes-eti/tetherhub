@@ -7,7 +7,7 @@ import arrow.core.raise.ensure
 import eti.lucasgomes.tetherhub.user.UserRepository
 import org.bson.types.ObjectId
 import request.CreateChatRequest
-import response.CreateChatResponse
+import response.ChatResponse
 import response.TetherHubError
 
 class ChatService(
@@ -16,7 +16,7 @@ class ChatService(
     private val chatMapper: ChatMapper
 ) {
 
-    suspend fun createChat(createChatRequest: CreateChatRequest): Either<TetherHubError, CreateChatResponse> =
+    suspend fun createChat(createChatRequest: CreateChatRequest): Either<TetherHubError, ChatResponse> =
         either {
             ensure(createChatRequest.users.isNotEmpty()) { ChatErrors.UsersAreEmpty }
             ensure(usersAreInDb(createChatRequest.users.map { ObjectId(it) })) { ChatErrors.UsersNotFoundInDb }
@@ -46,7 +46,7 @@ class ChatService(
 //            }
         }
 
-    suspend fun findById(chatId: ObjectId): Either<TetherHubError, CreateChatResponse> = either {
+    suspend fun findById(chatId: ObjectId): Either<TetherHubError, ChatResponse> = either {
         val entity =
             chatRepository.findById(chatId).mapLeft { ChatErrors.ChatNotFound(chatId.toString()) }
                 .bind()
@@ -63,7 +63,7 @@ class ChatService(
         return true
     }
 
-    suspend fun findRoomsByUserId(userId: ObjectId): Either<TetherHubError, List<CreateChatResponse>> =
+    suspend fun findRoomsByUserId(userId: ObjectId): Either<TetherHubError, List<ChatResponse>> =
         either {
             chatRepository.findByUserId(userId).mapLeft { ChatErrors.ErrorWhileFetchingRooms(it) }
                 .map { it.map { entity -> chatMapper.fromEntityToResponse(entity) } }.bind()

@@ -8,11 +8,20 @@ import io.ktor.util.pipeline.PipelineContext
 import org.bson.types.ObjectId
 import javax.naming.AuthenticationException
 
-val PipelineContext<*, ApplicationCall>.userEmail: String
-    get() = call.principal<User>()?.email?.value ?: throw AuthenticationException()
-
-val PipelineContext<*, ApplicationCall>.userId: ObjectId
-    get() = call.principal<User>()?.id?.value ?: throw AuthenticationException()
-
 val ApplicationCall.userId: ObjectId
     get() = principal<User>()?.id?.value ?: throw AuthenticationException()
+
+val ApplicationCall.userEmail: String
+    get() = principal<User>()?.email?.value ?: throw AuthenticationException()
+
+val ApplicationCall.username: String
+    get() = principal<User>()?.username?.value ?: throw AuthenticationException()
+
+val PipelineContext<*, ApplicationCall>.userId: ObjectId
+    get() = call.userId
+
+val PipelineContext<*, ApplicationCall>.userEmail: String
+    get() = call.userEmail
+
+val PipelineContext<*, ApplicationCall>.username: String
+    get() = call.username

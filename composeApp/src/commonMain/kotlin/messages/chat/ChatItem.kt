@@ -52,7 +52,7 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
 
     val users = StringBuilder()
     chatUiState.users.forEachIndexed { index, user ->
-        users.append(user.takeLast(3))
+        users.append(user.username)
         if (index != chatUiState.users.lastIndex) {
             users.append(", ")
         }

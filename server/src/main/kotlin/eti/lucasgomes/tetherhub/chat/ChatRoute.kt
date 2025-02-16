@@ -2,6 +2,7 @@ package eti.lucasgomes.tetherhub.chat
 
 import Message
 import eti.lucasgomes.tetherhub.dsl.userId
+import eti.lucasgomes.tetherhub.dsl.username
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -21,11 +22,12 @@ import kotlinx.serialization.json.Json
 import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
 import request.CreateChatRequest
-import response.CreateChatResponse
+import response.ChatResponse
+import response.UserResponse
 import java.util.Collections
 
 data class ServerRooms(
-    val chat: CreateChatResponse,
+    val chat: ChatResponse,
     val connectedSessions: MutableList<WebSocketServerSession>
 )
 
@@ -52,6 +54,16 @@ fun Route.chatRoutes() {
             }.onRight { call.respond(it) }
         }
 
+        get("{chatId}") {
+            val chatId = call.parameters["chatId"]?.let { ObjectId(it) } ?: run {
+                call.respond(HttpStatusCode.BadRequest, ChatErrors.MissingParameter)
+                return@get
+            }
+            chatService.findById(chatId).onLeft {
+                call.respond(HttpStatusCode.fromValue(it.httCode), it)
+            }.onRight { call.respond(it) }
+        }
+
         webSocket("{chatId}") {
 
             val chatId = call.parameters["chatId"]?.let { ObjectId(it) } ?: run {
@@ -62,8 +74,6 @@ fun Route.chatRoutes() {
             chatService.findById(chatId).onLeft {
                 close(CloseReason(CloseReason.Codes.NORMAL, it.message))
             }.onRight { chat ->
-                sendSerialized(Message("You joined the room: ${chat.roomName}"))
-
                 val roomIndex =
                     serverRooms.indexOfFirst { it.chat.chatId == chatId.toString() }.let {
                         return@let if (it != -1) {
@@ -75,7 +85,9 @@ fun Route.chatRoutes() {
                         }
                     }
 
-                sendSerialized(Message("Online members: ${serverRooms[roomIndex].connectedSessions.size}"))
+                serverRooms[roomIndex].connectedSessions.forEach {
+                    it.sendSerialized(Message("${call.username} Joined the chat. Online members: ${serverRooms[roomIndex].connectedSessions.size}"))
+                }
 
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
@@ -84,10 +96,10 @@ fun Route.chatRoutes() {
                         val newMessage = Json.decodeFromString<Message>(serializedMessage)
                         for (session in serverRooms[roomIndex].connectedSessions) {
                             session.sendSerialized(newMessage)
-                            val offlineUsers = mutableListOf<String>()
+                            val offlineUsers = mutableListOf<UserResponse>()
                             chat.users.forEach {
                                 if (!serverRooms[roomIndex].connectedSessions.map { session.call.userId }
-                                        .contains(ObjectId(it))) {
+                                        .contains(ObjectId(it.id))) {
                                     offlineUsers.add(it)
                                 }
                             }

@@ -1,7 +1,7 @@
 package messages.rooms
 
-import response.CreateChatResponse
+import response.ChatResponse
 
 data class RoomsUiState(
-    val rooms: List<CreateChatResponse>,
+    val rooms: List<ChatResponse>,
 )

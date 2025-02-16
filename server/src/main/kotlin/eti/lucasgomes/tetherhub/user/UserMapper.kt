@@ -4,7 +4,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt
 import org.bson.BsonObjectId
 import org.bson.types.ObjectId
 import request.CreateUserRequest
-import response.CreateUserResponse
+import response.UserResponse
 
 class UserMapper(private val userRepository: UserRepository) {
 
@@ -19,10 +19,14 @@ class UserMapper(private val userRepository: UserRepository) {
         )
     }
 
-    suspend fun buildCreateUserResponse(userId: BsonObjectId): CreateUserResponse? {
+    suspend fun buildCreateUserResponse(userId: BsonObjectId): UserResponse? {
         val user = userRepository.findById(userId)
         user ?: return null
-        return user.run { CreateUserResponse(id.toString(), email, username) }
+        return user.run { UserResponse(id.toString(), email, username) }
+    }
+
+    fun fromEntityToResponse(userEntity: UserEntity) = with(userEntity) {
+        UserResponse(id = id.toString(), email = email, username = username)
     }
 }
 

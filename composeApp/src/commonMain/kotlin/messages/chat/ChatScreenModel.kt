@@ -9,17 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import messages.ChatClient
-
-data class ChatUiState(
-    val users: List<String>,
-    val messages: List<Message>,
-    val draft: String
-)
-
-sealed class ChatAction {
-    data class DraftChanged(val value: String) : ChatAction()
-    data object Send : ChatAction()
-}
+import network.onSuccess
 
 //data class LocalMessage(private val message: Message, val isFromMe: Boolean) :
 //    Message(message.id, message.sender, message.content)
@@ -40,6 +30,15 @@ class ChatScreenModel(private val chatId: String, private val chatClient: ChatCl
 
     init {
         subscribeToChat()
+        fetchChat(chatId)
+    }
+
+    private fun fetchChat(chatId: String) {
+        screenModelScope.launch {
+            chatClient.getChatById(chatId).onSuccess {
+                _uiState.update { state -> state.copy(users = it.users) }
+            }
+        }
     }
 
     private fun subscribeToChat() {

@@ -11,14 +11,14 @@ import network.Resource
 import network.unexpectedErrorWithException
 import network.unexpectedErrorWithHttpStatusCode
 import request.CreateUserRequest
-import response.CreateUserResponse
 import response.TetherHubError
+import response.UserResponse
 
 class RegistrationClient(
     private val httpClientManager: HttpClientManager
 ) {
 
-    suspend fun submitNewUser(request: CreateUserRequest): Resource<CreateUserResponse> {
+    suspend fun submitNewUser(request: CreateUserRequest): Resource<UserResponse> {
         val response = try {
             httpClientManager.client.post("/user") {
                 contentType(ContentType.Application.Json)
@@ -33,7 +33,7 @@ class RegistrationClient(
 
         return when (response.status.value) {
             in 200..299 -> {
-                val result = response.body<CreateUserResponse>()
+                val result = response.body<UserResponse>()
                 Resource.Success(result)
             }
 

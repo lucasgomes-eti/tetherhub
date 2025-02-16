@@ -4,12 +4,12 @@ import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensure
 import request.CreateUserRequest
-import response.CreateUserResponse
 import response.TetherHubError
+import response.UserResponse
 
 class UserService(private val userRepository: UserRepository, private val userMapper: UserMapper) {
 
-    suspend fun saveUser(createUserRequest: CreateUserRequest): Either<TetherHubError, CreateUserResponse> =
+    suspend fun saveUser(createUserRequest: CreateUserRequest): Either<TetherHubError, UserResponse> =
         either {
             ensure(createUserRequest.email.isValid()) { UserErrors.InvalidEmail }
             ensure(emailIsUnique(createUserRequest.email.value)) { UserErrors.EmailNotUnique }

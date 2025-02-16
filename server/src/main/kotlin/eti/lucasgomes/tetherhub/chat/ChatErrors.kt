@@ -46,4 +46,10 @@ object ChatErrors {
         "TH-307",
         "Error while fetching rooms. Cause: ${exception.message}"
     )
+
+    object MissingParameter : TetherHubError(
+        HttpStatusCode.BadRequest.value,
+        "TH-308",
+        "Missing parameter chatId"
+    )
 }
