@@ -1,6 +1,5 @@
 package messages
 
-import Message
 import io.ktor.client.plugins.websocket.receiveDeserialized
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocket
@@ -13,38 +12,55 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import network.HttpClientManager
 import network.Resource
+import request.MessageRequest
 import response.ChatResponse
+import response.MessageResponse
+import response.MessageType
 
 class ChatClient(private val httpClientManager: HttpClientManager) {
 
-    private val outgoingMessage = Channel<Message>()
+    private val outgoingMessageRequest = Channel<MessageRequest>()
 
     suspend fun getRooms(): Resource<List<ChatResponse>> = httpClientManager.withApiResource {
         get("chats")
     }
 
-    suspend fun sendMessage(message: Message) {
-        outgoingMessage.send(message)
+    suspend fun sendMessage(messageRequest: MessageRequest) {
+        outgoingMessageRequest.send(messageRequest)
     }
 
-    fun connectToChat(chatId: String): Flow<Message> = flow {
-        httpClientManager.client.webSocket(
-            method = HttpMethod.Get,
-            host = httpClientManager.baseUrl.host,
-            port = httpClientManager.baseUrl.port,
-            path = "/chats/$chatId"
-        ) {
-            launch {
-                outgoingMessage.receiveAsFlow().collect {
-                    sendSerialized(it)
+    fun connectToChat(chatId: String): Flow<MessageResponse> = flow {
+        try {
+            httpClientManager.client.webSocket(
+                method = HttpMethod.Get,
+                host = httpClientManager.baseUrl.host,
+                port = httpClientManager.baseUrl.port,
+                path = "/chats/$chatId"
+            ) {
+                launch {
+                    outgoingMessageRequest.receiveAsFlow().collect {
+                        sendSerialized(it)
+                    }
+                }
+                while (currentCoroutineContext().isActive) {
+                    val message = receiveDeserialized<MessageResponse>()
+                    emit(message)
                 }
             }
-            while (currentCoroutineContext().isActive) {
-                emit(receiveDeserialized<Message>())
-            }
+        } catch (e: Exception) {
+            emit(
+                MessageResponse(
+                    "tetherhub",
+                    "Disconnected from server. Cause: ${e.message}",
+                    Clock.System.now(),
+                    MessageType.SYSTEM
+                )
+            )
         }
+
     }
 
     suspend fun getChatById(chatId: String): Resource<ChatResponse> =

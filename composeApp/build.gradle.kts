@@ -52,6 +52,8 @@ kotlin {
             implementation(libs.voyager.koin)
             implementation(libs.stately.common)
             implementation(libs.kotlinx.datetime)
+            api(libs.datastore)
+            api(libs.datastore.preferences)
         }
         androidMain.dependencies {
             implementation(compose.preview)

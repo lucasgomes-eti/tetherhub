@@ -1,36 +1,61 @@
 package messages.chat
 
-import Message
+import DATE_TIME_PRESENTATION_FORMAT
+import DataStoreKeys
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.toLocalDateTime
 import messages.ChatClient
 import network.onSuccess
+import request.MessageRequest
+import response.MessageType
 
-//data class LocalMessage(private val message: Message, val isFromMe: Boolean) :
-//    Message(message.id, message.sender, message.content)
-
-class ChatScreenModel(private val chatId: String, private val chatClient: ChatClient) :
-    ScreenModel {
+class ChatScreenModel(
+    private val chatId: String,
+    private val chatClient: ChatClient,
+    private val preferences: DataStore<Preferences>
+) : ScreenModel {
 
     private val _uiState = MutableStateFlow(
         ChatUiState(
             users = emptyList(),
-            messages = listOf(Message("chatId: $chatId")),
+            messages = emptyList(),
             ""
         )
     )
     val uiState = _uiState.asStateFlow()
 
     private var chatListenerJob: Job? = null
+    private var _userId: String? = null
 
     init {
         subscribeToChat()
         fetchChat(chatId)
+    }
+
+    private suspend fun getUserId(): String {
+        val userIdSnapshot = _userId
+        if (userIdSnapshot == null) {
+            val userIdFromStorage =
+                preferences.data.map { it[stringPreferencesKey(DataStoreKeys.USER_ID)] }
+                    .firstOrNull() ?: error("UserId is null")
+            _userId = userIdFromStorage
+            return userIdFromStorage
+        } else {
+            return userIdSnapshot
+        }
     }
 
     private fun fetchChat(chatId: String) {
@@ -43,9 +68,24 @@ class ChatScreenModel(private val chatId: String, private val chatClient: ChatCl
 
     private fun subscribeToChat() {
         chatListenerJob = screenModelScope.launch {
+            val userId = getUserId()
             chatClient.connectToChat(chatId).collect {
                 val messages = _uiState.value.messages.toMutableList().apply {
-                    add(it)
+                    add(
+                        LocalMessage(
+                            content = it.content,
+                            timeStamp = it.at.toLocalDateTime(TimeZone.currentSystemDefault())
+                                .format(DATE_TIME_PRESENTATION_FORMAT),
+                            sender = if (it.type == MessageType.SYSTEM) {
+                                MessageSender.SYSTEM
+                            } else {
+                                if (it.senderId == userId)
+                                    MessageSender.ME
+                                else
+                                    MessageSender.OTHER
+                            }
+                        )
+                    )
                 }
                 _uiState.update { state -> state.copy(messages = messages) }
             }
@@ -70,7 +110,7 @@ class ChatScreenModel(private val chatId: String, private val chatClient: ChatCl
             if (_uiState.value.draft.isEmpty()) {
                 return@launch
             }
-            chatClient.sendMessage(Message(_uiState.value.draft))
+            chatClient.sendMessage(MessageRequest(_uiState.value.draft))
             _uiState.update { state -> state.copy(draft = "") }
         }
     }

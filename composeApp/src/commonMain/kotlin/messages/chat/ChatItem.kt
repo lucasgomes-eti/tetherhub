@@ -107,7 +107,8 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
                 }
             }
         }) { innerPadding ->
-        val lazyListState = rememberLazyListState(chatUiState.messages.lastIndex)
+        val lazyListState =
+            rememberLazyListState(if (chatUiState.messages.isNotEmpty()) chatUiState.messages.lastIndex else 0)
 
         LaunchedEffect(chatUiState.messages) {
             if (lazyListState.canScrollForward) {

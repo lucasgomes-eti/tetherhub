@@ -75,7 +75,11 @@ class HttpClientManager(private val engine: HttpClientEngine, val baseUrl: BaseU
         _httpClient = createHttpClient()
     }
 
-    suspend inline fun <reified T> withApiResource(httpRequest: HttpClient.() -> HttpResponse): Resource<T> {
+    suspend inline fun <reified T> withApiResource(
+        noinline onSuccess: (suspend (T) -> Unit)? = null,
+        noinline onFailure: (suspend (TetherHubError) -> Unit)? = null,
+        httpRequest: HttpClient.() -> HttpResponse
+    ): Resource<T> {
         val response = try {
             client.httpRequest()
         } catch (e: Exception) {
@@ -87,14 +91,22 @@ class HttpClientManager(private val engine: HttpClientEngine, val baseUrl: BaseU
 
         return when (response.status.value) {
             in 200..299 -> {
-                Resource.Success(response.body<T>())
+                val data = response.body<T>()
+                onSuccess?.invoke(data)
+                Resource.Success(data)
             }
 
             in 400..599 -> {
-                Resource.Error(response.body<TetherHubError>())
+                val error = response.body<TetherHubError>()
+                onFailure?.invoke(error)
+                Resource.Error(error)
             }
 
-            else -> Resource.Error(unexpectedErrorWithHttpStatusCode(response.status.value))
+            else -> {
+                val error = unexpectedErrorWithHttpStatusCode(response.status.value)
+                onFailure?.invoke(error)
+                Resource.Error(error)
+            }
         }
     }
 }

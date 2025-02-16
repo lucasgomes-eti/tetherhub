@@ -1,6 +1,5 @@
 package eti.lucasgomes.tetherhub.chat
 
-import Message
 import eti.lucasgomes.tetherhub.dsl.userId
 import eti.lucasgomes.tetherhub.dsl.username
 import io.ktor.http.HttpStatusCode
@@ -18,11 +17,15 @@ import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
 import request.CreateChatRequest
+import request.MessageRequest
 import response.ChatResponse
+import response.MessageResponse
+import response.MessageType
 import response.UserResponse
 import java.util.Collections
 
@@ -86,16 +89,31 @@ fun Route.chatRoutes() {
                     }
 
                 serverRooms[roomIndex].connectedSessions.forEach {
-                    it.sendSerialized(Message("${call.username} Joined the chat. Online members: ${serverRooms[roomIndex].connectedSessions.size}"))
+                    it.sendSerialized(
+                        MessageResponse(
+                            senderId = "tetherhub",
+                            content = "${call.username} Joined the chat. Online members: ${serverRooms[roomIndex].connectedSessions.size}",
+                            at = Clock.System.now(),
+                            type = MessageType.SYSTEM
+                        )
+                    )
                 }
 
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     launch {
                         val serializedMessage = frame.data.toString(Charsets.UTF_8)
-                        val newMessage = Json.decodeFromString<Message>(serializedMessage)
+                        val newMessageRequest =
+                            Json.decodeFromString<MessageRequest>(serializedMessage)
                         for (session in serverRooms[roomIndex].connectedSessions) {
-                            session.sendSerialized(newMessage)
+                            session.sendSerialized(
+                                MessageResponse(
+                                    call.userId.toString(),
+                                    newMessageRequest.content,
+                                    Clock.System.now(),
+                                    MessageType.USER
+                                )
+                            )
                             val offlineUsers = mutableListOf<UserResponse>()
                             chat.users.forEach {
                                 if (!serverRooms[roomIndex].connectedSessions.map { session.call.userId }
@@ -112,6 +130,7 @@ fun Route.chatRoutes() {
                 } else {
                     serverRooms.removeAt(roomIndex)
                 }
+                // TODO: there's a bug where the client disconnects from the socket without closing the receive channel, in this case the room is never cleared.
             }
         }
     }

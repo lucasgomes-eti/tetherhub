@@ -13,4 +13,5 @@ actual val platformModule = module {
             )
         )
     }
+    single { createDataStore() }
 }

@@ -1,6 +1,7 @@
 import io.ktor.client.engine.okhttp.OkHttp
 import network.BaseUrl
 import network.HttpClientManager
+import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
 
 actual val platformModule = module {
@@ -12,5 +13,8 @@ actual val platformModule = module {
                 port = 8082
             )
         )
+    }
+    single {
+        createDataStore(androidApplication())
     }
 }

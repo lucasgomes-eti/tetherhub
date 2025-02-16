@@ -1,5 +1,5 @@
+import auth.login.LoginClient
 import auth.login.LoginScreenModel
-import auth.login.network.LoginClient
 import auth.registration.RegistrationScreenModel
 import auth.registration.network.RegistrationClient
 import messages.ChatClient
@@ -53,3 +53,5 @@ fun initKoin(config: KoinAppDeclaration? = null) {
         modules(platformModule, appModule, authModule, profileModule, postsModule, messagesModule)
     }
 }
+
+internal const val DATA_STORE_FILE_NAME = "prefs.preferences_pb"

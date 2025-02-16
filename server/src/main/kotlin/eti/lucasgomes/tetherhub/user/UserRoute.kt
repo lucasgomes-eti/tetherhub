@@ -54,7 +54,7 @@ fun Route.userRoutes() {
                         .withExpiresAt(
                             Date(expiresAt)
                         ).sign(Algorithm.HMAC256(secret))
-                call.respond(AuthResponse(token, expiresAt))
+                call.respond(AuthResponse(token, expiresAt, result.value.id.value.toString()))
             }
         }
     }
