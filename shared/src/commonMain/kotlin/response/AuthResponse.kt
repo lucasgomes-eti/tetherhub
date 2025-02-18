@@ -3,4 +3,4 @@ package response
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AuthResponse(val token: String, val expiresAt: Long, val userId: String)
+data class AuthResponse(val userId: String, val token: String, val refreshToken: String)

@@ -21,6 +21,7 @@ expect val platformModule: Module
 
 val appModule = module {
     singleOf(::EventBus)
+    singleOf(::SplashScreenModel)
 }
 
 val authModule = module {

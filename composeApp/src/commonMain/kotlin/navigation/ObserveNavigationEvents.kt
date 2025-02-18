@@ -16,7 +16,8 @@ fun ObserveNavigationEvents(flow: Flow<NavigationAction>) {
             flow.collect {
                 when (it) {
                     is NavigationAction.Push -> navigator.push(it.screen)
-                    NavigationAction.Pop -> navigator.pop()
+                    is NavigationAction.Pop -> navigator.pop()
+                    is NavigationAction.Replace -> navigator.replace(it.screen)
                 }
             }
         }

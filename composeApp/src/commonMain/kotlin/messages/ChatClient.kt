@@ -34,7 +34,7 @@ class ChatClient(private val httpClientManager: HttpClientManager) {
 
     fun connectToChat(chatId: String): Flow<MessageResponse> = flow {
         try {
-            httpClientManager.client.webSocket(
+            httpClientManager.getClient().webSocket(
                 method = HttpMethod.Get,
                 host = httpClientManager.baseUrl.host,
                 port = httpClientManager.baseUrl.port,

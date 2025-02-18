@@ -29,11 +29,11 @@ class LoginClient(
     }
 
     private suspend fun createUserSession(auth: AuthResponse) {
-        httpClientManager.installAuth(auth.token)
         preferences.edit { dataStore ->
             dataStore[stringPreferencesKey(DataStoreKeys.USER_ID)] = auth.userId
             dataStore[stringPreferencesKey(DataStoreKeys.TOKEN)] = auth.token
-            dataStore[longPreferencesKey(DataStoreKeys.TOKEN_EXPIRATION)] = auth.expiresAt
+            dataStore[stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN)] = auth.refreshToken
         }
+        httpClientManager.installAuth()
     }
 }

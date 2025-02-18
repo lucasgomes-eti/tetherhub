@@ -1,5 +1,10 @@
 package network
 
+import DataStoreKeys
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
@@ -11,28 +16,39 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import request.RefreshTokenRequest
+import response.AuthResponse
 import response.TetherHubError
 import kotlin.coroutines.cancellation.CancellationException
 
-class HttpClientManager(private val engine: HttpClientEngine, val baseUrl: BaseUrl) {
+class HttpClientManager(
+    private val engine: HttpClientEngine,
+    private val preferences: DataStore<Preferences>,
+    val baseUrl: BaseUrl,
+) {
     private var _httpClient: HttpClient? = null
 
-    // TODO: token needs to be saved in the local storage
-    private var authToken: String? = null
-
-    val client: HttpClient
-        get() {
-            if (_httpClient == null) {
-                _httpClient = createHttpClient()
-            }
-            return _httpClient!!
+    suspend fun getClient(): HttpClient {
+        if (_httpClient == null) {
+            _httpClient = createHttpClient()
         }
+        return _httpClient!!
+    }
 
-    private fun createHttpClient(): HttpClient {
+    private suspend fun createHttpClient(): HttpClient {
+        val userIsPersisted =
+            preferences.data.map { it[stringPreferencesKey(DataStoreKeys.USER_ID)] }.firstOrNull()
+                .let { it != null }
         return HttpClient(engine) {
             val contentSerializer = Json {
                 ignoreUnknownKeys = true
@@ -49,11 +65,45 @@ class HttpClientManager(private val engine: HttpClientEngine, val baseUrl: BaseU
                 url(baseUrl.path)
             }
 
-            authToken?.let { token ->
+            if (userIsPersisted) {
                 install(Auth) {
                     bearer {
                         loadTokens {
-                            BearerTokens(token, "")
+                            // Load tokens from a local storage and return them as the 'BearerTokens' instance
+                            val token =
+                                preferences.data.map { it[stringPreferencesKey(DataStoreKeys.TOKEN)] }
+                                    .firstOrNull() ?: ""
+                            val refreshToken =
+                                preferences.data.map { it[stringPreferencesKey(DataStoreKeys.TOKEN)] }
+                                    .firstOrNull() ?: ""
+                            BearerTokens(token, refreshToken)
+                        }
+                        refreshTokens {
+                            // Refresh tokens and return them as the 'BearerTokens' instance
+                            val response = client.post("/login/refresh") {
+                                contentType(ContentType.Application.Json)
+                                setBody(RefreshTokenRequest(oldTokens?.refreshToken ?: ""))
+                            }
+                            return@refreshTokens when (response.status.value) {
+                                in 200..299 -> {
+                                    val auth = response.body<AuthResponse>()
+                                    preferences.edit { dataStore ->
+                                        dataStore[stringPreferencesKey(DataStoreKeys.USER_ID)] =
+                                            auth.userId
+                                        dataStore[stringPreferencesKey(DataStoreKeys.TOKEN)] =
+                                            auth.token
+                                        dataStore[stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN)] =
+                                            auth.refreshToken
+                                    }
+                                    BearerTokens(auth.token, auth.refreshToken)
+                                }
+
+                                else -> {
+                                    logOut()
+                                    null
+                                }
+                            }
+
                         }
                     }
                 }
@@ -65,12 +115,20 @@ class HttpClientManager(private val engine: HttpClientEngine, val baseUrl: BaseU
         }
     }
 
-    fun installAuth(token: String) {
-        authToken = token
+    private suspend fun logOut() {
+        preferences.edit { dataStore ->
+            dataStore.remove(stringPreferencesKey(DataStoreKeys.USER_ID))
+            dataStore.remove(stringPreferencesKey(DataStoreKeys.TOKEN))
+            dataStore.remove(stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN))
+        }
+        // TODO: maybe need to navigate to login screen (EventBus)
+    }
+
+    suspend fun installAuth() {
         refreshHttpClient()
     }
 
-    private fun refreshHttpClient() {
+    private suspend fun refreshHttpClient() {
         _httpClient?.close()
         _httpClient = createHttpClient()
     }
@@ -81,7 +139,7 @@ class HttpClientManager(private val engine: HttpClientEngine, val baseUrl: BaseU
         httpRequest: HttpClient.() -> HttpResponse
     ): Resource<T> {
         val response = try {
-            client.httpRequest()
+            getClient().httpRequest()
         } catch (e: Exception) {
             if (e is CancellationException) {
                 throw e

@@ -6,7 +6,9 @@ import org.koin.dsl.module
 actual val platformModule = module {
     single {
         HttpClientManager(
-            engine = Darwin.create(), baseUrl = BaseUrl(
+            engine = Darwin.create(),
+            preferences = get(),
+            baseUrl = BaseUrl(
                 protocol = "http://",
                 host = "localhost",
                 port = 8082

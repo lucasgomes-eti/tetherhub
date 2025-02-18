@@ -7,7 +7,9 @@ import org.koin.dsl.module
 actual val platformModule = module {
     single {
         HttpClientManager(
-            engine = OkHttp.create(), baseUrl = BaseUrl(
+            engine = OkHttp.create(),
+            preferences = get(),
+            baseUrl = BaseUrl(
                 protocol = "http://",
                 host = "10.0.2.2",
                 port = 8082
