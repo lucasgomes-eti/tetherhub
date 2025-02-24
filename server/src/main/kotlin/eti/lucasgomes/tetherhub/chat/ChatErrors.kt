@@ -3,51 +3,51 @@ package eti.lucasgomes.tetherhub.chat
 import io.ktor.http.HttpStatusCode
 import response.TetherHubError
 
+@Suppress("FunctionName")
 object ChatErrors {
-
-    data object UsersAreEmpty : TetherHubError(
+    val UsersAreEmpty = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-301",
         "Can't create chat room without users"
     )
 
-    data object UsersNotFoundInDb : TetherHubError(
+    val UsersNotFoundInDb = TetherHubError(
         HttpStatusCode.InternalServerError.value,
         "TH-302",
         "One or more users weren't found in the database"
     )
 
-    object MissingRoomName : TetherHubError(
+    val MissingRoomName = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-303",
         "Missing room name"
     )
 
-    data class ChatCreationError(val exception: Exception) : TetherHubError(
+    fun ChatCreationError(cause: Exception) = TetherHubError(
         HttpStatusCode.InternalServerError.value,
         "TH-304",
-        "Error while creating chat. Cause: ${exception.message}"
+        "Error while creating chat. Cause: ${cause.message}"
     )
 
-    data class ChatNotFound(val id: String) : TetherHubError(
+    fun ChatNotFound(id: String) = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-305",
         "Chat with id: $id not found"
     )
 
-    data object InvalidBody : TetherHubError(
+    val InvalidBody = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-306",
         "Invalid body for this request"
     )
 
-    data class ErrorWhileFetchingRooms(val exception: Exception) : TetherHubError(
+    fun ErrorWhileFetchingRooms(cause: Exception) = TetherHubError(
         HttpStatusCode.InternalServerError.value,
         "TH-307",
-        "Error while fetching rooms. Cause: ${exception.message}"
+        "Error while fetching rooms. Cause: ${cause.message}"
     )
 
-    object MissingParameter : TetherHubError(
+    val MissingParameter = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-308",
         "Missing parameter chatId"

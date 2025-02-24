@@ -15,7 +15,7 @@ class RegistrationClient(
 
     suspend fun submitNewUser(request: CreateUserRequest): Resource<UserResponse> =
         httpClientManager.withApiResource {
-            post("/user") {
+            post("/users") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }

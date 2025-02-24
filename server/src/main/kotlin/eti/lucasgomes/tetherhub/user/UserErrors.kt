@@ -3,53 +3,54 @@ package eti.lucasgomes.tetherhub.user
 import io.ktor.http.HttpStatusCode
 import response.TetherHubError
 
+@Suppress("FunctionName")
 object UserErrors {
-    data object InvalidEmail : TetherHubError(
+    val InvalidEmail = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-001",
         "Email doesn't have a valid format"
     )
 
-    data object InvalidParameters : TetherHubError(
+    val InvalidParameters = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-002",
         "Invalid parameters for this request"
     )
 
-    data object EmptyUsername :
+    val EmptyUsername =
         TetherHubError(HttpStatusCode.BadRequest.value, "TH-003", "Username must not be empty")
 
-    data object InvalidPassword : TetherHubError(
+    val InvalidPassword = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-004",
         "Password must not be empty or have spaces. It must have at least 8 characters composed of letters and numbers"
     )
 
-    data object CreateUserError : TetherHubError(
+    val CreateUserError = TetherHubError(
         HttpStatusCode.InternalServerError.value,
         "TH-004",
         "Could not create user on database"
     )
 
-    data object UserNotFoundAfterCreatingIt : TetherHubError(
+    val UserNotFoundAfterCreatingIt = TetherHubError(
         HttpStatusCode.InternalServerError.value,
         "TH-005",
         "Could not found the nearly created user on database"
     )
 
-    data object UserNotFound : TetherHubError(
+    val UserNotFound = TetherHubError(
         HttpStatusCode.InternalServerError.value,
         "TH-006",
         "Could not found the user on database"
     )
 
-    data object EmailNotUnique : TetherHubError(
+    val EmailNotUnique = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-007",
         "This email already exists on database"
     )
 
-    data class UserNotFoundByEmail(private val email: String) : TetherHubError(
+    fun UserNotFoundByEmail(email: String) = TetherHubError(
         HttpStatusCode.BadRequest.value,
         "TH-008",
         "Could not found user with this email: $email"

@@ -80,7 +80,7 @@ class HttpClientManager(
                         }
                         refreshTokens {
                             // Refresh tokens and return them as the 'BearerTokens' instance
-                            val response = client.post("/login/refresh") {
+                            val response = client.post("users/login/refresh") {
                                 contentType(ContentType.Application.Json)
                                 setBody(RefreshTokenRequest(oldTokens?.refreshToken ?: ""))
                             }

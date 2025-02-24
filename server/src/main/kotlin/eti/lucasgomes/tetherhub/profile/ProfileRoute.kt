@@ -13,8 +13,8 @@ import org.koin.ktor.ext.inject
 fun Route.profileRoutes() {
     val profileService by inject<ProfileService>()
 
-    route("profile") {
-        get {
+    route("profiles") {
+        get("my_profile") {
             when (val result = profileService.getProfile(userEmail)) {
                 is Either.Left -> {
                     call.respond(status = HttpStatusCode.BadRequest, message = result.value.message)
@@ -24,6 +24,20 @@ fun Route.profileRoutes() {
                     call.respond(result.value)
                 }
             }
+        }
+
+        get {
+            val usernameFilter = call.request.queryParameters["username"]
+            if (usernameFilter == null) {
+                call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    message = ProfileErrors.MissingUsernameQueryFilter
+                )
+                return@get
+            }
+            profileService.getProfilesByUsername(usernameFilter ?: "").onLeft {
+                call.respond(HttpStatusCode.fromValue(it.httpCode), it)
+            }.onRight { call.respond(it) }
         }
     }
 }

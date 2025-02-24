@@ -30,7 +30,7 @@ fun Route.postRoutes() {
             }
             when (val createResponse = postService.savePost(createPostRequest, userEmail)) {
                 is Either.Left -> call.respond(
-                    HttpStatusCode.fromValue(createResponse.value.httCode),
+                    HttpStatusCode.fromValue(createResponse.value.httpCode),
                     createResponse.value
                 )
 
@@ -49,7 +49,7 @@ fun Route.postRoutes() {
             }
             postService.findById(postId = postId, userId = userId)
                 .onLeft {
-                    call.respond(HttpStatusCode.fromValue(it.httCode), it)
+                    call.respond(HttpStatusCode.fromValue(it.httpCode), it)
                 }.onRight {
                     call.respond(it)
                 }
@@ -63,7 +63,7 @@ fun Route.postRoutes() {
             }
             when (val result = postService.toggleLike(postId = postId, userId = userId)) {
                 is Either.Left -> call.respond(
-                    HttpStatusCode.fromValue(result.value.httCode),
+                    HttpStatusCode.fromValue(result.value.httpCode),
                     result.value
                 )
 
@@ -92,7 +92,7 @@ fun Route.postRoutes() {
                 newContent = newContent
             )) {
                 is Either.Left -> call.respond(
-                    HttpStatusCode.fromValue(result.value.httCode),
+                    HttpStatusCode.fromValue(result.value.httpCode),
                     result.value
                 )
 
@@ -108,7 +108,7 @@ fun Route.postRoutes() {
             }
             when (val result = postService.deletePost(postId, userId = userId)) {
                 is Either.Left -> call.respond(
-                    HttpStatusCode.fromValue(result.value.httCode),
+                    HttpStatusCode.fromValue(result.value.httpCode),
                     result.value
                 )
 

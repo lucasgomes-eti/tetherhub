@@ -4,7 +4,6 @@ import DataStoreKeys
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -22,7 +21,7 @@ class LoginClient(
         email: String,
         password: String
     ): Resource<AuthResponse> = httpClientManager.withApiResource(onSuccess = ::createUserSession) {
-        post("/login") {
+        post("users/login") {
             contentType(ContentType.Application.Json)
             setBody(hashMapOf("email" to email, "password" to password))
         }

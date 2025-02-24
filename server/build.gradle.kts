@@ -31,7 +31,6 @@ dependencies {
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.mongodb)
     implementation(libs.ktor.server.mongodb.bson)
-    implementation(libs.ktor.server.statusPages)
     implementation(libs.kotlinx.datetime)
     implementation(libs.ktor.server.websockets)
 }

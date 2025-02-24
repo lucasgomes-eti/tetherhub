@@ -47,13 +47,13 @@ fun Route.chatRoutes() {
                 return@post
             }
             chatService.createChat(createChatRequest).onLeft {
-                call.respond(HttpStatusCode.fromValue(it.httCode), it)
+                call.respond(HttpStatusCode.fromValue(it.httpCode), it)
             }.onRight { call.respond(HttpStatusCode.Created, it) }
         }
 
         get {
             chatService.findRoomsByUserId(userId).onLeft {
-                call.respond(HttpStatusCode.fromValue(it.httCode), it)
+                call.respond(HttpStatusCode.fromValue(it.httpCode), it)
             }.onRight { call.respond(it) }
         }
 
@@ -63,7 +63,7 @@ fun Route.chatRoutes() {
                 return@get
             }
             chatService.findById(chatId).onLeft {
-                call.respond(HttpStatusCode.fromValue(it.httCode), it)
+                call.respond(HttpStatusCode.fromValue(it.httpCode), it)
             }.onRight { call.respond(it) }
         }
 

@@ -8,6 +8,6 @@ import response.ProfileResponse
 class ProfileClient(private val httpClientManager: HttpClientManager) {
 
     suspend fun getProfile(): Resource<ProfileResponse> = httpClientManager.withApiResource {
-        get("/profile")
+        get("profiles/my_profile")
     }
 }

@@ -1,6 +1,8 @@
 package eti.lucasgomes.tetherhub.user
 
-import io.ktor.server.auth.*
+import eti.lucasgomes.tetherhub.dsl.MongoEntity
+import eti.lucasgomes.tetherhub.user.UserRepository.Companion.USER_COLLECTION
+import io.ktor.server.auth.Principal
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.types.ObjectId
 
@@ -26,6 +28,7 @@ data class User(
 ) : Principal
 
 //db
+@MongoEntity(USER_COLLECTION)
 data class UserEntity(
     val id: ObjectId,
     val email: String,

@@ -6,11 +6,16 @@ import arrow.core.right
 import at.favre.lib.crypto.bcrypt.BCrypt
 import com.mongodb.MongoException
 import com.mongodb.client.model.Filters
+import com.mongodb.client.model.Indexes
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
+import eti.lucasgomes.tetherhub.dsl.withCollection
 import io.ktor.util.toCharArray
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 import org.bson.BsonObjectId
 import org.bson.types.ObjectId
+import response.PageResponse
+import java.util.regex.Pattern
 
 class UserRepository(private val mongoDatabase: MongoDatabase) {
     companion object {
@@ -70,4 +75,26 @@ class UserRepository(private val mongoDatabase: MongoDatabase) {
             null
         }
     }
+
+    suspend fun findUsersByUsername(
+        username: String,
+        page: Int,
+        size: Int
+    ): Either<Exception, PageResponse<UserEntity>> =
+        mongoDatabase.withCollection<UserEntity, PageResponse<UserEntity>> {
+            createIndex(Indexes.text(UserEntity::username.name))
+            val escapedText = Pattern.quote(username)
+            val filter = Filters.regex(UserEntity::username.name, "(?i).*$escapedText.*")
+            val totalItems = countDocuments(filter)
+            val totalPages = if (totalItems > 0) ((totalItems + size - 1) / size).toInt() else 0
+            val skip = (page - 1) * size
+
+            PageResponse(
+                items = find(filter).skip(skip).limit(size).toList(),
+                totalPages = totalPages,
+                totalItems = totalItems,
+                currentPage = page,
+                lastPage = page >= totalPages
+            )
+        }
 }

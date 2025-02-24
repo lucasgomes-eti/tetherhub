@@ -9,6 +9,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
 import request.CreateUserRequest
 import request.RefreshTokenRequest
@@ -24,88 +25,90 @@ fun Route.userRoutes() {
     val expiration = environment?.config?.propertyOrNull("ktor.auth.expiration")?.getString()
         ?: throw RuntimeException("Issuer not set")
 
-    post("user") {
-        val createUserRequest = try {
-            call.receive<CreateUserRequest>()
-        } catch (e: Exception) {
-            call.respond(HttpStatusCode.BadRequest, UserErrors.InvalidParameters)
-            return@post
-        }
-        when (val result = userService.saveUser(createUserRequest)) {
-            is Either.Left -> call.respond(
-                HttpStatusCode.fromValue(result.value.httCode),
-                result.value
-            )
-
-            is Either.Right -> call.respond(HttpStatusCode.Created, result.value)
-        }
-    }
-
-    post("login") {
-        val credentials = call.receive<EmailPasswordCredentials>()
-        when (val result = userService.findUserByCredentials(credentials)) {
-            is Either.Left -> {
-                call.respond(status = HttpStatusCode.BadRequest, message = result.value.message)
+    route("users") {
+        post {
+            val createUserRequest = try {
+                call.receive<CreateUserRequest>()
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, UserErrors.InvalidParameters)
+                return@post
             }
-
-            is Either.Right -> {
-                val tokenExpiresAt = System.currentTimeMillis() + expiration.toInt()
-                val refreshTokenExpiresAt = tokenExpiresAt * 15
-                val token = JWT.create()
-                    .withIssuer(issuer)
-                    .withClaim("email", result.value.email.value)
-                    .withClaim("user_id", result.value.id.value.toString())
-                    .withExpiresAt(Date(tokenExpiresAt))
-                    .sign(Algorithm.HMAC256(secret))
-                val refreshToken = JWT.create()
-                    .withIssuer(issuer)
-                    .withClaim("email", result.value.email.value)
-                    .withClaim("user_id", result.value.id.value.toString())
-                    .withClaim("refresh", true)
-                    .withExpiresAt(Date(refreshTokenExpiresAt))
-                    .sign(Algorithm.HMAC256(secret))
-                call.respond(
-                    AuthResponse(
-                        userId = result.value.id.value.toString(),
-                        token = token,
-                        refreshToken = refreshToken
-                    )
+            when (val result = userService.saveUser(createUserRequest)) {
+                is Either.Left -> call.respond(
+                    HttpStatusCode.fromValue(result.value.httpCode),
+                    result.value
                 )
+
+                is Either.Right -> call.respond(HttpStatusCode.Created, result.value)
             }
         }
-    }
 
-    post("login/refresh") {
-        val refreshToken = call.receive<RefreshTokenRequest>()
-        val verifier = JWT.require(Algorithm.HMAC256(secret))
-            .withIssuer(issuer)
-            .withClaim("refresh", true)
-            .build()
-        val token = verifier.verify(refreshToken.value)
-        val userId = token.getClaim("user_id").asString()
-        val email = token.getClaim("email").asString()
+        post("login") {
+            val credentials = call.receive<EmailPasswordCredentials>()
+            when (val result = userService.findUserByCredentials(credentials)) {
+                is Either.Left -> {
+                    call.respond(status = HttpStatusCode.BadRequest, message = result.value.message)
+                }
 
-        val tokenExpiresAt = System.currentTimeMillis() + expiration.toInt()
-        val refreshTokenExpiresAt = System.currentTimeMillis() + (expiration.toInt() * 15)
-        val newToken = JWT.create()
-            .withIssuer(issuer)
-            .withClaim("email", email)
-            .withClaim("user_id", userId)
-            .withExpiresAt(Date(tokenExpiresAt))
-            .sign(Algorithm.HMAC256(secret))
-        val newRefreshToken = JWT.create()
-            .withIssuer(issuer)
-            .withClaim("email", email)
-            .withClaim("user_id", userId)
-            .withClaim("refresh", true)
-            .withExpiresAt(Date(refreshTokenExpiresAt))
-            .sign(Algorithm.HMAC256(secret))
-        call.respond(
-            AuthResponse(
-                userId = userId,
-                token = newToken,
-                refreshToken = newRefreshToken
+                is Either.Right -> {
+                    val tokenExpiresAt = System.currentTimeMillis() + expiration.toInt()
+                    val refreshTokenExpiresAt = tokenExpiresAt * 15
+                    val token = JWT.create()
+                        .withIssuer(issuer)
+                        .withClaim("email", result.value.email.value)
+                        .withClaim("user_id", result.value.id.value.toString())
+                        .withExpiresAt(Date(tokenExpiresAt))
+                        .sign(Algorithm.HMAC256(secret))
+                    val refreshToken = JWT.create()
+                        .withIssuer(issuer)
+                        .withClaim("email", result.value.email.value)
+                        .withClaim("user_id", result.value.id.value.toString())
+                        .withClaim("refresh", true)
+                        .withExpiresAt(Date(refreshTokenExpiresAt))
+                        .sign(Algorithm.HMAC256(secret))
+                    call.respond(
+                        AuthResponse(
+                            userId = result.value.id.value.toString(),
+                            token = token,
+                            refreshToken = refreshToken
+                        )
+                    )
+                }
+            }
+        }
+
+        post("login/refresh") {
+            val refreshToken = call.receive<RefreshTokenRequest>()
+            val verifier = JWT.require(Algorithm.HMAC256(secret))
+                .withIssuer(issuer)
+                .withClaim("refresh", true)
+                .build()
+            val token = verifier.verify(refreshToken.value)
+            val userId = token.getClaim("user_id").asString()
+            val email = token.getClaim("email").asString()
+
+            val tokenExpiresAt = System.currentTimeMillis() + expiration.toInt()
+            val refreshTokenExpiresAt = System.currentTimeMillis() + (expiration.toInt() * 15)
+            val newToken = JWT.create()
+                .withIssuer(issuer)
+                .withClaim("email", email)
+                .withClaim("user_id", userId)
+                .withExpiresAt(Date(tokenExpiresAt))
+                .sign(Algorithm.HMAC256(secret))
+            val newRefreshToken = JWT.create()
+                .withIssuer(issuer)
+                .withClaim("email", email)
+                .withClaim("user_id", userId)
+                .withClaim("refresh", true)
+                .withExpiresAt(Date(refreshTokenExpiresAt))
+                .sign(Algorithm.HMAC256(secret))
+            call.respond(
+                AuthResponse(
+                    userId = userId,
+                    token = newToken,
+                    refreshToken = newRefreshToken
+                )
             )
-        )
+        }
     }
 }
