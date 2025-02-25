@@ -7,6 +7,10 @@ import eti.lucasgomes.tetherhub.chat.ChatMapper
 import eti.lucasgomes.tetherhub.chat.ChatRepository
 import eti.lucasgomes.tetherhub.chat.ChatService
 import eti.lucasgomes.tetherhub.chat.chatRoutes
+import eti.lucasgomes.tetherhub.friends.FriendsMapper
+import eti.lucasgomes.tetherhub.friends.FriendsRepository
+import eti.lucasgomes.tetherhub.friends.FriendsService
+import eti.lucasgomes.tetherhub.friends.friendsRoutes
 import eti.lucasgomes.tetherhub.post.PostMapper
 import eti.lucasgomes.tetherhub.post.PostRepository
 import eti.lucasgomes.tetherhub.post.PostService
@@ -66,18 +70,21 @@ fun Application.module() {
                 single { UserRepository(get()) }
                 single { PostRepository(get()) }
                 singleOf(::ChatRepository)
+                singleOf(::FriendsRepository)
             },
             module { // Mapper module
                 single { UserMapper(get()) }
                 single { ProfileMapper() }
                 single { PostMapper() }
                 singleOf(::ChatMapper)
+                singleOf(::FriendsMapper)
             },
             module { // Service module
                 single { UserService(get(), get()) }
                 single { ProfileService(get(), get()) }
                 single { PostService(get(), get(), get()) }
                 singleOf(::ChatService)
+                singleOf(::FriendsService)
             }
         )
     }
@@ -121,6 +128,7 @@ fun Application.module() {
             profileRoutes()
             postRoutes()
             chatRoutes()
+            friendsRoutes()
         }
     }
 }

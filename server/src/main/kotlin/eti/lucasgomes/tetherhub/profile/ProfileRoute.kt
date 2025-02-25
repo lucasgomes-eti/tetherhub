@@ -2,6 +2,7 @@ package eti.lucasgomes.tetherhub.profile
 
 import arrow.core.Either
 import eti.lucasgomes.tetherhub.dsl.userEmail
+import eti.lucasgomes.tetherhub.dsl.userId
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
@@ -35,7 +36,7 @@ fun Route.profileRoutes() {
                 )
                 return@get
             }
-            profileService.getProfilesByUsername(usernameFilter ?: "").onLeft {
+            profileService.getProfilesByUsername(usernameFilter ?: "", userId).onLeft {
                 call.respond(HttpStatusCode.fromValue(it.httpCode), it)
             }.onRight { call.respond(it) }
         }

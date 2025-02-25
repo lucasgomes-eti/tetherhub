@@ -3,4 +3,4 @@ package response
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PublicProfileResponse(val username: String)
+data class PublicProfileResponse(val username: String, val isFriendsWithYou: Boolean)
