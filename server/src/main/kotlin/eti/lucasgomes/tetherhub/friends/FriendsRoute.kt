@@ -1,5 +1,6 @@
 package eti.lucasgomes.tetherhub.friends
 
+import eti.lucasgomes.tetherhub.dsl.getParameterAsObjectIdOrRespond
 import eti.lucasgomes.tetherhub.dsl.userId
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -24,6 +25,18 @@ fun Route.friendsRoutes() {
             friendsService.createFriendshipSolicitation(request, userId).onLeft {
                 call.respond(HttpStatusCode.fromValue(it.httpCode), it)
             }.onRight { call.respond(HttpStatusCode.Created) }
+        }
+        post("{requestId}/accept") {
+            getParameterAsObjectIdOrRespond("requestId") {
+                respond(HttpStatusCode.BadRequest, FriendsErrors.InvalidParameters)
+            }.onRight { requestId ->
+                friendsService.acceptFriendRequest(
+                    friendshipRequestId = requestId,
+                    clientUserId = userId
+                ).onLeft { call.respond(HttpStatusCode.fromValue(it.httpCode), it) }.onRight {
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
         }
     }
 }

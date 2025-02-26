@@ -7,6 +7,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt
 import com.mongodb.MongoException
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Indexes
+import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import eti.lucasgomes.tetherhub.dsl.withCollection
 import io.ktor.util.toCharArray
@@ -97,4 +98,9 @@ class UserRepository(private val mongoDatabase: MongoDatabase) {
                 lastPage = page >= totalPages
             )
         }
+
+    suspend fun updateUser(user: UserEntity) = mongoDatabase.withCollection<UserEntity, Boolean> {
+        val updates = Updates.combine(Updates.set(UserEntity::friends.name, user.friends))
+        updateOne(Filters.eq("id", user.id), updates).modifiedCount == 1L
+    }
 }

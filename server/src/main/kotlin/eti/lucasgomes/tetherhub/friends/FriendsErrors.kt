@@ -20,4 +20,26 @@ object FriendsErrors {
         "TH-503",
         "An error occurred while creating your friendship request. Cause: ${cause.message}"
     )
+
+    val FriendshipRequestNotFound =
+        TetherHubError(HttpStatusCode.BadRequest.value, "TH-504", "Friendship request not found")
+
+    val NotAuthorizedToAccept =
+        TetherHubError(
+            HttpStatusCode.Forbidden.value,
+            "TH-505",
+            "You are not authorized to accept this friendship request"
+        )
+
+    fun ErrorWhileAcceptingFriendshipSolicitation(cause: Exception) = TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-506",
+        "An error occurred while accepting your friendship request. Cause: ${cause.message}"
+    )
+
+    val ErrorWhileAcceptingFriendshipSolicitation = TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-507",
+        "An error occurred while accepting your friendship request."
+    )
 }
