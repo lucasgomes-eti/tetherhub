@@ -1,5 +1,5 @@
 package post.detail
 
-import Event
+import dsl.eventbus.Event
 
 data object PostUpdated : Event

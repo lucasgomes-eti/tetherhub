@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import messages.ChatClient
 import messages.chat.ChatScreen
-import navigation.NavigationAction
+import dsl.navigation.NavigationAction
 import network.onError
 import network.onSuccess
 

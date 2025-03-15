@@ -1,6 +1,6 @@
 package post.feed
 
-import EventBus
+import dsl.eventbus.EventBus
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.flow.MutableStateFlow

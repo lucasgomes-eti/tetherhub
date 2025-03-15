@@ -7,7 +7,11 @@ import response.PublicProfileResponse
 
 class ProfileMapper {
     fun transformUserEntityToProfileResponse(userEntity: UserEntity) =
-        ProfileResponse(username = userEntity.username, email = userEntity.email)
+        ProfileResponse(
+            username = userEntity.username,
+            email = userEntity.email,
+            friendsCount = userEntity.friends.size
+        )
 
     fun fromUserEntityToPublicProfile(userEntity: UserEntity, clientUserId: ObjectId) =
         with(userEntity) {

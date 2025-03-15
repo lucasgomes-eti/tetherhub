@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -25,19 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import components.ErrorBanner
-import post.detail.EditPostScreen
 import post.detail.MyPost
 
 @Composable
 fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> Unit) {
-    val navigator = LocalNavigator.currentOrThrow
-    when (profileUiState.event) {
-        is ProfileEvent.None -> Unit
-        is ProfileEvent.EditMyPost -> navigator.push(EditPostScreen(profileUiState.event.postId))
-    }
     val openAlertDialog = remember { mutableStateOf(DeleteDialogData(false, "")) }
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -46,6 +39,14 @@ fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> 
         ) {
             item {
                 AboutMe(profileUiState, onProfileAction)
+            }
+
+            item {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onProfileAction(ProfileAction.ManageFriends) }) {
+                    Text("Manage Friends")
+                }
             }
 
             item {
@@ -97,6 +98,19 @@ fun AboutMe(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> 
         )
         Text(
             profileUiState.email,
+            style = typography.bodyLarge,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            "Friends",
+            style = typography.labelMedium,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start
+        )
+        Text(
+            profileUiState.friendsCount.toString(),
             style = typography.bodyLarge,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start

@@ -1,7 +1,7 @@
 package post.detail
 
 import DATE_TIME_PRESENTATION_FORMAT
-import EventBus
+import dsl.eventbus.EventBus
 import PUBLICATION_WORD_LIMIT
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
-import navigation.NavigationAction
+import dsl.navigation.NavigationAction
 import network.onError
 import network.onSuccess
 import post.PostClient

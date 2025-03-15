@@ -5,9 +5,12 @@ import arrow.core.flatMap
 import arrow.core.raise.Raise
 import arrow.core.raise.either
 import arrow.core.raise.ensure
+import eti.lucasgomes.tetherhub.user.UserErrors
 import eti.lucasgomes.tetherhub.user.UserRepository
 import org.bson.types.ObjectId
 import request.FriendshipSolicitationRequest
+import response.FriendshipSolicitationResponse
+import response.PublicProfileResponse
 import response.TetherHubError
 
 class FriendsService(
@@ -21,13 +24,10 @@ class FriendsService(
         clientUserId: ObjectId
     ): Either<TetherHubError, Unit> = either {
         ensure(friendshipSolicitation.to.isNotBlank()) { FriendsErrors.UserNotFound }
-        ensure(requiredUserExists(friendshipSolicitation.to)) { FriendsErrors.UserNotFound }
-        friendsRepository.insertOne(friendsMapper.buildEntity(friendshipSolicitation, clientUserId))
+        val clientUser = userRepository.findById(ObjectId(friendshipSolicitation.to))
+        ensure(clientUser != null) { FriendsErrors.UserNotFound }
+        friendsRepository.insertOne(friendsMapper.buildEntity(friendshipSolicitation, clientUser))
             .mapLeft { FriendsErrors.ErrorWhileCreatingFriendshipSolicitation(it) }.bind()
-    }
-
-    private suspend fun requiredUserExists(to: String): Boolean {
-        return userRepository.findById(ObjectId(to)) != null
     }
 
     suspend fun acceptFriendRequest(
@@ -37,7 +37,7 @@ class FriendsService(
         friendsRepository.findById(friendshipRequestId).mapLeft {
             FriendsErrors.FriendshipRequestNotFound
         }.flatMap { friendshipSolicitation ->
-            ensure(friendshipSolicitation.to == clientUserId) { FriendsErrors.NotAuthorizedToAccept }
+            ensure(friendshipSolicitation.toId == clientUserId) { FriendsErrors.NotAuthorizedToAccept }
             friendsRepository.update(friendshipSolicitation.copy(accepted = true))
                 .mapLeft { FriendsErrors.ErrorWhileAcceptingFriendshipSolicitation(it) }
                 .map { success ->
@@ -48,8 +48,8 @@ class FriendsService(
     }
 
     private suspend fun Raise<TetherHubError>.updateUsersFriendsList(friendshipSolicitation: FriendshipSolicitationEntity) {
-        val toUser = userRepository.findById(friendshipSolicitation.to)
-        val fromUser = userRepository.findById(friendshipSolicitation.from)
+        val toUser = userRepository.findById(friendshipSolicitation.toId)
+        val fromUser = userRepository.findById(friendshipSolicitation.fromId)
 
         ensure(toUser != null) { FriendsErrors.ErrorWhileAcceptingFriendshipSolicitation }
         ensure(fromUser != null) { FriendsErrors.ErrorWhileAcceptingFriendshipSolicitation }
@@ -76,4 +76,27 @@ class FriendsService(
         ensure(toUserUpdated) { FriendsErrors.ErrorWhileAcceptingFriendshipSolicitation }
         ensure(fromUserUpdated) { FriendsErrors.ErrorWhileAcceptingFriendshipSolicitation }
     }
+
+    suspend fun getFriendsByUser(clientUserId: ObjectId): Either<TetherHubError, List<PublicProfileResponse>> =
+        either {
+            val user = userRepository.findById(clientUserId)
+            ensure(user != null) { UserErrors.UserNotFound }
+            val friends = user.friends.mapNotNull { friendId ->
+                userRepository.findById(ObjectId(friendId))
+            }
+            friends.map { friendsMapper.fromUserEntityToPublicProfile(clientUserId, it) }
+        }
+
+    suspend fun getFriendshipRequestsByUser(clientUserId: ObjectId): Either<TetherHubError, List<FriendshipSolicitationResponse>> =
+        either {
+            friendsRepository.findByAssignedToUserId(clientUserId)
+                .mapLeft { FriendsErrors.ErrorWhileFetchingFriendRequests }
+                .map {
+                    it.map { entity ->
+                        friendsMapper.fromSolicitationEntityToSolicitationResponse(
+                            entity
+                        )
+                    }
+                }.bind()
+        }
 }

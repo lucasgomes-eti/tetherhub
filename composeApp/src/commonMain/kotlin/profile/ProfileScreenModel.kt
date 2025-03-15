@@ -1,15 +1,16 @@
 package profile
 
-import EventBus
+import dsl.eventbus.EventBus
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import friends.FriendsScreen
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import navigation.NavigationAction
+import dsl.navigation.NavigationAction
 import network.Resource
 import network.onError
 import network.onSuccess
@@ -30,7 +31,7 @@ class ProfileScreenModel(
             isLoading = false,
             errorMsg = "",
             myPosts = emptyList(),
-            event = ProfileEvent.None
+            friendsCount = 0
         )
     )
     val uiState = _uiState.asStateFlow()
@@ -58,7 +59,12 @@ class ProfileScreenModel(
             is ProfileAction.DismissError -> onDismissError()
             is ProfileAction.DeleteMyPost -> onDeleteMyPost(action.postId)
             is ProfileAction.EditMyPost -> onEditMyPost(action.postId)
+            is ProfileAction.ManageFriends -> onManageFriends()
         }
+    }
+
+    private fun onManageFriends() {
+        screenModelScope.launch { _navigationActions.send(NavigationAction.Push(FriendsScreen)) }
     }
 
     private fun onEditMyPost(postId: String) {
@@ -99,26 +105,23 @@ class ProfileScreenModel(
     private fun fetchProfile() {
         screenModelScope.launch {
             _uiState.update { state -> state.copy(isLoading = true) }
-            when (val response = profileClient.getProfile()) {
-                is Resource.Success -> {
-                    _uiState.update { state ->
-                        state.copy(
-                            username = response.data.username,
-                            email = response.data.email,
-                            isLoading = false
-                        )
-                    }
+            profileClient.getProfile().onError { error ->
+                _uiState.update { state ->
+                    state.copy(
+                        username = "-",
+                        email = "-",
+                        isLoading = false,
+                        errorMsg = "${error.internalCode} - ${error.message}"
+                    )
                 }
-
-                is Resource.Error -> {
-                    _uiState.update { state ->
-                        state.copy(
-                            username = "-",
-                            email = "-",
-                            isLoading = false,
-                            errorMsg = "${response.error.internalCode} - ${response.error.message}"
-                        )
-                    }
+            }.onSuccess { data ->
+                _uiState.update { state ->
+                    state.copy(
+                        username = data.username,
+                        email = data.email,
+                        friendsCount = data.friendsCount,
+                        isLoading = false,
+                    )
                 }
             }
         }

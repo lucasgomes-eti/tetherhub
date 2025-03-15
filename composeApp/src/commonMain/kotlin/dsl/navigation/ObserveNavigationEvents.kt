@@ -1,4 +1,4 @@
-package navigation
+package dsl.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

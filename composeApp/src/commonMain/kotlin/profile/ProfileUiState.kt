@@ -8,5 +8,5 @@ data class ProfileUiState(
     val isLoading: Boolean,
     val errorMsg: String,
     val myPosts: List<PostResponse>,
-    val event: ProfileEvent
+    val friendsCount: Int
 )

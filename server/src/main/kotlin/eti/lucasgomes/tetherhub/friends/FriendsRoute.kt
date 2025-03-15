@@ -7,6 +7,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
@@ -15,7 +16,21 @@ import request.FriendshipSolicitationRequest
 fun Route.friendsRoutes() {
     val friendsService: FriendsService by inject()
     route("friends") {
-        post {
+        get {
+            friendsService.getFriendsByUser(userId).onLeft {
+                call.respond(HttpStatusCode.fromValue(it.httpCode), it)
+            }.onRight {
+                call.respond(it)
+            }
+        }
+        get("requests") {
+            friendsService.getFriendshipRequestsByUser(userId).onLeft {
+                call.respond(HttpStatusCode.fromValue(it.httpCode), it)
+            }.onRight {
+                call.respond(it)
+            }
+        }
+        post("requests") {
             val request = try {
                 call.receive<FriendshipSolicitationRequest>()
             } catch (e: Exception) {
@@ -26,7 +41,7 @@ fun Route.friendsRoutes() {
                 call.respond(HttpStatusCode.fromValue(it.httpCode), it)
             }.onRight { call.respond(HttpStatusCode.Created) }
         }
-        post("{requestId}/accept") {
+        post("requests/{requestId}/accept") {
             getParameterAsObjectIdOrRespond("requestId") {
                 respond(HttpStatusCode.BadRequest, FriendsErrors.InvalidParameters)
             }.onRight { requestId ->

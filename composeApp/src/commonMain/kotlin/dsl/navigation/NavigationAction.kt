@@ -1,4 +1,4 @@
-package navigation
+package dsl.navigation
 
 import cafe.adriel.voyager.core.screen.Screen
 

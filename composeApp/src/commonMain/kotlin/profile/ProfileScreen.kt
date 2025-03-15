@@ -5,7 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
-import navigation.ObserveNavigationEvents
+import dsl.navigation.ObserveNavigationEvents
 
 object ProfileScreen : Screen {
     @Composable

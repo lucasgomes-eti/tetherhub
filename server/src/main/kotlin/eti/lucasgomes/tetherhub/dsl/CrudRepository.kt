@@ -7,7 +7,9 @@ import com.mongodb.client.model.Filters
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 import org.bson.BsonObjectId
+import org.bson.conversions.Bson
 import org.bson.types.ObjectId
 import kotlin.reflect.KClass
 
@@ -44,4 +46,11 @@ suspend inline fun <reified E : Any> MongoDatabase.findById(id: BsonObjectId) =
         withDocumentClass<E>()
             .find(Filters.eq("_id", id))
             .firstOrNull()!!
+    }
+
+suspend inline fun <reified E : Any> MongoDatabase.find(filter: Bson) =
+    withCollection<E, List<E>> {
+        withDocumentClass<E>()
+            .find(filter)
+            .toList()
     }

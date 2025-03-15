@@ -24,11 +24,13 @@ class ProfileService(
 
     suspend fun getProfilesByUsername(
         username: String,
-        clientUserId: ObjectId
+        clientUserId: ObjectId,
+        page: Int,
+        size: Int
     ): Either<TetherHubError, PageResponse<PublicProfileResponse>> =
         either {
             ensure(username.isNotBlank()) { ProfileErrors.InvalidUsername }
-            userRepository.findUsersByUsername(username, page = 1, size = 20)
+            userRepository.findUsersByUsername(username, page, size)
                 .mapLeft { ProfileErrors.ErrorWhileFetchingProfiles(it) }
                 .map {
                     with(it) {

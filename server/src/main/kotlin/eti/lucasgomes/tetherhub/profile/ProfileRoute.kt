@@ -1,6 +1,5 @@
 package eti.lucasgomes.tetherhub.profile
 
-import arrow.core.Either
 import eti.lucasgomes.tetherhub.dsl.userEmail
 import eti.lucasgomes.tetherhub.dsl.userId
 import io.ktor.http.HttpStatusCode
@@ -16,15 +15,9 @@ fun Route.profileRoutes() {
 
     route("profiles") {
         get("my_profile") {
-            when (val result = profileService.getProfile(userEmail)) {
-                is Either.Left -> {
-                    call.respond(status = HttpStatusCode.BadRequest, message = result.value.message)
-                }
-
-                is Either.Right -> {
-                    call.respond(result.value)
-                }
-            }
+            profileService.getProfile(userEmail).onLeft {
+                call.respond(status = HttpStatusCode.fromValue(it.httpCode), message = it)
+            }.onRight { call.respond(it) }
         }
 
         get {
@@ -36,7 +29,9 @@ fun Route.profileRoutes() {
                 )
                 return@get
             }
-            profileService.getProfilesByUsername(usernameFilter ?: "", userId).onLeft {
+            val page = call.request.queryParameters["page"]?.toInt() ?: 1
+            val size = call.request.queryParameters["size"]?.toInt() ?: 20
+            profileService.getProfilesByUsername(usernameFilter, userId, page, size).onLeft {
                 call.respond(HttpStatusCode.fromValue(it.httpCode), it)
             }.onRight { call.respond(it) }
         }

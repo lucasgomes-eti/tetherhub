@@ -2,6 +2,9 @@ import auth.login.LoginClient
 import auth.login.LoginScreenModel
 import auth.registration.RegistrationScreenModel
 import auth.registration.network.RegistrationClient
+import dsl.eventbus.EventBus
+import friends.FriendsClient
+import friends.FriendsScreenModel
 import messages.ChatClient
 import messages.chat.ChatScreenModel
 import messages.rooms.RoomsScreenModel
@@ -16,6 +19,8 @@ import post.detail.CreateOrEditPostScreenModel
 import post.feed.FeedScreenModel
 import profile.ProfileClient
 import profile.ProfileScreenModel
+import profile.search.SearchProfileScreenModel
+import splash.SplashScreenModel
 
 expect val platformModule: Module
 
@@ -33,7 +38,8 @@ val authModule = module {
 
 val profileModule = module {
     singleOf(::ProfileClient)
-    factory { ProfileScreenModel(get(), get(), get()) }
+    factoryOf(::ProfileScreenModel)
+    factory { params -> SearchProfileScreenModel(params.get(), get()) }
 }
 
 val postsModule = module {
@@ -48,10 +54,23 @@ val messagesModule = module {
     factoryOf(::ChatScreenModel)
 }
 
+val friendsModule = module {
+    singleOf(::FriendsScreenModel)
+    singleOf(::FriendsClient)
+}
+
 fun initKoin(config: KoinAppDeclaration? = null) {
     startKoin {
         config?.invoke(this)
-        modules(platformModule, appModule, authModule, profileModule, postsModule, messagesModule)
+        modules(
+            platformModule,
+            appModule,
+            authModule,
+            profileModule,
+            postsModule,
+            messagesModule,
+            friendsModule
+        )
     }
 }
 

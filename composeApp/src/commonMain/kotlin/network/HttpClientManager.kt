@@ -121,7 +121,7 @@ class HttpClientManager(
             dataStore.remove(stringPreferencesKey(DataStoreKeys.TOKEN))
             dataStore.remove(stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN))
         }
-        // TODO: maybe need to navigate to login screen (EventBus)
+        // TODO: maybe need to navigate to login screen (dsl.eventbus.EventBus)
     }
 
     suspend fun installAuth() {

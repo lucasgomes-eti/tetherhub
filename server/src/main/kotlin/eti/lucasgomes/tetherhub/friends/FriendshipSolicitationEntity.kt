@@ -7,8 +7,9 @@ import org.bson.types.ObjectId
 @MongoEntity("friendship_solicitations")
 data class FriendshipSolicitationEntity(
     val id: ObjectId,
-    val from: ObjectId,
-    val to: ObjectId,
+    val fromId: ObjectId,
+    val fromUsername: String,
+    val toId: ObjectId,
     val createdAt: Instant,
     val accepted: Boolean
 )

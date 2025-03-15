@@ -42,4 +42,10 @@ object FriendsErrors {
         "TH-507",
         "An error occurred while accepting your friendship request."
     )
+
+    val ErrorWhileFetchingFriendRequests = TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-508",
+        "An error occurred while fetching your friendship requests."
+    )
 }
