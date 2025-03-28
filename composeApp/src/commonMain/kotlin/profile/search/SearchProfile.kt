@@ -1,6 +1,6 @@
 package profile.search
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -64,27 +64,35 @@ fun SearchProfile(uiState: SearchProfileUiState, onAction: (SearchProfileAction)
             state = listState,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            item {
+                AnimatedVisibility(uiState.errorMessage.isNotBlank()) {
+                    ErrorBanner(uiState.errorMessage) { onAction(SearchProfileAction.DismissError) }
+                }
+            }
             items(uiState.profiles.items) {
                 ListItem(
                     headlineContent = { Text(it.username) },
                     supportingContent = {
-                        Text(if (it.isFriendsWithYou) "You are friends with this user" else "Press invite to request friendship")
+                        Text(
+                            when (it.relationshipStatus) {
+                                PublicProfileResponse.RelationshipStatus.FRIENDS -> "You are friends with this user"
+                                PublicProfileResponse.RelationshipStatus.NOT_FRIENDS -> "Press invite to request friendship"
+                                PublicProfileResponse.RelationshipStatus.PENDING -> "Pending request"
+                                PublicProfileResponse.RelationshipStatus.SELF -> "You"
+                            }
+                        )
                     },
-                    trailingContent = if (it.isFriendsWithYou.not()) {
-                        { Button(onClick = {}) { Text("Invite") } }
+                    trailingContent = if (it.relationshipStatus == PublicProfileResponse.RelationshipStatus.NOT_FRIENDS) {
+                        {
+                            Button(onClick = { onAction(SearchProfileAction.InviteFriend(it)) }) {
+                                Text(
+                                    "Invite"
+                                )
+                            }
+                        }
                     } else null,
                 )
             }
-            item {
-                AnimatedContent(uiState.errorMessage.isNotBlank()) {
-                    ErrorBanner(uiState.errorMessage) { onAction(SearchProfileAction.DismissError) }
-                }
-            }
         }
     }
-}
-
-@Composable
-fun ProfileItem(profileClient: PublicProfileResponse) {
-    //ListItem()
 }

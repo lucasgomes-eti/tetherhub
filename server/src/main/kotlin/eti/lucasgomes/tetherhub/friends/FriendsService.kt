@@ -5,6 +5,8 @@ import arrow.core.flatMap
 import arrow.core.raise.Raise
 import arrow.core.raise.either
 import arrow.core.raise.ensure
+import eti.lucasgomes.tetherhub.profile.ProfileMapper
+import eti.lucasgomes.tetherhub.user.UserEntity
 import eti.lucasgomes.tetherhub.user.UserErrors
 import eti.lucasgomes.tetherhub.user.UserRepository
 import org.bson.types.ObjectId
@@ -16,7 +18,8 @@ import response.TetherHubError
 class FriendsService(
     private val friendsRepository: FriendsRepository,
     private val friendsMapper: FriendsMapper,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val profileMapper: ProfileMapper
 ) {
 
     suspend fun createFriendshipSolicitation(
@@ -24,10 +27,34 @@ class FriendsService(
         clientUserId: ObjectId
     ): Either<TetherHubError, Unit> = either {
         ensure(friendshipSolicitation.to.isNotBlank()) { FriendsErrors.UserNotFound }
-        val clientUser = userRepository.findById(ObjectId(friendshipSolicitation.to))
+        val clientUser = userRepository.findById(clientUserId)
         ensure(clientUser != null) { FriendsErrors.UserNotFound }
+        val toUser = userRepository.findById(ObjectId(friendshipSolicitation.to))
+        ensure(toUser != null) { FriendsErrors.UserNotFound }
+        ensure(
+            friendShipSolicitationIsUnique(
+                clientUser,
+                toUser
+            )
+        ) { FriendsErrors.FriendshipRequestIsNotUnique }
         friendsRepository.insertOne(friendsMapper.buildEntity(friendshipSolicitation, clientUser))
-            .mapLeft { FriendsErrors.ErrorWhileCreatingFriendshipSolicitation(it) }.bind()
+            .mapLeft { FriendsErrors.ErrorWhileCreatingFriendshipSolicitation(it) }
+            .flatMap {
+                userRepository.updateUser(
+                    toUser.copy(
+                        friendRequests = toUser.friendRequests.toMutableSet().apply {
+                            add(clientUser.id.toString())
+                        }.toList()
+                    )
+                ).mapLeft { FriendsErrors.ErrorWhileCreatingFriendshipSolicitation(it) }
+            }.bind()
+    }
+
+    private fun friendShipSolicitationIsUnique(
+        clientUser: UserEntity,
+        toUser: UserEntity
+    ): Boolean {
+        return toUser.friendRequests.contains(clientUser.id.toString()).not()
     }
 
     suspend fun acceptFriendRequest(
@@ -60,6 +87,9 @@ class FriendsService(
                     add(
                         fromUser.id.toString()
                     )
+                }.toList(),
+                friendRequests = toUser.friendRequests.toMutableSet().apply {
+                    remove(fromUser.id.toString())
                 }.toList()
             )
         ).mapLeft { FriendsErrors.ErrorWhileAcceptingFriendshipSolicitation(it) }.bind()
@@ -84,7 +114,7 @@ class FriendsService(
             val friends = user.friends.mapNotNull { friendId ->
                 userRepository.findById(ObjectId(friendId))
             }
-            friends.map { friendsMapper.fromUserEntityToPublicProfile(clientUserId, it) }
+            friends.map { profileMapper.fromUserEntityToPublicProfile(clientUserId, it) }
         }
 
     suspend fun getFriendshipRequestsByUser(clientUserId: ObjectId): Either<TetherHubError, List<FriendshipSolicitationResponse>> =

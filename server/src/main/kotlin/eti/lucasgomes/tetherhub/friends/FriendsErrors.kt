@@ -48,4 +48,10 @@ object FriendsErrors {
         "TH-508",
         "An error occurred while fetching your friendship requests."
     )
+
+    val FriendshipRequestIsNotUnique = TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-509",
+        "There is already a friendship request to this user"
+    )
 }

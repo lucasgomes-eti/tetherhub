@@ -39,5 +39,7 @@ data class UserEntity(
     val username: String,
     val passwordHash: String,
     @Serializable
-    val friends: List<String>
+    val friends: List<String>,
+    @Serializable
+    val friendRequests: List<String>
 )

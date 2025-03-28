@@ -16,8 +16,36 @@ class ProfileMapper {
     fun fromUserEntityToPublicProfile(userEntity: UserEntity, clientUserId: ObjectId) =
         with(userEntity) {
             PublicProfileResponse(
+                id = id.toString(),
                 username = username,
-                isFriendsWithYou = friends.contains(clientUserId.toString())
+                relationshipStatus = getRelationshipStatus(this, clientUserId)
             )
         }
+
+    fun fromUserEntityToPublicProfile(
+        clientUserId: ObjectId,
+        entity: UserEntity
+    ): PublicProfileResponse = with(entity) {
+        PublicProfileResponse(
+            id = id.toString(),
+            username = username,
+            relationshipStatus = getRelationshipStatus(this, clientUserId)
+        )
+    }
+
+    private fun getRelationshipStatus(
+        userEntity: UserEntity,
+        clientUserId: ObjectId
+    ): PublicProfileResponse.RelationshipStatus = with(userEntity) {
+        return if (friends.contains(clientUserId.toString())) {
+            PublicProfileResponse.RelationshipStatus.FRIENDS
+        } else {
+            if (id == clientUserId)
+                return PublicProfileResponse.RelationshipStatus.SELF
+            if (friendRequests.contains(clientUserId.toString()))
+                PublicProfileResponse.RelationshipStatus.PENDING
+            else
+                PublicProfileResponse.RelationshipStatus.NOT_FRIENDS
+        }
+    }
 }

@@ -22,16 +22,16 @@ class FriendsClient(private val httpClientManager: HttpClientManager) {
             get("friends/requests")
         }
 
-    suspend fun postFriendshipRequest(request: FriendshipSolicitationRequest) =
-        httpClientManager.withApiResource<EmptyResult> {
+    suspend fun postFriendshipRequest(request: FriendshipSolicitationRequest): EmptyResult =
+        httpClientManager.withApiResource {
             post("friends/requests") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }
         }
 
-    suspend fun acceptFriendshipRequest(requestId: String) =
-        httpClientManager.withApiResource<Unit> {
+    suspend fun acceptFriendshipRequest(requestId: String): EmptyResult =
+        httpClientManager.withApiResource {
             post("friends/requests/${requestId}/accept")
         }
 }

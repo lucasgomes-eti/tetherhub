@@ -5,7 +5,6 @@ import kotlinx.datetime.Clock
 import org.bson.types.ObjectId
 import request.FriendshipSolicitationRequest
 import response.FriendshipSolicitationResponse
-import response.PublicProfileResponse
 
 class FriendsMapper {
     fun buildEntity(
@@ -19,16 +18,6 @@ class FriendsMapper {
             toId = ObjectId(friendshipSolicitation.to),
             createdAt = Clock.System.now(),
             accepted = false
-        )
-    }
-
-    fun fromUserEntityToPublicProfile(
-        clientUserId: ObjectId,
-        entity: UserEntity
-    ): PublicProfileResponse = with(entity) {
-        PublicProfileResponse(
-            username = username,
-            isFriendsWithYou = friends.contains(clientUserId.toString())
         )
     }
 

@@ -16,7 +16,7 @@ class ProfileClient(private val httpClientManager: HttpClientManager) {
     suspend fun getProfilesByUsername(
         query: String,
         page: Int,
-        size: Int = 2
+        size: Int = 50
     ): Resource<PageResponse<PublicProfileResponse>> =
         httpClientManager.withApiResource {
             get("profiles?username=$query&page=$page&size=$size")

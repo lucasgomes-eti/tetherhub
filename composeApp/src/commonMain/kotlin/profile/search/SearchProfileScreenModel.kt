@@ -3,6 +3,7 @@ package profile.search
 import cafe.adriel.voyager.core.model.ScreenModel
 import dsl.navigation.NavigationAction
 import dsl.withScreenModelScope
+import friends.FriendsClient
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,11 +12,14 @@ import kotlinx.coroutines.flow.update
 import network.onError
 import network.onSuccess
 import profile.ProfileClient
+import request.FriendshipSolicitationRequest
 import response.PageResponse
+import response.PublicProfileResponse
 
 class SearchProfileScreenModel(
     private val searchQuery: String,
-    private val profileClient: ProfileClient
+    private val profileClient: ProfileClient,
+    private val friendsClient: FriendsClient
 ) : ScreenModel {
 
     private val _uiState = MutableStateFlow(
@@ -41,11 +45,32 @@ class SearchProfileScreenModel(
         fetchProfiles(1)
     }
 
-    fun onAction(actions: SearchProfileAction) {
-        when (actions) {
+    fun onAction(action: SearchProfileAction) {
+        when (action) {
             SearchProfileAction.NavigateBack -> onNavigateBack()
             SearchProfileAction.FetchMore -> onFetchMore()
             SearchProfileAction.DismissError -> onDismissError()
+            is SearchProfileAction.InviteFriend -> onInviteFriend(action.profile)
+        }
+    }
+
+    private fun onInviteFriend(profile: PublicProfileResponse) = withScreenModelScope {
+        friendsClient.postFriendshipRequest(FriendshipSolicitationRequest(profile.id)).onError {
+            _uiState.update { state ->
+                state.copy(errorMessage = it.formatedMessage)
+            }
+        }.onSuccess {
+            val profiles = _uiState.value.profiles.items.toMutableList().apply {
+                val index = indexOf(profile)
+                removeAt(index)
+                add(
+                    index,
+                    profile.copy(relationshipStatus = PublicProfileResponse.RelationshipStatus.PENDING)
+                )
+            }.toList()
+            _uiState.update { state ->
+                state.copy(profiles = state.profiles.copy(items = profiles))
+            }
         }
     }
 

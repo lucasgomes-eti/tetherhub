@@ -39,7 +39,7 @@ val authModule = module {
 val profileModule = module {
     singleOf(::ProfileClient)
     factoryOf(::ProfileScreenModel)
-    factory { params -> SearchProfileScreenModel(params.get(), get()) }
+    factory { params -> SearchProfileScreenModel(params.get(), get(), get()) }
 }
 
 val postsModule = module {

@@ -39,7 +39,7 @@ fun Route.friendsRoutes() {
             }
             friendsService.createFriendshipSolicitation(request, userId).onLeft {
                 call.respond(HttpStatusCode.fromValue(it.httpCode), it)
-            }.onRight { call.respond(HttpStatusCode.Created) }
+            }.onRight { call.respond(HttpStatusCode.NoContent, it) }
         }
         post("requests/{requestId}/accept") {
             getParameterAsObjectIdOrRespond("requestId") {

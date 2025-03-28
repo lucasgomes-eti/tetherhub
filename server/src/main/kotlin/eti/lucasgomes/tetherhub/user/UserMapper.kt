@@ -35,7 +35,8 @@ fun User.toEntity() = UserEntity(
     email = email.value,
     username = username.value,
     passwordHash = passwordHash.value,
-    friends = emptyList()
+    friends = emptyList(),
+    friendRequests = emptyList()
 )
 
 fun UserEntity.toDomain() = User(
