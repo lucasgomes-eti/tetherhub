@@ -1,6 +1,7 @@
 package friends
 
 import DATE_TIME_PRESENTATION_FORMAT
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,6 +35,7 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
+import components.ErrorBanner
 import dsl.plus
 import home.LocalNavigationAppBar
 import kotlinx.datetime.TimeZone
@@ -102,10 +104,15 @@ fun Friends(uiState: FriendsUiState, onAction: (FriendsAction) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
+                AnimatedVisibility(uiState.errorMessage.isNotBlank()) {
+                    ErrorBanner(uiState.errorMessage) { onAction(FriendsAction.DismissError) }
+                }
+            }
+            item {
                 Text("Requests", style = typography.titleMedium)
             }
             items(uiState.requests) {
-                FriendRequest(it) {}
+                FriendRequest(it) { onAction(FriendsAction.AcceptRequest(it.id)) }
             }
             item {
                 Text("Friends", style = typography.titleMedium)

@@ -11,23 +11,7 @@ import kotlinx.coroutines.flow.update
 import network.onError
 import network.onSuccess
 import profile.search.SearchProfileScreen
-import response.FriendshipSolicitationResponse
 import response.PublicProfileResponse
-
-data class FriendsUiState(
-    val isLoading: Boolean,
-    val requests: List<FriendshipSolicitationResponse>,
-    val friends: List<PublicProfileResponse>,
-    val errorMessage: String,
-    val searchQuery: String
-)
-
-sealed class FriendsAction {
-    data object CancelSearch : FriendsAction()
-    data object NavigateBack : FriendsAction()
-    data class SearchQueryChanged(val query: String) : FriendsAction()
-    data object Search : FriendsAction()
-}
 
 class FriendsScreenModel(private val friendsClient: FriendsClient) : ScreenModel {
 
@@ -56,6 +40,40 @@ class FriendsScreenModel(private val friendsClient: FriendsClient) : ScreenModel
             FriendsAction.NavigateBack -> onNavigateBack()
             is FriendsAction.SearchQueryChanged -> onSearchQueryChanged(action.query)
             FriendsAction.Search -> onSearch()
+            is FriendsAction.AcceptRequest -> onAcceptRequest(action.id)
+            FriendsAction.DismissError -> onDismissError()
+        }
+    }
+
+    private fun onDismissError() = withScreenModelScope {
+        _uiState.update { state -> state.copy(errorMessage = "") }
+    }
+
+    private fun onAcceptRequest(id: String) = withScreenModelScope {
+        _uiState.update { state -> state.copy(isLoading = true) }
+        friendsClient.acceptFriendshipRequest(id).onError {
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    errorMessage = it.formatedMessage
+                )
+            }
+        }.onSuccess {
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    requests = state.requests.filter { it.id != id },
+                    friends = state.friends.toMutableSet().apply {
+                        add(state.requests.find { it.id == id }!!.run {
+                            PublicProfileResponse(
+                                id,
+                                fromUsername,
+                                PublicProfileResponse.RelationshipStatus.FRIENDS
+                            )
+                        })
+                    }.toList()
+                )
+            }
         }
     }
 
