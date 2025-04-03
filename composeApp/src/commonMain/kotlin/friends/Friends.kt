@@ -3,6 +3,7 @@ package friends
 import DATE_TIME_PRESENTATION_FORMAT
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +34,7 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
+import dsl.plus
 import home.LocalNavigationAppBar
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -95,7 +97,10 @@ fun Friends(uiState: FriendsUiState, onAction: (FriendsAction) -> Unit) {
             ) {}
         }
     ) { innerPadding ->
-        LazyColumn(contentPadding = innerPadding) {
+        LazyColumn(
+            contentPadding = innerPadding + PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             item {
                 Text("Requests", style = typography.titleMedium)
             }
@@ -114,7 +119,7 @@ fun Friends(uiState: FriendsUiState, onAction: (FriendsAction) -> Unit) {
 
 @Composable
 fun FriendRequest(friendRequest: FriendshipSolicitationResponse, onAccept: () -> Unit) {
-    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text("From: ${friendRequest.fromUsername}")
         Text(
             "At: ${
@@ -130,5 +135,5 @@ fun FriendRequest(friendRequest: FriendshipSolicitationResponse, onAccept: () ->
 
 @Composable
 fun Friend(publicProfileResponse: PublicProfileResponse) {
-    Text(modifier = Modifier.padding(16.dp), text = publicProfileResponse.username)
+    Text(text = publicProfileResponse.username)
 }

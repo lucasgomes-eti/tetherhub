@@ -28,5 +28,10 @@ class FriendsRepository(private val mongoDatabase: MongoDatabase) {
         }
 
     suspend fun findByAssignedToUserId(clientUserId: ObjectId) =
-        mongoDatabase.find<FriendshipSolicitationEntity>(Filters.eq("to", clientUserId))
+        mongoDatabase.find<FriendshipSolicitationEntity>(
+            Filters.eq(
+                FriendshipSolicitationEntity::toId.name,
+                clientUserId
+            )
+        )
 }

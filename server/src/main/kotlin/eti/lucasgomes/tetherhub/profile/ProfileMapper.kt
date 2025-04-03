@@ -1,11 +1,12 @@
 package eti.lucasgomes.tetherhub.profile
 
 import eti.lucasgomes.tetherhub.user.UserEntity
+import eti.lucasgomes.tetherhub.user.UserRepository
 import org.bson.types.ObjectId
 import response.ProfileResponse
 import response.PublicProfileResponse
 
-class ProfileMapper {
+class ProfileMapper(private val userRepository: UserRepository) {
     fun transformUserEntityToProfileResponse(userEntity: UserEntity) =
         ProfileResponse(
             username = userEntity.username,
@@ -13,7 +14,7 @@ class ProfileMapper {
             friendsCount = userEntity.friends.size
         )
 
-    fun fromUserEntityToPublicProfile(userEntity: UserEntity, clientUserId: ObjectId) =
+    suspend fun fromUserEntityToPublicProfile(userEntity: UserEntity, clientUserId: ObjectId) =
         with(userEntity) {
             PublicProfileResponse(
                 id = id.toString(),
@@ -22,7 +23,7 @@ class ProfileMapper {
             )
         }
 
-    fun fromUserEntityToPublicProfile(
+    suspend fun fromUserEntityToPublicProfile(
         clientUserId: ObjectId,
         entity: UserEntity
     ): PublicProfileResponse = with(entity) {
@@ -33,7 +34,7 @@ class ProfileMapper {
         )
     }
 
-    private fun getRelationshipStatus(
+    private suspend fun getRelationshipStatus(
         userEntity: UserEntity,
         clientUserId: ObjectId
     ): PublicProfileResponse.RelationshipStatus = with(userEntity) {
@@ -42,7 +43,11 @@ class ProfileMapper {
         } else {
             if (id == clientUserId)
                 return PublicProfileResponse.RelationshipStatus.SELF
-            if (friendRequests.contains(clientUserId.toString()))
+            val clientUser = userRepository.findById(clientUserId)
+            if (friendRequests.contains(clientUserId.toString()) || clientUser?.friendRequests?.contains(
+                    userEntity.id.toString()
+                ) == true
+            )
                 PublicProfileResponse.RelationshipStatus.PENDING
             else
                 PublicProfileResponse.RelationshipStatus.NOT_FRIENDS

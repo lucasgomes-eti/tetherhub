@@ -74,7 +74,7 @@ fun Application.module() {
             },
             module { // Mapper module
                 single { UserMapper(get()) }
-                single { ProfileMapper() }
+                singleOf(::ProfileMapper)
                 single { PostMapper() }
                 singleOf(::ChatMapper)
                 singleOf(::FriendsMapper)
