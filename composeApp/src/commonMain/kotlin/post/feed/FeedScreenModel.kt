@@ -1,15 +1,22 @@
 package post.feed
 
-import dsl.eventbus.EventBus
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import dsl.eventbus.EventBus
+import dsl.navigation.NavigationAction
+import dsl.withScreenModelScope
+import friends.FriendsScreen
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import network.Resource
 import post.PostClient
+import post.detail.CreatePostScreen
 import post.detail.PostUpdated
+import profile.search.SearchProfileScreen
 
 class FeedScreenModel(
     private val postClient: PostClient,
@@ -17,8 +24,18 @@ class FeedScreenModel(
 ) : ScreenModel {
 
     private val _uiState =
-        MutableStateFlow(FeedUiState(posts = emptyList(), isLoading = false, errorMsg = ""))
+        MutableStateFlow(
+            FeedUiState(
+                posts = emptyList(),
+                isLoading = false,
+                errorMsg = "",
+                searchQuery = ""
+            )
+        )
     val uiState = _uiState.asStateFlow()
+
+    private val _navigationActions = Channel<NavigationAction>()
+    val navigationActions = _navigationActions.receiveAsFlow()
 
     init {
         fetchPosts()
@@ -64,7 +81,35 @@ class FeedScreenModel(
             is FeedAction.Like -> onPostLiked(feedAction.postId)
             is FeedAction.DismissError -> onDismissError()
             is FeedAction.Refresh -> fetchPosts()
+            FeedAction.CancelSearch -> onCancelSearch()
+            FeedAction.Search -> onSearch()
+            is FeedAction.SearchQueryChanged -> onSearchQueryChanged(feedAction.query)
+            FeedAction.CreatePost -> onCreatePost()
+            FeedAction.NavigateToFriends -> onNavigateToFriends()
         }
+    }
+
+    private fun onNavigateToFriends() = withScreenModelScope {
+        _navigationActions.send(NavigationAction.Push(FriendsScreen))
+    }
+
+    private fun onCreatePost() = withScreenModelScope {
+        _navigationActions.send(NavigationAction.Push(CreatePostScreen))
+    }
+
+    private fun onSearch() = withScreenModelScope {
+        val searchQuery = _uiState.value.searchQuery
+        if (searchQuery.isNotBlank()) {
+            _navigationActions.send(NavigationAction.Push(SearchProfileScreen(searchQuery)))
+        }
+    }
+
+    private fun onSearchQueryChanged(query: String) = withScreenModelScope {
+        _uiState.update { state -> state.copy(searchQuery = query) }
+    }
+
+    private fun onCancelSearch() = withScreenModelScope {
+        _uiState.update { state -> state.copy(searchQuery = "") }
     }
 
     private fun onPostLiked(postId: String) {

@@ -3,24 +3,26 @@ package post.feed
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import components.ErrorBanner
+import components.ProfileSearchBar
 import home.LocalNavigationAppBar
-import post.detail.CreatePostScreen
 import post.detail.Post
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,18 +30,36 @@ import post.detail.Post
 fun Feed(feedUiState: FeedUiState, onFeedAction: (FeedAction) -> Unit) {
 
     val navigationAppBar = LocalNavigationAppBar.current
-    val navigator = LocalNavigator.currentOrThrow
 
     Scaffold(
         modifier = Modifier.padding(bottom = navigationAppBar.ContainerHeight),
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                navigator.push(CreatePostScreen)
+                onFeedAction(FeedAction.CreatePost)
             }) {
                 Icon(Icons.Default.Add, null)
             }
-        }) {
+        },
+        topBar = {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ProfileSearchBar(
+                    searchQuery = feedUiState.searchQuery,
+                    onSearchQueryChanged = { onFeedAction(FeedAction.SearchQueryChanged(it)) },
+                    onSearch = { onFeedAction(FeedAction.Search) },
+                    onCancelSearch = { onFeedAction(FeedAction.CancelSearch) },
+                )
+                IconButton(onClick = { onFeedAction(FeedAction.NavigateToFriends) }) {
+                    Icon(Icons.Default.People, null)
+                }
+            }
+        },
+    ) { innerPadding ->
         PullToRefreshBox(
+            modifier = Modifier.padding(innerPadding),
             isRefreshing = feedUiState.isLoading,
             onRefresh = { onFeedAction(FeedAction.Refresh) }
         ) {
