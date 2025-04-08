@@ -52,7 +52,8 @@ fun Route.userRoutes() {
 
                 is Either.Right -> {
                     val tokenExpiresAt = System.currentTimeMillis() + expiration.toInt()
-                    val refreshTokenExpiresAt = tokenExpiresAt * 15
+                    val refreshTokenExpiresAt =
+                        System.currentTimeMillis() + (expiration.toInt() * 15)
                     val token = JWT.create()
                         .withIssuer(issuer)
                         .withClaim("email", result.value.email.value)

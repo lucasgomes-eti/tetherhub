@@ -74,7 +74,7 @@ class HttpClientManager(
                                 preferences.data.map { it[stringPreferencesKey(DataStoreKeys.TOKEN)] }
                                     .firstOrNull() ?: ""
                             val refreshToken =
-                                preferences.data.map { it[stringPreferencesKey(DataStoreKeys.TOKEN)] }
+                                preferences.data.map { it[stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN)] }
                                     .firstOrNull() ?: ""
                             BearerTokens(token, refreshToken)
                         }
