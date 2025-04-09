@@ -26,24 +26,6 @@ class ChatService(
                     chatRepository.findById(id).mapLeft { ChatErrors.ChatNotFound(id.toString()) }
                 }.bind()
             chatMapper.fromEntityToResponse(entity)
-//            when (val insertResult =
-//                chatRepository.insertOne(chatMapper.buildChatEntity(createChatRequest))) {
-//                is Either.Left -> {
-//                    raise(ChatErrors.ChatCreationError(insertResult.value))
-//                }
-//
-//                is Either.Right -> {
-//                    when (val entity = chatRepository.findById(insertResult.value)) {
-//                        is Either.Left -> {
-//                            raise(ChatErrors.ChatNotFound(insertResult.toString()))
-//                        }
-//
-//                        is Either.Right -> {
-//                            chatMapper.fromEntityToResponse(entity.value)
-//                        }
-//                    }
-//                }
-//            }
         }
 
     suspend fun findById(chatId: ObjectId): Either<TetherHubError, ChatResponse> = either {

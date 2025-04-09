@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,7 +40,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import components.ErrorBanner
 import home.LocalNavigationAppBar
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -81,7 +85,7 @@ fun NewRoom(uiState: NewRoomUiState, onAction: (NewRoomAction) -> Unit) {
                         item {
                             ListItem(
                                 headlineContent = {
-                                    Text(user)
+                                    Text(user.username)
                                 },
                                 trailingContent = {
                                     Button(onClick = {
@@ -104,6 +108,9 @@ fun NewRoom(uiState: NewRoomUiState, onAction: (NewRoomAction) -> Unit) {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            AnimatedVisibility(uiState.errorMessage.isNotBlank()) {
+                ErrorBanner(uiState.errorMessage) { onAction(NewRoomAction.DismissError) }
+            }
             TextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = uiState.name,
@@ -112,7 +119,7 @@ fun NewRoom(uiState: NewRoomUiState, onAction: (NewRoomAction) -> Unit) {
                     Text("Chat name")
                 },
                 placeholder = {
-                    Text("me, ${uiState.selectedUsers.joinToString()}")
+                    Text("${uiState.myUsername}, ${uiState.selectedUsers.joinToString { it.username }}")
                 }
             )
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -135,7 +142,7 @@ fun NewRoom(uiState: NewRoomUiState, onAction: (NewRoomAction) -> Unit) {
                                 onAction(NewRoomAction.RemoveUser(user))
                             },
                             selected = true,
-                            label = { Text(user) },
+                            label = { Text(user.username) },
                             trailingIcon = {
                                 Icon(
                                     Icons.Default.Close,
@@ -154,7 +161,7 @@ fun NewRoom(uiState: NewRoomUiState, onAction: (NewRoomAction) -> Unit) {
                         )
                         ListItem(
                             colors = ListItemDefaults.colors(containerColor = backgroundColor),
-                            headlineContent = { Text(user.user) },
+                            headlineContent = { Text(user.user.username) },
                             trailingContent = if (user.isSelected) {
                                 { Icon(Icons.Default.Check, null) }
                             } else {
@@ -178,10 +185,16 @@ fun NewRoom(uiState: NewRoomUiState, onAction: (NewRoomAction) -> Unit) {
             }
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {},
-                enabled = uiState.selectedUsers.isNotEmpty()
+                onClick = { onAction(NewRoomAction.CreateChat) },
+                enabled = uiState.selectedUsers.isNotEmpty() && uiState.isCreating.not()
             ) {
-                Text("Create chat", style = typography.bodyMedium)
+                if (uiState.isCreating) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(with(LocalDensity.current) { typography.bodyMedium.fontSize.toDp() })
+                    )
+                } else {
+                    Text("Create chat", style = typography.bodyMedium)
+                }
             }
         }
     }
