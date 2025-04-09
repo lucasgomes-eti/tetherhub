@@ -7,6 +7,7 @@ import friends.FriendsClient
 import friends.FriendsScreenModel
 import messages.ChatClient
 import messages.chat.ChatScreenModel
+import messages.newroom.NewRoomScreenModel
 import messages.rooms.RoomsScreenModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -52,6 +53,7 @@ val messagesModule = module {
     singleOf(::ChatClient)
     factoryOf(::RoomsScreenModel)
     factoryOf(::ChatScreenModel)
+    factoryOf(::NewRoomScreenModel)
 }
 
 val friendsModule = module {

@@ -2,6 +2,8 @@ package messages.rooms
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import dsl.navigation.NavigationAction
+import dsl.withScreenModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import messages.ChatClient
 import messages.chat.ChatScreen
-import dsl.navigation.NavigationAction
+import messages.newroom.NewRoomScreen
 import network.onError
 import network.onSuccess
 
@@ -33,7 +35,12 @@ class RoomsScreenModel(private val chatClient: ChatClient) : ScreenModel {
     fun onAction(action: RoomsAction) {
         when (action) {
             is RoomsAction.OpenNewChat -> onOpenNewChat(action.chatId)
+            RoomsAction.CreateNewRoom -> onCreateNewRoom()
         }
+    }
+
+    private fun onCreateNewRoom() = withScreenModelScope {
+        _navigationActions.send(NavigationAction.Push(NewRoomScreen))
     }
 
     private fun onOpenNewChat(chatId: String) {
