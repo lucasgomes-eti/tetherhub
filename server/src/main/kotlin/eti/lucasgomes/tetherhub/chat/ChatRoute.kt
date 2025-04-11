@@ -92,6 +92,7 @@ fun Route.chatRoutes() {
                     it.sendSerialized(
                         MessageResponse(
                             senderId = "tetherhub",
+                            senderUsername = "tetherhub",
                             content = "${call.username} Joined the chat. Online members: ${serverRooms[roomIndex].connectedSessions.size}",
                             at = Clock.System.now(),
                             type = MessageType.SYSTEM
@@ -108,10 +109,11 @@ fun Route.chatRoutes() {
                         for (session in serverRooms[roomIndex].connectedSessions) {
                             session.sendSerialized(
                                 MessageResponse(
-                                    call.userId.toString(),
-                                    newMessageRequest.content,
-                                    Clock.System.now(),
-                                    MessageType.USER
+                                    senderId = call.userId.toString(),
+                                    senderUsername = call.username,
+                                    content = newMessageRequest.content,
+                                    at = Clock.System.now(),
+                                    type = MessageType.USER
                                 )
                             )
                             val offlineUsers = mutableListOf<UserResponse>()

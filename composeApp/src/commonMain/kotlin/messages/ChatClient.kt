@@ -66,10 +66,11 @@ class ChatClient(private val httpClientManager: HttpClientManager) {
         } catch (e: Exception) {
             emit(
                 MessageResponse(
-                    "tetherhub",
-                    "Disconnected from server. Cause: ${e.message}",
-                    Clock.System.now(),
-                    MessageType.SYSTEM
+                    senderId = "tetherhub",
+                    senderUsername = "tetherhub",
+                    content = "Disconnected from server. Cause: ${e.message}",
+                    at = Clock.System.now(),
+                    type = MessageType.SYSTEM
                 )
             )
         }

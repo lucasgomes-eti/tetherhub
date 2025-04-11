@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.realm)
 }
 
 kotlin {
@@ -54,6 +55,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             api(libs.datastore)
             api(libs.datastore.preferences)
+            implementation(libs.realm)
         }
         androidMain.dependencies {
             implementation(compose.preview)

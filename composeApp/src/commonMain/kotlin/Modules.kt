@@ -5,8 +5,12 @@ import auth.registration.network.RegistrationClient
 import dsl.eventbus.EventBus
 import friends.FriendsClient
 import friends.FriendsScreenModel
+import io.realm.kotlin.Realm
+import io.realm.kotlin.RealmConfiguration
 import messages.ChatClient
 import messages.chat.ChatScreenModel
+import messages.chat.data.MessageEntity
+import messages.chat.data.MessageRepository
 import messages.newroom.NewRoomScreenModel
 import messages.rooms.RoomsScreenModel
 import org.koin.core.context.startKoin
@@ -54,6 +58,11 @@ val messagesModule = module {
     factoryOf(::RoomsScreenModel)
     factoryOf(::ChatScreenModel)
     factoryOf(::NewRoomScreenModel)
+    single<Realm> {
+        val config = RealmConfiguration.create(setOf(MessageEntity::class))
+        Realm.open(config)
+    }
+    singleOf(::MessageRepository)
 }
 
 val friendsModule = module {

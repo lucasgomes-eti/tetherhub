@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import dsl.withScreenModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,10 +15,12 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import messages.ChatClient
+import messages.chat.data.MessageRepository
 import network.onSuccess
 import request.MessageRequest
 import response.MessageType
@@ -25,7 +28,8 @@ import response.MessageType
 class ChatScreenModel(
     private val chatId: String,
     private val chatClient: ChatClient,
-    private val preferences: DataStore<Preferences>
+    private val preferences: DataStore<Preferences>,
+    private val messageRepository: MessageRepository
 ) : ScreenModel {
 
     private val _uiState = MutableStateFlow(
@@ -41,8 +45,8 @@ class ChatScreenModel(
     private var _userId: String? = null
 
     init {
-        subscribeToChat()
         fetchChat(chatId)
+        subscribeToChat()
     }
 
     private suspend fun getUserId(): String {
@@ -58,12 +62,24 @@ class ChatScreenModel(
         }
     }
 
-    private fun fetchChat(chatId: String) {
-        screenModelScope.launch {
-            chatClient.getChatById(chatId).onSuccess {
-                _uiState.update { state -> state.copy(users = it.users) }
-            }
+    private fun fetchChat(chatId: String) = withScreenModelScope {
+        chatClient.getChatById(chatId).onSuccess {
+            _uiState.update { state -> state.copy(users = it.users) }
         }
+        val messages = _uiState.value.messages + messageRepository.getMessages(chatId).map {
+            LocalMessage(
+                content = it.content,
+                timeStamp = Instant.fromEpochMilliseconds(it.at)
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .format(DATE_TIME_PRESENTATION_FORMAT),
+                sender = if (it.senderId == getUserId())
+                    MessageSender.ME
+                else
+                    MessageSender.OTHER,
+                senderUsername = it.senderUsername
+            )
+        }
+        _uiState.update { state -> state.copy(messages = messages) }
     }
 
     private fun subscribeToChat() {
@@ -83,11 +99,15 @@ class ChatScreenModel(
                                     MessageSender.ME
                                 else
                                     MessageSender.OTHER
-                            }
+                            },
+                            senderUsername = it.senderUsername
                         )
                     )
                 }
                 _uiState.update { state -> state.copy(messages = messages) }
+                if (it.type == MessageType.USER) {
+                    messageRepository.saveMessage(it, chatId)
+                }
             }
         }
     }

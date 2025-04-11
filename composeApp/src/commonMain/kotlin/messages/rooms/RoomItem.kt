@@ -31,7 +31,7 @@ fun RoomItem(conversation: ChatResponse, onClick: () -> Unit) {
         ) {
             Text(conversation.roomName, style = typography.bodyMedium)
             HorizontalDivider()
-            Text(users.toString(), style = typography.bodyMedium)
+            Text(conversation.users.joinToString { it.username }, style = typography.bodyMedium)
         }
     }
 }

@@ -60,6 +60,9 @@ fun ChatItem(message: LocalMessage) {
             },
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            if (message.sender != MessageSender.SYSTEM) {
+                Text(message.senderUsername, style = typography.labelSmall)
+            }
             Text(message.content, style = typography.bodyLarge)
             Text(message.timeStamp, style = typography.labelSmall)
         }
