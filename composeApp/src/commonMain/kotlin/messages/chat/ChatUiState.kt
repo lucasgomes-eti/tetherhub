@@ -1,5 +1,6 @@
 package messages.chat
 
+import messages.chat.data.LocalMessage
 import response.UserResponse
 
 data class ChatUiState(

@@ -1,4 +1,6 @@
-package messages.chat
+package messages.chat.data
+
+import messages.chat.MessageSender
 
 data class LocalMessage(
     val content: String,

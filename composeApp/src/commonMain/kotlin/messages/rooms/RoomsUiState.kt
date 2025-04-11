@@ -1,9 +1,9 @@
 package messages.rooms
 
-import response.ChatResponse
+import messages.rooms.data.LocalRoom
 
 data class RoomsUiState(
-    val rooms: List<ChatResponse>,
+    val rooms: List<LocalRoom>,
     val isLoading: Boolean,
     val errorMessage: String
 )

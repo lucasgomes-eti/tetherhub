@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import components.ErrorBanner
@@ -24,6 +25,10 @@ import home.LocalNavigationAppBar
 fun Rooms(roomsUiState: RoomsUiState, onAction: (RoomsAction) -> Unit) {
 
     val navigationAppBar = LocalNavigationAppBar.current
+
+    LaunchedEffect(Unit) {
+        onAction(RoomsAction.Refresh)
+    }
 
     Scaffold(
         modifier = Modifier.padding(bottom = navigationAppBar.ContainerHeight),
@@ -48,7 +53,7 @@ fun Rooms(roomsUiState: RoomsUiState, onAction: (RoomsAction) -> Unit) {
                     }
                 }
                 items(roomsUiState.rooms) {
-                    RoomItem(it) { onAction(RoomsAction.OpenNewChat(it.chatId)) }
+                    RoomItem(it) { onAction(RoomsAction.OpenNewChat(it.chat.chatId)) }
                 }
             }
         }

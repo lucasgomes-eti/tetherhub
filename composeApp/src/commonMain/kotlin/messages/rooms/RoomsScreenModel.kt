@@ -11,14 +11,17 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import messages.ChatClient
 import messages.chat.ChatScreen
+import messages.chat.data.MessageRepository
 import messages.newroom.NewRoomScreen
 import messages.newroom.RoomCreated
+import messages.rooms.data.LocalRoom
 import network.onError
 import network.onSuccess
 
 class RoomsScreenModel(
     private val chatClient: ChatClient,
-    private val eventBus: EventBus
+    private val eventBus: EventBus,
+    private val messageRepository: MessageRepository
 ) : ScreenModel {
 
     private val _uiState = MutableStateFlow(
@@ -34,7 +37,6 @@ class RoomsScreenModel(
     val navigationActions = _navigationActions.receiveAsFlow()
 
     init {
-        fetchRooms()
         subscribeToRoomUpdates()
     }
 
@@ -70,9 +72,15 @@ class RoomsScreenModel(
                 state.copy(errorMessage = it.formatedMessage, isLoading = false)
             }
         }.onSuccess {
+
             _uiState.update { state ->
                 state.copy(
-                    rooms = it,
+                    rooms = it.map {
+                        LocalRoom(
+                            chat = it,
+                            lastMessage = messageRepository.getLastMessage(it.chatId)?.content
+                        )
+                    },
                     isLoading = false,
                     errorMessage = ""
                 )

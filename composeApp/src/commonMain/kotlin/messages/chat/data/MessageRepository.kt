@@ -1,6 +1,11 @@
 package messages.chat.data
 
 import io.realm.kotlin.Realm
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.withContext
 import response.MessageResponse
 
 class MessageRepository(private val realm: Realm) {
@@ -19,7 +24,14 @@ class MessageRepository(private val realm: Realm) {
 
     suspend fun getMessages(chatId: String): List<MessageEntity> {
         return realm.query(MessageEntity::class, "chatId == $0", chatId).find()
-            .sortedByDescending { it.at }
+            .sortedByDescending { it.at }.asFlow().toList()
     }
 
+
+    suspend fun getLastMessage(chatId: String): MessageEntity? {
+        return withContext(Dispatchers.IO) {
+            realm.query(MessageEntity::class, "chatId == $0", chatId).find()
+                .maxByOrNull { it.at }
+        }
+    }
 }
