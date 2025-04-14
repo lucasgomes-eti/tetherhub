@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.realm)
+    alias(libs.plugins.googleServices)
 }
 
 kotlin {
@@ -63,6 +64,8 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.bundles.firebase)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

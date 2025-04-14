@@ -93,6 +93,9 @@ xcuserdata/
 
 iOSInjectionProject/
 
+# Google Services (e.g. APIs or Firebase)
+GoogleService-Info.plist
+
 ### Swift template
 # Xcode
 #

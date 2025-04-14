@@ -17,6 +17,8 @@ voyager = "1.1.0-beta03"
 kotlinx-datetime = "0.6.1"
 datastore = "1.1.2"
 realm = "2.3.0"
+google-services = "4.4.2"
+firebase = "33.12.0"
 
 [libraries]
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
@@ -61,6 +63,8 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 realm = { module = "io.realm.kotlin:library-base", version.ref = "realm" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -72,3 +76,9 @@ ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 realm = { id = "io.realm.kotlin", version.ref = "realm" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
+
+[bundles]
+firebase = [
+    "firebase-analytics"
+]
