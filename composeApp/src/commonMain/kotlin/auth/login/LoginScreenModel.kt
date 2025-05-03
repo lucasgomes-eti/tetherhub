@@ -2,14 +2,23 @@ package auth.login
 
 import RegexConstants
 import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import com.mmk.kmpnotifier.notification.Notifier
+import dev.icerock.moko.permissions.DeniedAlwaysException
+import dev.icerock.moko.permissions.DeniedException
+import dev.icerock.moko.permissions.Permission
+import dev.icerock.moko.permissions.PermissionsController
+import dev.icerock.moko.permissions.notifications.REMOTE_NOTIFICATION
+import dsl.withScreenModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import network.Resource
 
-class LoginScreenModel(private val loginClient: LoginClient) : ScreenModel {
+class LoginScreenModel(
+    private val loginClient: LoginClient,
+    private val permissionsController: PermissionsController,
+    private val notifier: Notifier
+) : ScreenModel {
 
     private val _uiState = MutableStateFlow(
         LoginUiState(
@@ -40,40 +49,57 @@ class LoginScreenModel(private val loginClient: LoginClient) : ScreenModel {
         _uiState.update { state -> state.copy(password = value, errorMsg = "") }
     }
 
-    private fun onLogin() {
-        screenModelScope.launch {
-            val uiStateSnapshot = _uiState.value
-            if (isUiStateValid(uiStateSnapshot)) {
-                _uiState.update { state ->
-                    state.copy(
-                        isLoading = true,
-                        errorMsg = "",
-                        emailError = "",
-                        passwordError = ""
-                    )
-                }
-                val result = loginClient.authenticateWithCredentials(
-                    uiStateSnapshot.email,
-                    uiStateSnapshot.password
-                )
-                when (result) {
-                    is Resource.Success -> {
-                        _uiState.update { state ->
-                            state.copy(
-                                isLoading = false,
-                                event = LoginEvent.SUCCESS
-                            )
-                        }
-                    }
+    private fun displayLocalNotification() {
+        notifier.notify { title = "Notification title"; body = "Notification text" }
+    }
 
-                    is Resource.Error -> {
-                        _uiState.update { state ->
-                            state.copy(
-                                isLoading = false,
-                                event = LoginEvent.NONE,
-                                errorMsg = "${result.error.internalCode} - ${result.error.message}"
-                            )
-                        }
+    private suspend fun askPermissionAndNotify() {
+        try {
+            permissionsController.providePermission(Permission.REMOTE_NOTIFICATION)
+            displayLocalNotification()
+        } catch (_: DeniedAlwaysException) {
+        } catch (_: DeniedException) {
+        }
+    }
+
+    private fun onLogin() = withScreenModelScope {
+        if (permissionsController.isPermissionGranted(Permission.REMOTE_NOTIFICATION)) {
+            displayLocalNotification()
+        } else {
+            askPermissionAndNotify()
+        }
+
+        val uiStateSnapshot = _uiState.value
+        if (isUiStateValid(uiStateSnapshot)) {
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = true,
+                    errorMsg = "",
+                    emailError = "",
+                    passwordError = ""
+                )
+            }
+            val result = loginClient.authenticateWithCredentials(
+                uiStateSnapshot.email,
+                uiStateSnapshot.password
+            )
+            when (result) {
+                is Resource.Success -> {
+                    _uiState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            event = LoginEvent.SUCCESS
+                        )
+                    }
+                }
+
+                is Resource.Error -> {
+                    _uiState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            event = LoginEvent.NONE,
+                            errorMsg = "${result.error.internalCode} - ${result.error.message}"
+                        )
                     }
                 }
             }

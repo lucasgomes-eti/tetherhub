@@ -3,6 +3,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
 import cafe.adriel.voyager.navigator.Navigator
+import dev.icerock.moko.permissions.PermissionsController
+import dev.icerock.moko.permissions.compose.BindEffect
 import dsl.eventbus.EventBus
 import dsl.eventbus.LocalEventBus
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -17,6 +19,8 @@ fun App() {
         KoinContext {
             val scope = rememberCoroutineScope()
             val eventBus = koinInject<EventBus>()
+            val permissionsController = koinInject<PermissionsController>()
+            BindEffect(permissionsController)
             CompositionLocalProvider(LocalEventBus provides eventBus) {
                 Navigator(SplashScreen)
             }

@@ -1,13 +1,13 @@
 [versions]
 arrow = "1.2.4"
-agp = "8.9.1"
+agp = "8.7.3"
 android-compileSdk = "35"
 android-minSdk = "25"
 android-targetSdk = "35"
 androidx-activityCompose = "1.10.1"
 bcrypt = "0.10.2"
-compose-multiplatform = "1.7.0"
-kotlin = "2.0.21"
+compose-multiplatform = "1.7.3"
+kotlin = "2.1.10"
 ktor = "2.3.12"
 koin = "4.0.2"
 mongodb = "4.10.1"
@@ -16,9 +16,13 @@ statelyCommon = "2.0.5"
 voyager = "1.1.0-beta03"
 kotlinx-datetime = "0.6.1"
 datastore = "1.1.4"
-realm = "2.3.0"
 google-services = "4.4.2"
-firebase = "33.12.0"
+firebase = "33.13.0"
+kmpnotifier = "1.5.1"
+moko = "0.19.1"
+room = "2.7.1"
+ksp = "2.1.10-1.0.31"
+sqlite = "2.5.0"
 
 [libraries]
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
@@ -62,9 +66,15 @@ koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
-realm = { module = "io.realm.kotlin:library-base", version.ref = "realm" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+kmpnotifier = { module = "io.github.mirzemehdi:kmpnotifier", version.ref = "kmpnotifier" }
+moko-permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko" }
+moko-permissions-notifications = { module = "dev.icerock.moko:permissions-notifications", version.ref = "moko" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-runtime-android = { module = "androidx.room:room-runtime-android", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -75,10 +85,15 @@ kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-realm = { id = "io.realm.kotlin", version.ref = "realm" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "room" }
 
 [bundles]
 firebase = [
     "firebase-analytics"
+]
+moko-permissions = [
+    "moko-permissions-compose",
+    "moko-permissions-notifications"
 ]

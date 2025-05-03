@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -6,13 +5,13 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.realm)
     alias(libs.plugins.googleServices)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -24,6 +23,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
+            export(libs.kmpnotifier)
             baseName = "ComposeApp"
             isStatic = true
         }
@@ -56,7 +56,10 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             api(libs.datastore)
             api(libs.datastore.preferences)
-            implementation(libs.realm)
+            api(libs.kmpnotifier)
+            implementation(libs.bundles.moko.permissions)
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
         }
         androidMain.dependencies {
             implementation(compose.preview)
@@ -69,6 +72,10 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+
+        }
+        iosMain {
+            kotlin.srcDirs("build/generated/ksp/metadata")
         }
     }
 }
@@ -107,3 +114,17 @@ android {
     }
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    add("kspCommonMainMetadata", libs.room.compiler)
+    add("kspAndroid", libs.room.compiler)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().configureEach {
+    if (name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
+}

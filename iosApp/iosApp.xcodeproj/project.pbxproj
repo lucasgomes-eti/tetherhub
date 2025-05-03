@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
+		099B92942DC6D239003A97D0 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 099B92932DC6D239003A97D0 /* FirebaseMessaging */; };
 		09D7A6A82DAD967400515E33 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 09D7A6A72DAD967400515E33 /* GoogleService-Info.plist */; };
 		09D7A6AB2DAD977E00515E33 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 09D7A6AA2DAD977E00515E33 /* FirebaseAnalytics */; };
 		09D7A6AD2DAD986B00515E33 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D7A6AC2DAD986200515E33 /* AppDelegate.swift */; };
@@ -33,6 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				099B92942DC6D239003A97D0 /* FirebaseMessaging in Frameworks */,
 				09D7A6AB2DAD977E00515E33 /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -114,6 +116,7 @@
 			name = iosApp;
 			packageProductDependencies = (
 				09D7A6AA2DAD977E00515E33 /* FirebaseAnalytics */,
+				099B92932DC6D239003A97D0 /* FirebaseMessaging */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* TetherHub.app */;
@@ -418,6 +421,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		099B92932DC6D239003A97D0 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 09D7A6A92DAD977E00515E33 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
 		09D7A6AA2DAD977E00515E33 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 09D7A6A92DAD977E00515E33 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

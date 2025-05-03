@@ -2,14 +2,13 @@ import auth.login.LoginClient
 import auth.login.LoginScreenModel
 import auth.registration.RegistrationScreenModel
 import auth.registration.network.RegistrationClient
+import com.mmk.kmpnotifier.notification.NotifierManager
 import dsl.eventbus.EventBus
 import friends.FriendsClient
 import friends.FriendsScreenModel
-import io.realm.kotlin.Realm
-import io.realm.kotlin.RealmConfiguration
 import messages.ChatClient
 import messages.chat.ChatScreenModel
-import messages.chat.data.MessageEntity
+import messages.chat.data.MessageDao
 import messages.chat.data.MessageRepository
 import messages.newroom.NewRoomScreenModel
 import messages.rooms.RoomsScreenModel
@@ -32,13 +31,14 @@ expect val platformModule: Module
 val appModule = module {
     singleOf(::EventBus)
     singleOf(::SplashScreenModel)
+    single { NotifierManager.getLocalNotifier() }
 }
 
 val authModule = module {
     singleOf(::RegistrationClient)
     singleOf(::LoginClient)
     factory { RegistrationScreenModel(get()) }
-    factory { LoginScreenModel(get()) }
+    factoryOf(::LoginScreenModel)
 }
 
 val profileModule = module {
@@ -58,10 +58,7 @@ val messagesModule = module {
     factoryOf(::RoomsScreenModel)
     factoryOf(::ChatScreenModel)
     factoryOf(::NewRoomScreenModel)
-    single<Realm> {
-        val config = RealmConfiguration.create(setOf(MessageEntity::class))
-        Realm.open(config)
-    }
+    single<MessageDao> { get<AppDatabase>().messageDao() }
     singleOf(::MessageRepository)
 }
 

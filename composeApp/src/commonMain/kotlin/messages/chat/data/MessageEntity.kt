@@ -1,15 +1,15 @@
 package messages.chat.data
 
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.PrimaryKey
-import org.mongodb.kbson.ObjectId
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-class MessageEntity : RealmObject {
-    @PrimaryKey
-    var _id: ObjectId = ObjectId()
-    var chatId: String = ""
-    var senderId: String = ""
-    var senderUsername: String = ""
-    var content: String = ""
-    var at: Long = 0
-}
+@Entity
+data class MessageEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L,
+    val chatId: String,
+    val senderId: String,
+    val senderUsername: String,
+    val content: String,
+    val at: Long
+)
