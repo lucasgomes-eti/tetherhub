@@ -3,6 +3,7 @@ package eti.lucasgomes.tetherhub.user
 import arrow.core.Either
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import eti.lucasgomes.tetherhub.dsl.userId
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -12,6 +13,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
 import request.CreateUserRequest
+import request.FcmTokenRequest
 import request.RefreshTokenRequest
 import response.AuthResponse
 import java.util.Date
@@ -110,6 +112,27 @@ fun Route.userRoutes() {
                     refreshToken = newRefreshToken
                 )
             )
+        }
+
+
+    }
+}
+
+fun Route.userConfigRoutes() {
+    val userService by inject<UserService>()
+    route("users") {
+        post("register_fcm_token") {
+            val request = try {
+                call.receive<FcmTokenRequest>()
+            } catch (e: Exception) {
+                call.respond(status = HttpStatusCode.BadRequest, UserErrors.InvalidParameters)
+                return@post
+            }
+            userService.registerFcmToken(userId, request).onLeft {
+                call.respond(HttpStatusCode.fromValue(it.httpCode), it)
+            }.onRight {
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

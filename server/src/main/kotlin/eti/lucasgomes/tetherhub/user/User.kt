@@ -41,5 +41,6 @@ data class UserEntity(
     @Serializable
     val friends: List<String>,
     @Serializable
-    val friendRequests: List<String>
+    val friendRequests: List<String>,
+    val fcmToken: String? = null
 )

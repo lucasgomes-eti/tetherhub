@@ -55,4 +55,10 @@ object UserErrors {
         "TH-008",
         "Could not found user with this email: $email"
     )
+
+    fun ErrorWhileRegisteringFcmToken(cause: Exception) = TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-009",
+        "Error while registering FCM token. Cause: ${cause.message}",
+    )
 }

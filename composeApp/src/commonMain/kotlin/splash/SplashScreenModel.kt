@@ -6,35 +6,36 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import auth.login.LoginScreen
 import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import cafe.adriel.voyager.core.screen.Screen
 import dsl.navigation.NavigationAction
+import dsl.withScreenModelScope
 import home.HomeScreen
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 
-class SplashScreenModel(private val preferences: DataStore<Preferences>) : ScreenModel {
+class SplashScreenModel(
+    private val preferences: DataStore<Preferences>
+) : ScreenModel {
     private val _navigationActions = Channel<NavigationAction>()
     val navigationActions = _navigationActions.receiveAsFlow()
 
     init {
-        getRootDestination()
+        navigateToRoot()
     }
 
-    private fun getRootDestination() {
-        screenModelScope.launch {
-            val userIsPersisted =
-                preferences.data.map { it[stringPreferencesKey(DataStoreKeys.USER_ID)] }
-                    .firstOrNull()
-                    .let { it != null }
+    private suspend fun userIsPersisted(): Boolean {
+        return preferences.data.map { it[stringPreferencesKey(DataStoreKeys.USER_ID)] }
+            .firstOrNull()
+            .let { it != null }
+    }
 
-            _navigationActions.send(
-                NavigationAction.Replace(
-                    if (userIsPersisted) HomeScreen else LoginScreen
-                )
-            )
-        }
+    private suspend fun getRootDestination(): Screen {
+        return if (userIsPersisted()) HomeScreen else LoginScreen
+    }
+
+    private fun navigateToRoot() = withScreenModelScope {
+        _navigationActions.send(NavigationAction.Replace(getRootDestination()))
     }
 }

@@ -22,6 +22,7 @@ import eti.lucasgomes.tetherhub.user.UserMapper
 import eti.lucasgomes.tetherhub.user.UserRepository
 import eti.lucasgomes.tetherhub.user.UserService
 import eti.lucasgomes.tetherhub.user.toDomain
+import eti.lucasgomes.tetherhub.user.userConfigRoutes
 import eti.lucasgomes.tetherhub.user.userRoutes
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
@@ -129,6 +130,7 @@ fun Application.module() {
             postRoutes()
             chatRoutes()
             friendsRoutes()
+            userConfigRoutes()
         }
     }
 }

@@ -102,7 +102,8 @@ class UserRepository(private val mongoDatabase: MongoDatabase) {
     suspend fun updateUser(user: UserEntity) = mongoDatabase.withCollection<UserEntity, Boolean> {
         val updates = Updates.combine(
             Updates.set(UserEntity::friends.name, user.friends),
-            Updates.set(UserEntity::friendRequests.name, user.friendRequests)
+            Updates.set(UserEntity::friendRequests.name, user.friendRequests),
+            Updates.set(UserEntity::fcmToken.name, user.fcmToken)
         )
         updateOne(Filters.eq("id", user.id), updates).modifiedCount == 1L
     }

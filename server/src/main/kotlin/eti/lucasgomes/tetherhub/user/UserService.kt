@@ -3,7 +3,9 @@ package eti.lucasgomes.tetherhub.user
 import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensure
+import org.bson.types.ObjectId
 import request.CreateUserRequest
+import request.FcmTokenRequest
 import response.TetherHubError
 import response.UserResponse
 
@@ -40,4 +42,14 @@ class UserService(private val userRepository: UserRepository, private val userMa
 
     private suspend fun emailIsUnique(email: String): Boolean =
         userRepository.findUserByEmail(email) == null
+
+    suspend fun registerFcmToken(
+        clientUserId: ObjectId,
+        fcmToken: FcmTokenRequest
+    ): Either<TetherHubError, Unit> = either {
+        userRepository.findById(clientUserId)?.let { userEntity ->
+            userRepository.updateUser(userEntity.copy(fcmToken = fcmToken.value))
+                .mapLeft { UserErrors.ErrorWhileRegisteringFcmToken(it) }.bind()
+        } ?: raise(UserErrors.UserNotFound)
+    }
 }

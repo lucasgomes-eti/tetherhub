@@ -6,6 +6,7 @@ import com.mmk.kmpnotifier.notification.NotifierManager
 import dsl.eventbus.EventBus
 import friends.FriendsClient
 import friends.FriendsScreenModel
+import home.HomeScreenModel
 import messages.ChatClient
 import messages.chat.ChatScreenModel
 import messages.chat.data.MessageDao
@@ -31,6 +32,7 @@ expect val platformModule: Module
 val appModule = module {
     singleOf(::EventBus)
     singleOf(::SplashScreenModel)
+    singleOf(::HomeScreenModel)
     single { NotifierManager.getLocalNotifier() }
 }
 

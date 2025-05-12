@@ -15,7 +15,7 @@ actual val platformModule = module {
             baseUrl = BaseUrl(
                 protocol = "http://",
                 host = "10.0.2.2",
-                port = 8082
+                port = SERVER_PORT
             )
         )
     }
