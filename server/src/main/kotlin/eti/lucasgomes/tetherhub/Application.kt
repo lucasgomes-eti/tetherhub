@@ -2,6 +2,10 @@ package eti.lucasgomes.tetherhub
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.google.auth.oauth2.GoogleCredentials
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
+import com.google.firebase.messaging.FirebaseMessaging
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import eti.lucasgomes.tetherhub.chat.ChatMapper
 import eti.lucasgomes.tetherhub.chat.ChatRepository
@@ -44,6 +48,7 @@ import org.koin.dsl.module
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
+import java.io.FileInputStream
 import java.time.Duration
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
@@ -86,6 +91,14 @@ fun Application.module() {
                 single { PostService(get(), get(), get()) }
                 singleOf(::ChatService)
                 singleOf(::FriendsService)
+                single<FirebaseApp> {
+                    val serviceAccount = FileInputStream("firebase-admin-service-account-key.json")
+                    val options = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                        .build()
+                    FirebaseApp.initializeApp(options)
+                }
+                single<FirebaseMessaging> { FirebaseMessaging.getInstance(get()) }
             }
         )
     }

@@ -2,7 +2,6 @@ import auth.login.LoginClient
 import auth.login.LoginScreenModel
 import auth.registration.RegistrationScreenModel
 import auth.registration.network.RegistrationClient
-import com.mmk.kmpnotifier.notification.NotifierManager
 import dsl.eventbus.EventBus
 import friends.FriendsClient
 import friends.FriendsScreenModel
@@ -31,9 +30,9 @@ expect val platformModule: Module
 
 val appModule = module {
     singleOf(::EventBus)
-    singleOf(::SplashScreenModel)
-    singleOf(::HomeScreenModel)
-    single { NotifierManager.getLocalNotifier() }
+    factory { params -> SplashScreenModel(params.getOrNull(), get()) }
+    factoryOf(::HomeScreenModel)
+    singleOf(::PushNotificationManager)
 }
 
 val authModule = module {
@@ -51,13 +50,13 @@ val profileModule = module {
 
 val postsModule = module {
     singleOf(::PostClient)
-    factory { FeedScreenModel(get(), get()) }
+    factoryOf(::FeedScreenModel)
     factory { params -> CreateOrEditPostScreenModel(get(), get(), params.getOrNull()) }
 }
 
 val messagesModule = module {
     singleOf(::ChatClient)
-    factoryOf(::RoomsScreenModel)
+    factory { params -> RoomsScreenModel(params.getOrNull(), get(), get(), get()) }
     factoryOf(::ChatScreenModel)
     factoryOf(::NewRoomScreenModel)
     single<MessageDao> { get<AppDatabase>().messageDao() }

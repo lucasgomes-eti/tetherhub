@@ -1,19 +1,26 @@
 package eti.lucasgomes.tetherhub.chat
 
+import NotificationType
 import arrow.core.Either
 import arrow.core.flatMap
 import arrow.core.raise.either
 import arrow.core.raise.ensure
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.Message
 import eti.lucasgomes.tetherhub.user.UserRepository
+import kotlinx.datetime.Instant
+import kotlinx.serialization.json.Json
 import org.bson.types.ObjectId
 import request.CreateChatRequest
 import response.ChatResponse
+import response.MessageResponse
 import response.TetherHubError
 
 class ChatService(
     private val chatRepository: ChatRepository,
     private val userRepository: UserRepository,
-    private val chatMapper: ChatMapper
+    private val chatMapper: ChatMapper,
+    private val firebaseMessaging: FirebaseMessaging,
 ) {
 
     suspend fun createChat(createChatRequest: CreateChatRequest): Either<TetherHubError, ChatResponse> =
@@ -50,4 +57,21 @@ class ChatService(
             chatRepository.findByUserId(userId).mapLeft { ChatErrors.ErrorWhileFetchingRooms(it) }
                 .map { it.map { entity -> chatMapper.fromEntityToResponse(entity) } }.bind()
         }
+
+    suspend fun sendNotification(userId: String, chatId: String, messageResponse: MessageResponse) {
+        val fcmToken = userRepository.findById(ObjectId(userId))?.fcmToken ?: return
+        val data = mapOf(
+            "type" to NotificationType.CHAT.name,
+            "chatId" to chatId,
+            "senderId" to messageResponse.senderId,
+            "senderUsername" to messageResponse.senderUsername,
+            "content" to messageResponse.content,
+            "at" to Json.encodeToString(Instant.serializer(), messageResponse.at),
+        )
+        val message = Message.builder()
+            .setToken(fcmToken)
+            .putAllData(data)
+            .build()
+        firebaseMessaging.send(message)
+    }
 }

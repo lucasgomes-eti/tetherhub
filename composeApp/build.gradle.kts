@@ -23,7 +23,6 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            export(libs.kmpnotifier)
             baseName = "ComposeApp"
             isStatic = true
         }
@@ -56,7 +55,6 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             api(libs.datastore)
             api(libs.datastore.preferences)
-            api(libs.kmpnotifier)
             implementation(libs.bundles.moko.permissions)
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)

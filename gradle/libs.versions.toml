@@ -15,14 +15,14 @@ logback = "1.5.3"
 statelyCommon = "2.0.5"
 voyager = "1.1.0-beta03"
 kotlinx-datetime = "0.6.1"
-datastore = "1.1.4"
+datastore = "1.1.6"
 google-services = "4.4.2"
 firebase = "33.13.0"
-kmpnotifier = "1.5.1"
 moko = "0.19.1"
 room = "2.7.1"
 ksp = "2.1.10-1.0.31"
-sqlite = "2.5.0"
+sqlite = "2.5.1"
+firebase-admin = "9.4.3"
 
 [libraries]
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
@@ -68,13 +68,14 @@ datastore = { module = "androidx.datastore:datastore", version.ref = "datastore"
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-kmpnotifier = { module = "io.github.mirzemehdi:kmpnotifier", version.ref = "kmpnotifier" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 moko-permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko" }
 moko-permissions-notifications = { module = "dev.icerock.moko:permissions-notifications", version.ref = "moko" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-runtime-android = { module = "androidx.room:room-runtime-android", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebase-admin" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -91,7 +92,8 @@ room = { id = "androidx.room", version.ref = "room" }
 
 [bundles]
 firebase = [
-    "firebase-analytics"
+    "firebase-analytics",
+    "firebase-messaging",
 ]
 moko-permissions = [
     "moko-permissions-compose",

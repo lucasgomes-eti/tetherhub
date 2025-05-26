@@ -262,3 +262,4 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 
 /.kotlin
+firebase-admin-service-account-key.json

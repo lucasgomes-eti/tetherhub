@@ -33,4 +33,5 @@ dependencies {
     implementation(libs.ktor.server.mongodb.bson)
     implementation(libs.kotlinx.datetime)
     implementation(libs.ktor.server.websockets)
+    implementation(libs.firebase.admin)
 }

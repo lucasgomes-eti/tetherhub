@@ -1,5 +1,6 @@
 package messages
 
+import DeepLink
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.runtime.Composable
@@ -9,10 +10,10 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import messages.rooms.RoomsScreen
 
-object MessagesTab : Tab {
+data class MessagesTab(val deepLink: DeepLink? = null) : Tab {
     @Composable
     override fun Content() {
-        Navigator(RoomsScreen)
+        Navigator(RoomsScreen(deepLink))
     }
 
     override val options: TabOptions

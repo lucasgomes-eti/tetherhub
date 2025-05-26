@@ -26,7 +26,6 @@ import request.MessageRequest
 import response.ChatResponse
 import response.MessageResponse
 import response.MessageType
-import response.UserResponse
 import java.util.Collections
 
 data class ServerRooms(
@@ -107,23 +106,25 @@ fun Route.chatRoutes() {
                         val newMessageRequest =
                             Json.decodeFromString<MessageRequest>(serializedMessage)
                         for (session in serverRooms[roomIndex].connectedSessions) {
-                            session.sendSerialized(
-                                MessageResponse(
-                                    senderId = call.userId.toString(),
-                                    senderUsername = call.username,
-                                    content = newMessageRequest.content,
-                                    at = Clock.System.now(),
-                                    type = MessageType.USER
-                                )
+                            val messageResponse = MessageResponse(
+                                senderId = call.userId.toString(),
+                                senderUsername = call.username,
+                                content = newMessageRequest.content,
+                                at = Clock.System.now(),
+                                type = MessageType.USER
                             )
-                            val offlineUsers = mutableListOf<UserResponse>()
+                            session.sendSerialized(messageResponse)
                             chat.users.forEach {
                                 if (!serverRooms[roomIndex].connectedSessions.map { session.call.userId }
                                         .contains(ObjectId(it.id))) {
-                                    offlineUsers.add(it)
+                                    // user is offline
+                                    chatService.sendNotification(
+                                        it.id,
+                                        chat.chatId,
+                                        messageResponse
+                                    )
                                 }
                             }
-                            // TODO: send notification to offline users
                         }
                     }
                 } // once socket is closed, the loop will complete

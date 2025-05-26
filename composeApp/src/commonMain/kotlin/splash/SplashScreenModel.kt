@@ -1,6 +1,7 @@
 package splash
 
 import DataStoreKeys
+import DeepLink
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -16,14 +17,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 
 class SplashScreenModel(
+    private val deepLink: DeepLink? = null,
     private val preferences: DataStore<Preferences>
 ) : ScreenModel {
     private val _navigationActions = Channel<NavigationAction>()
     val navigationActions = _navigationActions.receiveAsFlow()
-
-    init {
-        navigateToRoot()
-    }
 
     private suspend fun userIsPersisted(): Boolean {
         return preferences.data.map { it[stringPreferencesKey(DataStoreKeys.USER_ID)] }
@@ -32,10 +30,10 @@ class SplashScreenModel(
     }
 
     private suspend fun getRootDestination(): Screen {
-        return if (userIsPersisted()) HomeScreen else LoginScreen
+        return if (userIsPersisted()) HomeScreen(deepLink) else LoginScreen
     }
 
-    private fun navigateToRoot() = withScreenModelScope {
+    fun navigateToRoot() = withScreenModelScope {
         _navigationActions.send(NavigationAction.Replace(getRootDestination()))
     }
 }

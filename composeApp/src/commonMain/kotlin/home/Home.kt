@@ -29,8 +29,8 @@ import post.feed.FeedTab
 import profile.ProfileTab
 
 @Composable
-fun Home() {
-    TabNavigator(FeedTab) {
+fun Home(currentTab: Tab) {
+    TabNavigator(currentTab) {
 
         val navigationAppBar = remember { NavigationAppBar(mutableStateOf(true)) }
 
@@ -42,7 +42,7 @@ fun Home() {
             ) {
                 NavigationBar {
                     TabItem(FeedTab)
-                    TabItem(MessagesTab)
+                    TabItem(MessagesTab())
                     TabItem(ProfileTab)
                 }
             }

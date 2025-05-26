@@ -1,6 +1,7 @@
 package network
 
 import DataStoreKeys
+import FcmTokenManager
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -26,6 +27,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import request.FcmTokenRequest
 import request.RefreshTokenRequest
 import response.AuthResponse
 import response.TetherHubError
@@ -95,6 +97,16 @@ class HttpClientManager(
                                         dataStore[stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN)] =
                                             auth.refreshToken
                                     }
+
+                                    try {
+                                        client.post("users/register_fcm_token") {
+                                            headers.append("Authorization", "Bearer ${auth.token}")
+                                            contentType(ContentType.Application.Json)
+                                            setBody(FcmTokenRequest(FcmTokenManager.getFcmToken()))
+                                        }
+                                    } catch (_: Exception) {
+                                    }
+
                                     BearerTokens(auth.token, auth.refreshToken)
                                 }
 

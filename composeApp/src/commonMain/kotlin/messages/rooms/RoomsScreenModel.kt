@@ -1,5 +1,6 @@
 package messages.rooms
 
+import DeepLink
 import cafe.adriel.voyager.core.model.ScreenModel
 import dsl.eventbus.EventBus
 import dsl.navigation.NavigationAction
@@ -19,6 +20,7 @@ import network.onError
 import network.onSuccess
 
 class RoomsScreenModel(
+    private val deepLink: DeepLink? = null,
     private val chatClient: ChatClient,
     private val eventBus: EventBus,
     private val messageRepository: MessageRepository
@@ -38,6 +40,12 @@ class RoomsScreenModel(
 
     init {
         subscribeToRoomUpdates()
+        handleDeepLink()
+    }
+
+    private fun handleDeepLink() {
+        deepLink ?: return
+        onOpenNewChat(deepLink.resourceId)
     }
 
     private fun subscribeToRoomUpdates() = withScreenModelScope {

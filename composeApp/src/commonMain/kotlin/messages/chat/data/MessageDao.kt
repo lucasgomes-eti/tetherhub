@@ -10,7 +10,7 @@ interface MessageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMessage(message: MessageEntity)
 
-    @Query("SELECT * FROM messageEntity WHERE chatId = :chatId ORDER BY at DESC")
+    @Query("SELECT * FROM messageEntity WHERE chatId = :chatId ORDER BY at ASC")
     suspend fun getMessages(chatId: String): List<MessageEntity>
 
     @Query("SELECT * FROM messageEntity WHERE chatId = :chatId ORDER BY at DESC LIMIT 1")

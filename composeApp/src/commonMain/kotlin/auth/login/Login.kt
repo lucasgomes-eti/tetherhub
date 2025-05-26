@@ -53,7 +53,7 @@ fun Login(
 
     when (loginUiState.event) {
         LoginEvent.NONE -> Unit
-        LoginEvent.SUCCESS -> navigator.replace(HomeScreen)
+        LoginEvent.SUCCESS -> navigator.replace(HomeScreen())
     }
 
     Column(
