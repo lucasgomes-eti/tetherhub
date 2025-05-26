@@ -1,6 +1,7 @@
 package eti.lucasgomes.tetherhub.friends
 
 import com.mongodb.client.model.Filters
+import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import eti.lucasgomes.tetherhub.dsl.find
@@ -29,9 +30,9 @@ class FriendsRepository(private val mongoDatabase: MongoDatabase) {
 
     suspend fun findByAssignedToUserId(clientUserId: ObjectId) =
         mongoDatabase.find<FriendshipSolicitationEntity>(
-            Filters.eq(
-                FriendshipSolicitationEntity::toId.name,
-                clientUserId
+            Filters.and(
+                eq(FriendshipSolicitationEntity::toId.name, clientUserId),
+                eq(FriendshipSolicitationEntity::accepted.name, false)
             )
         )
 }
