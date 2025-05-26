@@ -10,7 +10,7 @@ class EventBus {
         events.emit(event)
     }
 
-    suspend inline fun <reified T : Event> subscribe(crossinline block: (T) -> Unit) {
+    suspend inline fun <reified T : Event> subscribe(crossinline block: suspend (T) -> Unit) {
         events.filterIsInstance<T>().collect { block(it) }
     }
 }

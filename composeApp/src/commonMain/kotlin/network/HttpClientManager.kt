@@ -6,6 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import dsl.eventbus.EventBus
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
@@ -37,6 +38,7 @@ class HttpClientManager(
     private val engine: HttpClientEngine,
     private val preferences: DataStore<Preferences>,
     val baseUrl: BaseUrl,
+    private val eventBus: EventBus
 ) {
     private var _httpClient: HttpClient? = null
 
@@ -133,7 +135,7 @@ class HttpClientManager(
             dataStore.remove(stringPreferencesKey(DataStoreKeys.TOKEN))
             dataStore.remove(stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN))
         }
-        // TODO: maybe need to navigate to login screen (dsl.eventbus.EventBus)
+        eventBus.publish(Logout)
     }
 
     suspend fun installAuth() {
