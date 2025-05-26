@@ -16,7 +16,8 @@ actual val platformModule = module {
                 protocol = "http://",
                 host = "10.0.2.2",
                 port = SERVER_PORT
-            )
+            ),
+            eventBus = get()
         )
     }
     single {

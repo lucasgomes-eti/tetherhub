@@ -3,6 +3,7 @@ package messages.rooms
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,7 +40,7 @@ fun Rooms(roomsUiState: RoomsUiState, onAction: (RoomsAction) -> Unit) {
         }
     ) { innerPadding ->
         PullToRefreshBox(
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
             isRefreshing = roomsUiState.isLoading,
             onRefresh = { onAction(RoomsAction.Refresh) }
         ) {

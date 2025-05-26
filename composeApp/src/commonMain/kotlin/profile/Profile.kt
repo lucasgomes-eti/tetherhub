@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -16,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,40 +34,43 @@ import post.detail.MyPost
 @Composable
 fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> Unit) {
     val openAlertDialog = remember { mutableStateOf(DeleteDialogData(false, "")) }
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item {
-                AboutMe(profileUiState, onProfileAction)
-            }
+    Scaffold { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+            LazyColumn(
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                item {
+                    AboutMe(profileUiState, onProfileAction)
+                }
 
-            item {
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { onProfileAction(ProfileAction.ManageFriends) }) {
-                    Text("Manage Friends")
+                item {
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { onProfileAction(ProfileAction.ManageFriends) }) {
+                        Text("Manage Friends")
+                    }
+                }
+
+                item {
+                    Text("My Posts", style = typography.titleMedium)
+                }
+
+                items(profileUiState.myPosts, key = { it.id }) {
+                    MyPost(
+                        post = it,
+                        onLikeClicked = { onProfileAction(ProfileAction.LikeMyPost(it.id)) },
+                        onEditClicked = { onProfileAction(ProfileAction.EditMyPost(it.id)) },
+                        onDeleteClicked = { openAlertDialog.value = DeleteDialogData(true, it.id) },
+                    )
                 }
             }
-
-            item {
-                Text("My Posts", style = typography.titleMedium)
+            DeletePostDialog(openAlertDialog) {
+                onProfileAction(ProfileAction.DeleteMyPost(openAlertDialog.value.postId))
             }
-
-            items(profileUiState.myPosts, key = { it.id }) {
-                MyPost(
-                    post = it,
-                    onLikeClicked = { onProfileAction(ProfileAction.LikeMyPost(it.id)) },
-                    onEditClicked = { onProfileAction(ProfileAction.EditMyPost(it.id)) },
-                    onDeleteClicked = { openAlertDialog.value = DeleteDialogData(true, it.id) },
-                )
-            }
-        }
-        DeletePostDialog(openAlertDialog) {
-            onProfileAction(ProfileAction.DeleteMyPost(openAlertDialog.value.postId))
         }
     }
+
 }
 
 @Composable
