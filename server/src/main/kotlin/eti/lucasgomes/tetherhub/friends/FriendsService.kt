@@ -1,14 +1,19 @@
 package eti.lucasgomes.tetherhub.friends
 
+import NotificationType
 import arrow.core.Either
 import arrow.core.flatMap
 import arrow.core.raise.Raise
 import arrow.core.raise.either
 import arrow.core.raise.ensure
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.Message
 import eti.lucasgomes.tetherhub.profile.ProfileMapper
 import eti.lucasgomes.tetherhub.user.UserEntity
 import eti.lucasgomes.tetherhub.user.UserErrors
 import eti.lucasgomes.tetherhub.user.UserRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.bson.types.ObjectId
 import request.FriendshipSolicitationRequest
 import response.FriendshipSolicitationResponse
@@ -19,7 +24,8 @@ class FriendsService(
     private val friendsRepository: FriendsRepository,
     private val friendsMapper: FriendsMapper,
     private val userRepository: UserRepository,
-    private val profileMapper: ProfileMapper
+    private val profileMapper: ProfileMapper,
+    private val firebaseMessaging: FirebaseMessaging
 ) {
 
     suspend fun createFriendshipSolicitation(
@@ -47,6 +53,13 @@ class FriendsService(
                         }.toList()
                     )
                 ).mapLeft { FriendsErrors.ErrorWhileCreatingFriendshipSolicitation(it) }
+            }.onRight {
+                toUser.fcmToken?.let {
+                    notifyFriendRequest(
+                        fcmToken = it,
+                        username = clientUser.username
+                    )
+                }
             }.bind()
     }
 
@@ -70,6 +83,8 @@ class FriendsService(
                 .map { success ->
                     ensure(success) { FriendsErrors.ErrorWhileAcceptingFriendshipSolicitation }
                     updateUsersFriendsList(friendshipSolicitation)
+                }.onRight {
+                    notifyRequestAccepted(friendshipSolicitation.fromId)
                 }
         }.bind()
     }
@@ -129,4 +144,34 @@ class FriendsService(
                     }
                 }.bind()
         }
+
+    private suspend fun notifyFriendRequest(fcmToken: String, username: String) {
+        withContext(Dispatchers.Default) {
+            val data = mapOf(
+                "type" to NotificationType.FRIENDS.name,
+                "content" to "You got a new friend request from: $username"
+            )
+            val message = Message.builder()
+                .setToken(fcmToken)
+                .putAllData(data)
+                .build()
+            firebaseMessaging.send(message)
+        }
+    }
+
+    private suspend fun notifyRequestAccepted(toUserId: ObjectId) {
+        val toUserEntity = userRepository.findById(toUserId)
+        val fcmToken = toUserEntity?.fcmToken ?: return
+        withContext(Dispatchers.Default) {
+            val data = mapOf(
+                "type" to NotificationType.FRIENDS.name,
+                "content" to "You're now friends with: ${toUserEntity.username}"
+            )
+            val message = Message.builder()
+                .setToken(fcmToken)
+                .putAllData(data)
+                .build()
+            firebaseMessaging.send(message)
+        }
+    }
 }

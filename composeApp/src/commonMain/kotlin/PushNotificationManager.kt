@@ -14,6 +14,7 @@ class PushNotificationManager(
     ) {
         when (notificationType) {
             NotificationType.CHAT -> handleChatNotification(data)
+            NotificationType.FRIENDS -> Unit
         }
     }
 

@@ -1,5 +1,6 @@
 package home
 
+import DeepLink
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,7 +30,7 @@ import post.feed.FeedTab
 import profile.ProfileTab
 
 @Composable
-fun Home(currentTab: Tab) {
+fun Home(currentTab: Tab, deepLink: DeepLink? = null) {
     TabNavigator(currentTab) {
 
         val navigationAppBar = remember { NavigationAppBar(mutableStateOf(true)) }
@@ -41,8 +42,8 @@ fun Home(currentTab: Tab) {
                 exit = slideOut { IntOffset(0, it.height) } + fadeOut()
             ) {
                 NavigationBar {
-                    TabItem(FeedTab)
-                    TabItem(MessagesTab())
+                    TabItem(FeedTab(deepLink))
+                    TabItem(MessagesTab(deepLink))
                     TabItem(ProfileTab)
                 }
             }

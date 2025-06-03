@@ -1,3 +1,4 @@
 enum class NotificationType {
-    CHAT
+    CHAT,
+    FRIENDS
 }

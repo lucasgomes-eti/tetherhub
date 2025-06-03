@@ -21,10 +21,11 @@ data class HomeScreen(val deepLink: DeepLink? = null) : Screen {
         ObserveNavigationEvents(viewModel.navigationActions)
         if (deepLink != null) {
             when (deepLink.destination) {
-                DeepLinkDestination.CHAT -> Home(MessagesTab(deepLink))
+                DeepLinkDestination.CHAT -> Home(MessagesTab(deepLink), deepLink)
+                DeepLinkDestination.FRIENDS -> Home(FeedTab(deepLink), deepLink)
             }
         } else {
-            Home(FeedTab)
+            Home(FeedTab())
         }
     }
 }

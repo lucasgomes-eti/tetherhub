@@ -1,5 +1,6 @@
 package post.feed
 
+import DeepLink
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dsl.eventbus.EventBus
@@ -19,6 +20,7 @@ import post.detail.PostUpdated
 import profile.search.SearchProfileScreen
 
 class FeedScreenModel(
+    private val deepLink: DeepLink? = null,
     private val postClient: PostClient,
     private val eventBus: EventBus
 ) : ScreenModel {
@@ -40,6 +42,12 @@ class FeedScreenModel(
     init {
         fetchPosts()
         subscribeToPostUpdates()
+        handleDeepLink()
+    }
+
+    private fun handleDeepLink() {
+        deepLink ?: return
+        onNavigateToFriends()
     }
 
     private fun subscribeToPostUpdates() {

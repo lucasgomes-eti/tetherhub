@@ -8,6 +8,8 @@ import arrow.core.raise.ensure
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
 import eti.lucasgomes.tetherhub.user.UserRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import org.bson.types.ObjectId
@@ -60,18 +62,20 @@ class ChatService(
 
     suspend fun sendNotification(userId: String, chatId: String, messageResponse: MessageResponse) {
         val fcmToken = userRepository.findById(ObjectId(userId))?.fcmToken ?: return
-        val data = mapOf(
-            "type" to NotificationType.CHAT.name,
-            "chatId" to chatId,
-            "senderId" to messageResponse.senderId,
-            "senderUsername" to messageResponse.senderUsername,
-            "content" to messageResponse.content,
-            "at" to Json.encodeToString(Instant.serializer(), messageResponse.at),
-        )
-        val message = Message.builder()
-            .setToken(fcmToken)
-            .putAllData(data)
-            .build()
-        firebaseMessaging.send(message)
+        withContext(Dispatchers.Default) {
+            val data = mapOf(
+                "type" to NotificationType.CHAT.name,
+                "chatId" to chatId,
+                "senderId" to messageResponse.senderId,
+                "senderUsername" to messageResponse.senderUsername,
+                "content" to messageResponse.content,
+                "at" to Json.encodeToString(Instant.serializer(), messageResponse.at),
+            )
+            val message = Message.builder()
+                .setToken(fcmToken)
+                .putAllData(data)
+                .build()
+            firebaseMessaging.send(message)
+        }
     }
 }

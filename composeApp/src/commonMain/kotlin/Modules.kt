@@ -50,7 +50,7 @@ val profileModule = module {
 
 val postsModule = module {
     singleOf(::PostClient)
-    factoryOf(::FeedScreenModel)
+    factory { params -> FeedScreenModel(params.getOrNull(), get(), get()) }
     factory { params -> CreateOrEditPostScreenModel(get(), get(), params.getOrNull()) }
 }
 

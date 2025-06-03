@@ -17,19 +17,26 @@ class MainActivity : ComponentActivity() {
         intent.extras?.keySet()?.forEach {
             payload[it] = intent.extras?.getString(it) ?: ""
         }
-        if (payload["type"] == NotificationType.CHAT.name) {
-            setContent {
-                App(
-                    DeepLink(
-                        destination = DeepLinkDestination.CHAT,
-                        resourceId = payload["chatId"]!!
-                    )
-                )
-            }
-        } else {
-            setContent {
-                App()
-            }
+        setContent {
+            App(
+                deepLink = when (payload["type"]) {
+                    NotificationType.CHAT.name -> {
+                        DeepLink(
+                            destination = DeepLinkDestination.CHAT,
+                            resourceId = payload["chatId"]!!
+                        )
+                    }
+
+                    NotificationType.FRIENDS.name -> {
+                        DeepLink(
+                            destination = DeepLinkDestination.FRIENDS,
+                            resourceId = ""
+                        )
+                    }
+
+                    else -> null
+                }
+            )
         }
     }
 }

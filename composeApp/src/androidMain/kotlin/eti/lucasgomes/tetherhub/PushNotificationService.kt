@@ -52,6 +52,11 @@ class PushNotificationService : FirebaseMessagingService(), KoinComponent {
                         setContentText(message.data["content"])
                         setPriority(NotificationCompat.PRIORITY_HIGH)
                     }
+
+                    NotificationType.FRIENDS -> {
+                        setContentText(message.data["content"])
+                        setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    }
                 }
             }
             .setContentIntent(createPendingIntent())
@@ -72,6 +77,7 @@ class PushNotificationService : FirebaseMessagingService(), KoinComponent {
     private fun getChannelId(notificationType: NotificationType): String {
         return when (notificationType) {
             NotificationType.CHAT -> Channels.CHAT
+            NotificationType.FRIENDS -> Channels.FRIENDS
         }
     }
 
@@ -90,6 +96,7 @@ class PushNotificationService : FirebaseMessagingService(), KoinComponent {
 
     private fun createNotificationChannels() {
         createChatNotificationChannel()
+        createFriendsNotificationChannel()
     }
 
     private fun createChatNotificationChannel() {
@@ -107,7 +114,23 @@ class PushNotificationService : FirebaseMessagingService(), KoinComponent {
         }
     }
 
+    private fun createFriendsNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Friends"
+            val descriptionText = "Friends requests notifications"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(Channels.FRIENDS, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system.
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
     object Channels {
         const val CHAT = "chat"
+        const val FRIENDS = "friends"
     }
 }

@@ -7,4 +7,4 @@ data class DeepLink(
 )
 
 @Serializable
-enum class DeepLinkDestination { CHAT }
+enum class DeepLinkDestination { CHAT, FRIENDS }
