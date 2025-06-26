@@ -48,8 +48,8 @@ fun ChatItem(message: LocalMessage) {
                 )
                 .background(
                     when (message.sender) {
-                        MessageSender.ME -> colorScheme.primaryContainer
-                        MessageSender.OTHER -> colorScheme.surfaceVariant
+                        MessageSender.ME -> colorScheme.primary
+                        MessageSender.OTHER -> colorScheme.surface
                         MessageSender.SYSTEM -> colorScheme.tertiaryContainer
                     }
                 )

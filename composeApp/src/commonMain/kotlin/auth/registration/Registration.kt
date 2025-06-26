@@ -104,7 +104,7 @@ fun Registration(
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colorScheme.primaryContainer,
-                    titleContentColor = colorScheme.primary,
+                    titleContentColor = colorScheme.onPrimaryContainer,
                 ),
                 title = { Text("Registration") },
                 navigationIcon = {

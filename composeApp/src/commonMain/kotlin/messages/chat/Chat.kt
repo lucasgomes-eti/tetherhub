@@ -65,14 +65,15 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colorScheme.primaryContainer,
-                    titleContentColor = colorScheme.primary,
+                    titleContentColor = colorScheme.onPrimaryContainer,
                 ),
                 title = { Text(users.toString()) },
                 navigationIcon = {
                     IconButton(onClick = { navigator.pop() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            "Navigate back"
+                            "Navigate back",
+                            tint = colorScheme.onPrimaryContainer
                         )
                     }
                 })
@@ -82,7 +83,7 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
                 modifier = Modifier.fillMaxWidth().background(colorScheme.surfaceContainerLow),
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(16.dp).padding(bottom = 32.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {

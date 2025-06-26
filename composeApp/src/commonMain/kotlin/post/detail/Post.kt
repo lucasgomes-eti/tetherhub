@@ -1,6 +1,7 @@
 package post.detail
 
 import DATE_TIME_PRESENTATION_FORMAT
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,11 +71,13 @@ fun Post(post: PostResponse, onLikeClicked: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Like", style = typography.bodyMedium)
+                Text("Like", style = typography.bodyMedium, color = colorScheme.onSurface)
+                val iconColor by animateColorAsState(if (post.isLiked) colorScheme.primary else colorScheme.onSurface)
                 BadgedBox(badge = { if (post.likes > 0) Badge { Text(post.likes.toString()) } }) {
                     Icon(
                         if (post.isLiked) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
-                        contentDescription = "Like Button"
+                        contentDescription = "Like Button",
+                        tint = iconColor
                     )
                 }
             }

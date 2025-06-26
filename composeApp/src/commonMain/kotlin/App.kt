@@ -1,4 +1,3 @@
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import cafe.adriel.voyager.navigator.Navigator
@@ -10,11 +9,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import splash.SplashScreen
+import theme.TetherHubTheme
 
 @Composable
 @Preview
 fun App(deepLink: DeepLink? = null) {
-    MaterialTheme {
+    TetherHubTheme {
         KoinContext {
             val eventBus = koinInject<EventBus>()
             val permissionsController = koinInject<PermissionsController>()

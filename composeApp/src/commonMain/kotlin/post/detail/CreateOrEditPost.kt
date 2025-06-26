@@ -56,14 +56,15 @@ fun CreateOrEditPost(
         TopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = colorScheme.primaryContainer,
-                titleContentColor = colorScheme.primary,
+                titleContentColor = colorScheme.onPrimaryContainer,
             ),
             title = { Text(uiState.topAppBarTitle) },
             actions = {
                 IconButton(onClick = { navigator.pop() }) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        "Close"
+                        "Close",
+                        tint = colorScheme.onPrimaryContainer
                     )
                 }
             })
