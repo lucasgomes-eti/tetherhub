@@ -28,6 +28,7 @@ import eti.lucasgomes.tetherhub.user.UserService
 import eti.lucasgomes.tetherhub.user.toDomain
 import eti.lucasgomes.tetherhub.user.userConfigRoutes
 import eti.lucasgomes.tetherhub.user.userRoutes
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -38,6 +39,7 @@ import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.netty.EngineMain
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.swagger.swaggerUI
+import io.ktor.server.response.respond
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.pingPeriod
@@ -48,6 +50,7 @@ import org.koin.dsl.module
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
+import response.TetherHubError
 import java.io.FileInputStream
 import java.time.Duration
 
@@ -121,6 +124,12 @@ fun Application.module() {
             validate { jwtCredential ->
                 jwtCredential.payload.getClaim("email").asString()
                     ?.let { userRepository.findUserByEmail(it)?.toDomain() }
+            }
+            challenge { _, _ ->
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    TetherHubError(401, "TH-010", "Authentication expired")
+                )
             }
         }
     }
