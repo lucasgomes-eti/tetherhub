@@ -17,7 +17,8 @@ actual val platformModule = module {
                 protocol = "http://",
                 host = "localhost",
                 port = SERVER_PORT
-            )
+            ),
+            eventBus = get()
         )
     }
     single { createDataStore() }
