@@ -15,5 +15,15 @@ fun TetherHubTheme(content: @Composable () -> Unit) {
         error = MexicanPink,
         tertiaryContainer = SpringGreen
     )
-    MaterialTheme(colorScheme = colorScheme, content = content)
+    val typography = MaterialTheme.typography.copy(
+        displaySmall = DisplaySmall(),
+        bodySmall = BodySmall(),
+        bodyMedium = BodyMedium(),
+        bodyLarge = BodyLarge(),
+        titleMedium = TitleMedium(),
+        labelSmall = LabelSmall(),
+        labelMedium = LabelMedium(),
+        labelLarge = LabelLarge()
+    )
+    MaterialTheme(colorScheme = colorScheme, content = content, typography = typography)
 }

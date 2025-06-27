@@ -41,6 +41,9 @@ import auth.registration.RegistrationScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import home.HomeScreen
+import org.jetbrains.compose.resources.painterResource
+import tetherhub.composeapp.generated.resources.Res
+import tetherhub.composeapp.generated.resources.hub
 
 @Composable
 fun Login(
@@ -65,11 +68,17 @@ fun Login(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Icon(
+                painterResource(Res.drawable.hub),
+                "TetherHub Logo",
+                tint = colorScheme.primaryContainer
+            )
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = "Login",
+                text = "TetherHub",
                 style = typography.displaySmall,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = colorScheme.primaryContainer
             )
             Spacer(modifier = Modifier.height(48.dp))
             TextField(
@@ -141,7 +150,11 @@ fun Login(
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text("Don't have an account?", style = typography.bodyLarge)
                 OutlinedButton(onClick = { navigator.push(RegistrationScreen) }) {
-                    Text("Create an account", style = typography.bodyMedium)
+                    Text(
+                        "Create an account",
+                        style = typography.bodyMedium,
+                        color = colorScheme.primaryContainer
+                    )
                 }
             }
         }
