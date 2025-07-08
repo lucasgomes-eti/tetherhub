@@ -36,6 +36,7 @@ import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.netty.EngineMain
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.swagger.swaggerUI
@@ -146,6 +147,7 @@ fun Application.module() {
         swaggerUI(path = "swagger-ui", swaggerFile = "openapi/documentation.yaml") {
             version = "4.15.5"
         }
+        staticResources("/terms-and-privacy", "static", index = "terms_and_privacy.html")
         userRoutes()
         authenticate {
             profileRoutes()
