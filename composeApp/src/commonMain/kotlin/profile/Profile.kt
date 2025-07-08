@@ -1,5 +1,6 @@
 package profile
 
+import TERMS_AND_PRIVACY_PATH
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,14 +27,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import components.ErrorBanner
+import network.BaseUrl
+import org.koin.compose.koinInject
 import post.detail.MyPost
 
 @Composable
 fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> Unit) {
     val openAlertDialog = remember { mutableStateOf(DeleteDialogData(false, "")) }
+    val uriHandler = LocalUriHandler.current
+    val baseUrl = koinInject<BaseUrl>()
     Scaffold { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             LazyColumn(
@@ -50,6 +56,12 @@ fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> 
                         onClick = { onProfileAction(ProfileAction.ManageFriends) }) {
                         Text("Manage Friends")
                     }
+                    TextButton(onClick = {
+                        uriHandler.openUri("${baseUrl.path}$TERMS_AND_PRIVACY_PATH")
+                    }) {
+                        Text("Terms of Use and Privacy Policy")
+                    }
+                    // TODO: add third-party software
                 }
 
                 item {

@@ -12,12 +12,15 @@ actual val platformModule = module {
         HttpClientManager(
             engine = OkHttp.create(),
             preferences = get(),
-            baseUrl = BaseUrl(
-                protocol = "http://",
-                host = "10.0.2.2",
-                port = SERVER_PORT
-            ),
+            baseUrl = get(),
             eventBus = get()
+        )
+    }
+    single<BaseUrl> {
+        BaseUrl(
+            protocol = "http://",
+            host = "10.0.2.2",
+            port = SERVER_PORT
         )
     }
     single {

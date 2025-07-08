@@ -1,5 +1,6 @@
 package eti.lucasgomes.tetherhub
 
+import TERMS_AND_PRIVACY_PATH
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.google.auth.oauth2.GoogleCredentials
@@ -147,7 +148,7 @@ fun Application.module() {
         swaggerUI(path = "swagger-ui", swaggerFile = "openapi/documentation.yaml") {
             version = "4.15.5"
         }
-        staticResources("/terms-and-privacy", "static", index = "terms_and_privacy.html")
+        staticResources(TERMS_AND_PRIVACY_PATH, "static", index = "terms_and_privacy.html")
         userRoutes()
         authenticate {
             profileRoutes()

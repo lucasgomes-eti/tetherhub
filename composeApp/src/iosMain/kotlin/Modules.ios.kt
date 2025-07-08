@@ -13,12 +13,15 @@ actual val platformModule = module {
         HttpClientManager(
             engine = Darwin.create(),
             preferences = get(),
-            baseUrl = BaseUrl(
-                protocol = "http://",
-                host = "localhost",
-                port = SERVER_PORT
-            ),
+            baseUrl = get(),
             eventBus = get()
+        )
+    }
+    single<BaseUrl> {
+        BaseUrl(
+            protocol = "http://",
+            host = "localhost",
+            port = SERVER_PORT
         )
     }
     single { createDataStore() }

@@ -1,5 +1,6 @@
 package auth.registration
 
+import TERMS_AND_PRIVACY_PATH
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -55,6 +58,8 @@ import components.ErrorBanner
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import network.BaseUrl
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +75,9 @@ fun Registration(
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val uriHandler = LocalUriHandler.current
+    val baseUrl = koinInject<BaseUrl>()
 
     when (registrationUiState.event) {
         RegistrationEvent.NONE -> Unit
@@ -237,6 +245,14 @@ fun Registration(
                 AnimatedVisibility(visible = registrationUiState.shouldShowClientError) {
                     ErrorBanner(message = registrationUiState.clientErrorMessage) {
                         onRegistrationAction(RegistrationAction.DismissError)
+                    }
+                }
+                Column {
+                    Text("By creating an account you agree with our")
+                    TextButton(onClick = {
+                        uriHandler.openUri("${baseUrl.path}$TERMS_AND_PRIVACY_PATH")
+                    }) {
+                        Text("Terms of Use and Privacy Policy")
                     }
                 }
                 Button(
