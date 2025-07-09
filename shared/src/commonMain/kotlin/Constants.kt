@@ -25,3 +25,4 @@ val DATE_TIME_PRESENTATION_FORMAT = LocalDateTime.Format {
     minute()
 }
 const val TERMS_AND_PRIVACY_PATH = "/terms-and-privacy"
+const val THIRD_PARTY_SOFTWARE_PATH = "/third-party-software"

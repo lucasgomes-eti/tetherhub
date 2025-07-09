@@ -1,6 +1,7 @@
 package profile
 
 import TERMS_AND_PRIVACY_PATH
+import THIRD_PARTY_SOFTWARE_PATH
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,7 +62,11 @@ fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> 
                     }) {
                         Text("Terms of Use and Privacy Policy")
                     }
-                    // TODO: add third-party software
+                    TextButton(onClick = {
+                        uriHandler.openUri("${baseUrl.path}$THIRD_PARTY_SOFTWARE_PATH")
+                    }) {
+                        Text("Third-Party Software")
+                    }
                 }
 
                 item {

@@ -1,6 +1,7 @@
 package auth.registration
 
 import TERMS_AND_PRIVACY_PATH
+import THIRD_PARTY_SOFTWARE_PATH
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -253,6 +255,12 @@ fun Registration(
                         uriHandler.openUri("${baseUrl.path}$TERMS_AND_PRIVACY_PATH")
                     }) {
                         Text("Terms of Use and Privacy Policy")
+                    }
+                    HorizontalDivider()
+                    TextButton(onClick = {
+                        uriHandler.openUri("${baseUrl.path}$THIRD_PARTY_SOFTWARE_PATH")
+                    }) {
+                        Text("Third-Party Software")
                     }
                 }
                 Button(

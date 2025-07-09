@@ -1,6 +1,7 @@
 package eti.lucasgomes.tetherhub
 
 import TERMS_AND_PRIVACY_PATH
+import THIRD_PARTY_SOFTWARE_PATH
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.google.auth.oauth2.GoogleCredentials
@@ -149,6 +150,7 @@ fun Application.module() {
             version = "4.15.5"
         }
         staticResources(TERMS_AND_PRIVACY_PATH, "static", index = "terms_and_privacy.html")
+        staticResources(THIRD_PARTY_SOFTWARE_PATH, "static", index = "third_party_software.html")
         userRoutes()
         authenticate {
             profileRoutes()
