@@ -18,8 +18,8 @@ actual val platformModule = module {
     }
     single<BaseUrl> {
         BaseUrl(
-            protocol = "http://",
-            host = "10.0.2.2",
+            protocol = "https://",
+            host = "tetherhub-production.up.railway.app",
             port = SERVER_PORT
         )
     }

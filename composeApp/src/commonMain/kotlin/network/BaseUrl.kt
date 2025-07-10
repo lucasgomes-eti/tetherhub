@@ -6,5 +6,5 @@ data class BaseUrl(
     val port: Int
 ) {
     val path: String
-        get() = "$protocol$host:$port"
+        get() = "$protocol$host"
 }

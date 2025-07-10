@@ -169,7 +169,11 @@ class HttpClientManager(
             }
 
             in 400..599 -> {
-                val error = response.body<TetherHubError>()
+                val error = try {
+                    response.body<TetherHubError>()
+                } catch (_: Exception) {
+                    unexpectedErrorWithHttpStatusCode(response.status.value)
+                }
                 onFailure?.invoke(error)
                 Resource.Error(error)
             }

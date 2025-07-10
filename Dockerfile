@@ -6,7 +6,6 @@ COPY shared shared
 COPY server server
 ARG FIREBASE_ADMIN_SERVICE_ACCOUNT_KEY
 RUN echo "$FIREBASE_ADMIN_SERVICE_ACCOUNT_KEY" > /app/firebase-admin-service-account-key.json
-COPY firebase-admin-service-account-key.json ./
 RUN gradle buildFatJar --no-daemon
 
 FROM eclipse-temurin:21-jre-alpine

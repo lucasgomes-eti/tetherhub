@@ -18,7 +18,7 @@ fun unexpectedErrorWithHttpStatusCode(statusCode: Int) =
     TetherHubError(
         statusCode,
         "TH-0",
-        "Unexpected http error. Code: ${statusCode}"
+        "Unexpected http error. Code: $statusCode"
     )
 
 inline fun <T, R> Resource<T>.map(map: (T) -> R): Resource<R> {
