@@ -7,7 +7,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
@@ -48,10 +47,7 @@ class ChatClient(private val httpClientManager: HttpClientManager) {
     fun connectToChat(chatId: String): Flow<MessageResponse> = flow {
         try {
             httpClientManager.getClient().webSocket(
-                method = HttpMethod.Get,
-                host = httpClientManager.baseUrl.host,
-                port = httpClientManager.baseUrl.port,
-                path = "/chats/$chatId"
+                urlString = "wss://${httpClientManager.baseUrl.host}/chats/$chatId",
             ) {
                 launch {
                     outgoingMessageRequest.receiveAsFlow().collect {
