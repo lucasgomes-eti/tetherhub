@@ -105,27 +105,26 @@ fun Route.chatRoutes() {
                         val serializedMessage = frame.data.toString(Charsets.UTF_8)
                         val newMessageRequest =
                             Json.decodeFromString<MessageRequest>(serializedMessage)
+                        val messageResponse = MessageResponse(
+                            senderId = call.userId.toString(),
+                            senderUsername = call.username,
+                            content = newMessageRequest.content,
+                            at = Clock.System.now(),
+                            type = MessageType.USER
+                        )
                         for (session in serverRooms[roomIndex].connectedSessions) {
-                            val messageResponse = MessageResponse(
-                                senderId = call.userId.toString(),
-                                senderUsername = call.username,
-                                content = newMessageRequest.content,
-                                at = Clock.System.now(),
-                                type = MessageType.USER
-                            )
                             session.sendSerialized(messageResponse)
-                            chat.users.forEach {
-                                if (!serverRooms[roomIndex].connectedSessions.map { session.call.userId }
-                                        .contains(ObjectId(it.id))) {
-                                    // user is offline
-                                    chatService.sendNotification(
-                                        it.id,
-                                        chat.chatId,
-                                        messageResponse
-                                    )
-                                }
-                            }
                         }
+                        chat.users.map { it.id }
+                            .subtract(serverRooms[roomIndex].connectedSessions.map {
+                                it.call.userId.toHexString()
+                            }.toSet()).forEach { offlineUser ->
+                                chatService.sendNotification(
+                                    offlineUser,
+                                    chat.chatId,
+                                    messageResponse
+                                )
+                            }
                     }
                 } // once socket is closed, the loop will complete
                 if (serverRooms[roomIndex].connectedSessions.size > 1) {
