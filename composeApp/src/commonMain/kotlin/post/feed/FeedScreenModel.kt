@@ -1,6 +1,7 @@
 package post.feed
 
 import DeepLink
+import DeepLinkDestination
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dsl.eventbus.EventBus
@@ -47,6 +48,7 @@ class FeedScreenModel(
 
     private fun handleDeepLink() {
         deepLink ?: return
+        if (deepLink.destination != DeepLinkDestination.FRIENDS) return
         onNavigateToFriends()
     }
 

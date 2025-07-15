@@ -1,6 +1,7 @@
 package messages.rooms
 
 import DeepLink
+import DeepLinkDestination
 import cafe.adriel.voyager.core.model.ScreenModel
 import dsl.eventbus.EventBus
 import dsl.navigation.NavigationAction
@@ -45,6 +46,7 @@ class RoomsScreenModel(
 
     private fun handleDeepLink() {
         deepLink ?: return
+        if (deepLink.destination != DeepLinkDestination.CHAT) return
         onOpenNewChat(deepLink.resourceId)
     }
 
