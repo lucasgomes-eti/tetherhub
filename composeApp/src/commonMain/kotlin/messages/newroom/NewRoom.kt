@@ -61,7 +61,7 @@ fun NewRoom(uiState: NewRoomUiState, onAction: (NewRoomAction) -> Unit) {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colorScheme.primaryContainer,
-                    titleContentColor = colorScheme.primary,
+                    titleContentColor = colorScheme.onPrimaryContainer,
                 ),
                 title = { Text("Create new chat") },
                 actions = {
