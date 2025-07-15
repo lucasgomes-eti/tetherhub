@@ -44,7 +44,7 @@ class PushNotificationService : FirebaseMessagingService(), KoinComponent {
         val notificationBuilder = NotificationCompat.Builder(
             this@PushNotificationService,
             getChannelId(notificationType)
-        ).setSmallIcon(R.mipmap.ic_launcher)
+        ).setSmallIcon(R.mipmap.ic_launcher_monochrome)
             .apply {
                 when (notificationType) {
                     NotificationType.CHAT -> {
