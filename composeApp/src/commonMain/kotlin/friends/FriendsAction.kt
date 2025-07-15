@@ -7,4 +7,5 @@ sealed class FriendsAction {
     data object Search : FriendsAction()
     data class AcceptRequest(val id: String) : FriendsAction()
     data object DismissError : FriendsAction()
+    data object Refresh : FriendsAction()
 }

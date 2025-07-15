@@ -29,11 +29,6 @@ class FriendsScreenModel(private val friendsClient: FriendsClient) : ScreenModel
     private val _navigationActions = Channel<NavigationAction>()
     val navigationActions = _navigationActions.receiveAsFlow()
 
-    init {
-        fetchRequests()
-        fetchFriends()
-    }
-
     fun onAction(action: FriendsAction) {
         when (action) {
             FriendsAction.CancelSearch -> onCancelSearch()
@@ -42,7 +37,13 @@ class FriendsScreenModel(private val friendsClient: FriendsClient) : ScreenModel
             FriendsAction.Search -> onSearch()
             is FriendsAction.AcceptRequest -> onAcceptRequest(action.id)
             FriendsAction.DismissError -> onDismissError()
+            FriendsAction.Refresh -> onRefresh()
         }
+    }
+
+    private fun onRefresh() {
+        fetchRequests()
+        fetchFriends()
     }
 
     private fun onDismissError() = withScreenModelScope {
