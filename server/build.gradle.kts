@@ -34,4 +34,6 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.ktor.server.websockets)
     implementation(libs.firebase.admin)
+    implementation(libs.stately.common)
+    implementation(libs.stately.concurrent.collections)
 }

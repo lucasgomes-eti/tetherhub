@@ -10,6 +10,7 @@ import dsl.eventbus.EventBus
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -33,6 +34,8 @@ import request.RefreshTokenRequest
 import response.AuthResponse
 import response.TetherHubError
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 class HttpClientManager(
     private val engine: HttpClientEngine,
@@ -57,7 +60,7 @@ class HttpClientManager(
             val contentSerializer = Json {
                 ignoreUnknownKeys = true
             }
-            install(Logging) {
+            install(Logging) { // TODO: Setup multiplatform logger for debug builds (Kermit?)
                 level = LogLevel.ALL
             }
             install(ContentNegotiation) {
@@ -125,6 +128,12 @@ class HttpClientManager(
 
             install(WebSockets) {
                 contentConverter = KotlinxWebsocketSerializationConverter(contentSerializer)
+                pingInterval = 20.seconds.inWholeMilliseconds
+                maxFrameSize = Long.MAX_VALUE
+            }
+
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10.seconds.inWholeMilliseconds
             }
         }
     }

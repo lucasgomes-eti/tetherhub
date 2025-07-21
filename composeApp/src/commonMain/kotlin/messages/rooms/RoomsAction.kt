@@ -5,4 +5,5 @@ sealed class RoomsAction {
     data object CreateNewRoom : RoomsAction()
     data object Refresh : RoomsAction()
     data object DismissError : RoomsAction()
+    data object Created : RoomsAction()
 }

@@ -1,5 +1,6 @@
 package eti.lucasgomes.tetherhub.chat
 
+import co.touchlab.stately.collections.ConcurrentMutableList
 import eti.lucasgomes.tetherhub.dsl.userId
 import eti.lucasgomes.tetherhub.dsl.username
 import io.ktor.http.HttpStatusCode
@@ -16,6 +17,7 @@ import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
@@ -26,7 +28,6 @@ import request.MessageRequest
 import response.ChatResponse
 import response.MessageResponse
 import response.MessageType
-import java.util.Collections
 
 data class ServerRooms(
     val chat: ChatResponse,
@@ -36,7 +37,7 @@ data class ServerRooms(
 fun Route.chatRoutes() {
     val chatService by inject<ChatService>()
     route("chats") {
-        val serverRooms = Collections.synchronizedList<ServerRooms>(ArrayList())
+        val serverRooms = ConcurrentMutableList<ServerRooms>()
 
         post {
             val createChatRequest = try {
@@ -99,34 +100,39 @@ fun Route.chatRoutes() {
                     )
                 }
 
-                for (frame in incoming) {
-                    frame as? Frame.Text ?: continue
-                    launch {
-                        val serializedMessage = frame.data.toString(Charsets.UTF_8)
-                        val newMessageRequest =
-                            Json.decodeFromString<MessageRequest>(serializedMessage)
-                        val messageResponse = MessageResponse(
-                            senderId = call.userId.toString(),
-                            senderUsername = call.username,
-                            content = newMessageRequest.content,
-                            at = Clock.System.now(),
-                            type = MessageType.USER
-                        )
-                        for (session in serverRooms[roomIndex].connectedSessions) {
-                            session.sendSerialized(messageResponse)
-                        }
-                        chat.users.map { it.id }
-                            .subtract(serverRooms[roomIndex].connectedSessions.map {
-                                it.call.userId.toHexString()
-                            }.toSet()).forEach { offlineUser ->
-                                chatService.sendNotification(
-                                    offlineUser,
-                                    chat.chatId,
-                                    messageResponse
+                runCatching {
+                    incoming.consumeEach { frame ->
+                        if (frame is Frame.Text) {
+                            launch {
+                                val serializedMessage = frame.data.toString(Charsets.UTF_8)
+                                val newMessageRequest =
+                                    Json.decodeFromString<MessageRequest>(serializedMessage)
+                                val messageResponse = MessageResponse(
+                                    senderId = call.userId.toString(),
+                                    senderUsername = call.username,
+                                    content = newMessageRequest.content,
+                                    at = Clock.System.now(),
+                                    type = MessageType.USER
                                 )
+                                for (session in serverRooms[roomIndex].connectedSessions) {
+                                    session.sendSerialized(messageResponse)
+                                }
+                                chat.users.map { it.id }
+                                    .subtract(serverRooms[roomIndex].connectedSessions.map {
+                                        it.call.userId.toHexString()
+                                    }.toSet()).forEach { offlineUser ->
+                                        chatService.sendNotification(
+                                            offlineUser,
+                                            chat.chatId,
+                                            messageResponse
+                                        )
+                                    }
                             }
+                        }
                     }
-                } // once socket is closed, the loop will complete
+                }.onFailure { exception ->
+                    println("WebSocket exception: ${exception.localizedMessage}")
+                }// once socket is closed, the loop will complete
                 if (serverRooms[roomIndex].connectedSessions.size > 1) {
                     serverRooms[roomIndex].connectedSessions.remove(this)
                 } else {

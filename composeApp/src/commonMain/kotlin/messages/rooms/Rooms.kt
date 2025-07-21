@@ -28,7 +28,7 @@ fun Rooms(roomsUiState: RoomsUiState, onAction: (RoomsAction) -> Unit) {
     val navigationAppBar = LocalNavigationAppBar.current
 
     LaunchedEffect(Unit) {
-        onAction(RoomsAction.Refresh)
+        onAction(RoomsAction.Created)
     }
 
     Scaffold(

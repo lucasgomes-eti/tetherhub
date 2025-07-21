@@ -4,13 +4,19 @@ import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.coroutines.Dispatchers
 import network.BaseUrl
 import network.HttpClientManager
+import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
+import java.util.concurrent.TimeUnit
 
 actual val platformModule = module {
     single {
         HttpClientManager(
-            engine = OkHttp.create(),
+            engine = OkHttp.create {
+                preconfigured = OkHttpClient.Builder()
+                    .pingInterval(20, TimeUnit.SECONDS)
+                    .build()
+            },
             preferences = get(),
             baseUrl = get(),
             eventBus = get()

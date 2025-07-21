@@ -8,6 +8,9 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.websocket.CloseReason
+import io.ktor.websocket.close
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
@@ -58,8 +61,10 @@ class ChatClient(private val httpClientManager: HttpClientManager) {
                     val message = receiveDeserialized<MessageResponse>()
                     emit(message)
                 }
+                close(CloseReason(CloseReason.Codes.NORMAL, "Chat closed"))
             }
         } catch (e: Exception) {
+            if (e is CancellationException) return@flow
             emit(
                 MessageResponse(
                     senderId = "tetherhub",

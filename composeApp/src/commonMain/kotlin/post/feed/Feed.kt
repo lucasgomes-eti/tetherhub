@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,10 @@ import post.detail.Post
 fun Feed(feedUiState: FeedUiState, onFeedAction: (FeedAction) -> Unit) {
 
     val navigationAppBar = LocalNavigationAppBar.current
+
+    LaunchedEffect(Unit) {
+        onFeedAction(FeedAction.Created)
+    }
 
     Scaffold(
         modifier = Modifier.padding(bottom = navigationAppBar.ContainerHeight),

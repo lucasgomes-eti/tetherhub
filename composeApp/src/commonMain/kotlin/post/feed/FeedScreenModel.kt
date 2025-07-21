@@ -21,7 +21,7 @@ import post.detail.PostUpdated
 import profile.search.SearchProfileScreen
 
 class FeedScreenModel(
-    private val deepLink: DeepLink? = null,
+    private var deepLink: DeepLink? = null,
     private val postClient: PostClient,
     private val eventBus: EventBus
 ) : ScreenModel {
@@ -43,13 +43,14 @@ class FeedScreenModel(
     init {
         fetchPosts()
         subscribeToPostUpdates()
-        handleDeepLink()
     }
 
     private fun handleDeepLink() {
-        deepLink ?: return
-        if (deepLink.destination != DeepLinkDestination.FRIENDS) return
-        onNavigateToFriends()
+        deepLink?.let { deepLink ->
+            if (deepLink.destination != DeepLinkDestination.FRIENDS) return
+            onNavigateToFriends()
+            this.deepLink = null
+        } ?: return
     }
 
     private fun subscribeToPostUpdates() {
@@ -96,7 +97,12 @@ class FeedScreenModel(
             is FeedAction.SearchQueryChanged -> onSearchQueryChanged(feedAction.query)
             FeedAction.CreatePost -> onCreatePost()
             FeedAction.NavigateToFriends -> onNavigateToFriends()
+            FeedAction.Created -> onCreated()
         }
+    }
+
+    private fun onCreated() {
+        handleDeepLink()
     }
 
     private fun onNavigateToFriends() = withScreenModelScope {
