@@ -6,4 +6,5 @@ sealed class ProfileAction {
     data class DeleteMyPost(val postId: String) : ProfileAction()
     data class EditMyPost(val postId: String) : ProfileAction()
     data object ManageFriends : ProfileAction()
+    data object AccountOptions : ProfileAction()
 }

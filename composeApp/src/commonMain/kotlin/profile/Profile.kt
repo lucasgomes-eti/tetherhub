@@ -1,7 +1,5 @@
 package profile
 
-import TERMS_AND_PRIVACY_PATH
-import THIRD_PARTY_SOFTWARE_PATH
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -28,19 +27,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import components.ErrorBanner
-import network.BaseUrl
-import org.koin.compose.koinInject
+import dsl.update
 import post.detail.MyPost
 
 @Composable
 fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> Unit) {
     val openAlertDialog = remember { mutableStateOf(DeleteDialogData(false, "")) }
-    val uriHandler = LocalUriHandler.current
-    val baseUrl = koinInject<BaseUrl>()
     Scaffold { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             LazyColumn(
@@ -58,14 +53,9 @@ fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> 
                         Text("Manage Friends")
                     }
                     TextButton(onClick = {
-                        uriHandler.openUri("${baseUrl.path}$TERMS_AND_PRIVACY_PATH")
+                        onProfileAction(ProfileAction.AccountOptions)
                     }) {
-                        Text("Terms of Use and Privacy Policy")
-                    }
-                    TextButton(onClick = {
-                        uriHandler.openUri("${baseUrl.path}$THIRD_PARTY_SOFTWARE_PATH")
-                    }) {
-                        Text("Third-Party Software")
+                        Text("Account Options")
                     }
                 }
 
@@ -78,7 +68,14 @@ fun Profile(profileUiState: ProfileUiState, onProfileAction: (ProfileAction) -> 
                         post = it,
                         onLikeClicked = { onProfileAction(ProfileAction.LikeMyPost(it.id)) },
                         onEditClicked = { onProfileAction(ProfileAction.EditMyPost(it.id)) },
-                        onDeleteClicked = { openAlertDialog.value = DeleteDialogData(true, it.id) },
+                        onDeleteClicked = {
+                            openAlertDialog.update {
+                                copy(
+                                    isShown = true,
+                                    postId = it.id
+                                )
+                            }
+                        },
                     )
                 }
             }
@@ -160,22 +157,23 @@ private fun DeletePostDialog(
                     Text(text = "You can't undo the deletion!")
                 },
                 onDismissRequest = {
-                    openAlertDialog.value = openAlertDialog.value.copy(isShown = false)
+                    openAlertDialog.update { copy(isShown = false) }
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
                             onDeleteConfirmed()
-                            openAlertDialog.value = openAlertDialog.value.copy(isShown = false)
-                        }
+                            openAlertDialog.update { copy(isShown = false) }
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = colorScheme.error)
                     ) {
-                        Text("Delete", color = colorScheme.error)
+                        Text("Delete")
                     }
                 },
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            openAlertDialog.value = openAlertDialog.value.copy(isShown = false)
+                            openAlertDialog.update { copy(isShown = false) }
                         }
                     ) {
                         Text("Cancel")

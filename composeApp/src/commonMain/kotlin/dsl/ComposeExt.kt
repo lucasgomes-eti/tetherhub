@@ -3,6 +3,7 @@ package dsl
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.unit.LayoutDirection
 
 operator fun PaddingValues.plus(other: PaddingValues): PaddingValues = PaddingValues(
@@ -13,3 +14,7 @@ operator fun PaddingValues.plus(other: PaddingValues): PaddingValues = PaddingVa
             other.calculateEndPadding(LayoutDirection.Ltr),
     bottom = this.calculateBottomPadding() + other.calculateBottomPadding(),
 )
+
+fun <T> MutableState<T>.update(function: T.() -> T) {
+    value = function(this.value)
+}

@@ -35,7 +35,6 @@ import response.AuthResponse
 import response.TetherHubError
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
 
 class HttpClientManager(
     private val engine: HttpClientEngine,
@@ -138,7 +137,7 @@ class HttpClientManager(
         }
     }
 
-    private suspend fun logOut() {
+    suspend fun logOut() {
         preferences.edit { dataStore ->
             dataStore.remove(stringPreferencesKey(DataStoreKeys.USER_ID))
             dataStore.remove(stringPreferencesKey(DataStoreKeys.TOKEN))

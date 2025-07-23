@@ -1,8 +1,11 @@
 package profile
 
-import dsl.eventbus.EventBus
+import accountOptions.AccountOptionsScreen
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import dsl.eventbus.EventBus
+import dsl.navigation.NavigationAction
+import dsl.withScreenModelScope
 import friends.FriendsScreen
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import dsl.navigation.NavigationAction
 import network.Resource
 import network.onError
 import network.onSuccess
@@ -60,7 +62,12 @@ class ProfileScreenModel(
             is ProfileAction.DeleteMyPost -> onDeleteMyPost(action.postId)
             is ProfileAction.EditMyPost -> onEditMyPost(action.postId)
             is ProfileAction.ManageFriends -> onManageFriends()
+            ProfileAction.AccountOptions -> onAccountOptions()
         }
+    }
+
+    private fun onAccountOptions() = withScreenModelScope {
+        _navigationActions.send(NavigationAction.Push(AccountOptionsScreen))
     }
 
     private fun onManageFriends() {
