@@ -13,7 +13,9 @@ fun TetherHubTheme(content: @Composable () -> Unit) {
         onPrimaryContainer = Black,
         surface = AliceBlue,
         error = MexicanPink,
-        tertiaryContainer = SpringGreen
+        tertiaryContainer = SpringGreen,
+        background = White,
+        onBackground = Black
     )
     val typography = MaterialTheme.typography.copy(
         displaySmall = DisplaySmall(),
