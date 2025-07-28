@@ -77,6 +77,15 @@ class UserRepository(private val mongoDatabase: MongoDatabase) {
         }
     }
 
+    suspend fun deleteById(userId: ObjectId): Either<Exception, Long> {
+        return try {
+            mongoDatabase.getCollection<UserEntity>(USER_COLLECTION).withDocumentClass<UserEntity>()
+                .deleteOne(Filters.eq("id", userId)).deletedCount.right()
+        } catch (e: MongoException) {
+            e.left()
+        }
+    }
+
     suspend fun findUsersByUsername(
         username: String,
         page: Int,

@@ -4,6 +4,7 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import com.mongodb.MongoException
+import com.mongodb.client.model.DeleteOptions
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
 import com.mongodb.client.model.Updates
@@ -91,6 +92,15 @@ class PostRepository(private val mongoDatabase: MongoDatabase) {
                 .deleteOne(Filters.eq("id", postId)).deletedCount.let {
                     (it == 1L).right()
                 }
+        } catch (e: Exception) {
+            e.left()
+        }
+    }
+
+    suspend fun deleteAllByAuthor(author: String): Either<Exception, Long> {
+        return try {
+            mongoDatabase.getCollection<PostEntity>(POST_COLLECTION)
+                .deleteMany(Filters.eq("author", author)).deletedCount.right()
         } catch (e: Exception) {
             e.left()
         }

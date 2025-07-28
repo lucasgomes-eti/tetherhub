@@ -2,27 +2,36 @@ package accountOptions
 
 import TERMS_AND_PRIVACY_PATH
 import THIRD_PARTY_SOFTWARE_PATH
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -31,8 +40,15 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import components.ErrorBanner
 import dsl.update
 import home.LocalNavigationAppBar
 import network.BaseUrl
@@ -48,7 +64,9 @@ fun AccountOptions(uiState: AccountOptionsUiState, onAction: (AccountOptionsActi
 
     DisposableEffect(Unit) {
         navigationAppBar.hide()
-        onDispose { navigationAppBar.show() }
+        onDispose {
+            navigationAppBar.show()
+        }
     }
 
     Scaffold(
@@ -83,6 +101,28 @@ fun AccountOptions(uiState: AccountOptionsUiState, onAction: (AccountOptionsActi
                 }, Modifier.fillMaxWidth()) {
                     Text("Logout")
                 }
+                AnimatedVisibility(visible = uiState.accountDeletionError.isNotEmpty()) {
+                    ErrorBanner(uiState.accountDeletionError) { onAction(AccountOptionsAction.DismissError) }
+                }
+                Button(
+                    onClick = {
+                        onAction(AccountOptionsAction.OpenDeleteAccountDialog)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorScheme.error,
+                        contentColor = colorScheme.onError
+                    ),
+                    enabled = uiState.isDeletingAccount.not()
+                ) {
+                    if (uiState.isDeletingAccount) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(with(LocalDensity.current) { typography.bodyMedium.fontSize.toDp() })
+                        )
+                    } else {
+                        Text("Delete My Account")
+                    }
+                }
                 HorizontalDivider()
                 TextButton(onClick = {
                     uriHandler.openUri("${baseUrl.path}$TERMS_AND_PRIVACY_PATH")
@@ -99,6 +139,25 @@ fun AccountOptions(uiState: AccountOptionsUiState, onAction: (AccountOptionsActi
         }
         LogoutDialog(logoutDialogDataState) {
             onAction(AccountOptionsAction.Logout)
+        }
+        if (uiState.isDeleteAccountDialogShown) {
+            DeleteAccountDialog(
+                confirmationText = uiState.accountDeletionConfirmationText,
+                onConfirmationTextChanged = {
+                    onAction(
+                        AccountOptionsAction.AccountDeletionConfirmationTextChanged(
+                            it
+                        )
+                    )
+                },
+                confirmationError = uiState.accountDeletionConfirmationError,
+                onCancel = {
+                    onAction(AccountOptionsAction.CloseDeleteAccountDialog)
+                },
+                onDeleteAccountConfirmed = {
+                    onAction(AccountOptionsAction.DeleteAccount)
+                }
+            )
         }
     }
 }
@@ -134,4 +193,54 @@ private fun LogoutDialog(
             }
         )
     }
+}
+
+@Composable
+private fun DeleteAccountDialog(
+    confirmationText: TextFieldValue,
+    onConfirmationTextChanged: (TextFieldValue) -> Unit,
+    confirmationError: Boolean,
+    onCancel: () -> Unit,
+    onDeleteAccountConfirmed: () -> Unit
+) {
+
+    AlertDialog(
+        title = { Text("Delete Account?") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text("This is a destructive action, deleting your account will wipe all your posts and friends information. If you wish to continue type 'delete' in the box bellow.")
+                Row(modifier = Modifier.height(IntrinsicSize.Max)) {
+                    TextField(
+                        value = confirmationText,
+                        onValueChange = {
+                            val newText = it.text
+                            val newSelection = TextRange(newText.length)
+                            onConfirmationTextChanged(TextFieldValue(newText, newSelection))
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            capitalization = KeyboardCapitalization.None,
+                            autoCorrectEnabled = false,
+                            imeAction = ImeAction.Done
+                        ),
+                        isError = confirmationError
+                    )
+                }
+            }
+        },
+        onDismissRequest = onCancel,
+        dismissButton = {
+            TextButton(onClick = onCancel) {
+                Text("Cancel")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onDeleteAccountConfirmed()
+            }, colors = ButtonDefaults.textButtonColors(contentColor = colorScheme.error)) {
+                Text("Delete My Account")
+            }
+        }
+    )
 }

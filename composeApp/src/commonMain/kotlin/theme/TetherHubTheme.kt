@@ -13,6 +13,7 @@ fun TetherHubTheme(content: @Composable () -> Unit) {
         onPrimaryContainer = Black,
         surface = AliceBlue,
         error = MexicanPink,
+        onError = White,
         tertiaryContainer = SpringGreen,
         background = White,
         onBackground = Black

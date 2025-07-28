@@ -1,15 +1,21 @@
 package eti.lucasgomes.tetherhub.user
 
 import arrow.core.Either
+import arrow.core.flatMap
 import arrow.core.raise.either
 import arrow.core.raise.ensure
+import eti.lucasgomes.tetherhub.post.PostRepository
 import org.bson.types.ObjectId
 import request.CreateUserRequest
 import request.FcmTokenRequest
 import response.TetherHubError
 import response.UserResponse
 
-class UserService(private val userRepository: UserRepository, private val userMapper: UserMapper) {
+class UserService(
+    private val userRepository: UserRepository,
+    private val userMapper: UserMapper,
+    private val postRepository: PostRepository
+) {
 
     suspend fun saveUser(createUserRequest: CreateUserRequest): Either<TetherHubError, UserResponse> =
         either {
@@ -50,6 +56,14 @@ class UserService(private val userRepository: UserRepository, private val userMa
         userRepository.findById(clientUserId)?.let { userEntity ->
             userRepository.updateUser(userEntity.copy(fcmToken = fcmToken.value))
                 .mapLeft { UserErrors.ErrorWhileRegisteringFcmToken(it) }.bind()
+        } ?: raise(UserErrors.UserNotFound)
+    }
+
+    suspend fun deleteAccount(clientUserId: ObjectId): Either<TetherHubError, Unit> = either {
+        userRepository.findById(clientUserId)?.let { userEntity ->
+            postRepository.deleteAllByAuthor(userEntity.username).mapLeft { UserErrors.ErrorWhileDeletingPosts(it) }.flatMap {
+                userRepository.deleteById(clientUserId).mapLeft { UserErrors.ErrorWhileDeletingUser(it) }
+            }.bind()
         } ?: raise(UserErrors.UserNotFound)
     }
 }

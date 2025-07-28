@@ -28,7 +28,7 @@ import eti.lucasgomes.tetherhub.user.UserMapper
 import eti.lucasgomes.tetherhub.user.UserRepository
 import eti.lucasgomes.tetherhub.user.UserService
 import eti.lucasgomes.tetherhub.user.toDomain
-import eti.lucasgomes.tetherhub.user.userConfigRoutes
+import eti.lucasgomes.tetherhub.user.userAuthenticatedRoutes
 import eti.lucasgomes.tetherhub.user.userRoutes
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
@@ -79,22 +79,22 @@ fun Application.module() {
                 }
             },
             module {// Repository module
-                single { UserRepository(get()) }
-                single { PostRepository(get()) }
+                singleOf(::UserRepository)
+                singleOf(::PostRepository)
                 singleOf(::ChatRepository)
                 singleOf(::FriendsRepository)
             },
             module { // Mapper module
-                single { UserMapper(get()) }
+                singleOf(::UserMapper)
                 singleOf(::ProfileMapper)
-                single { PostMapper() }
+                singleOf(::PostMapper)
                 singleOf(::ChatMapper)
                 singleOf(::FriendsMapper)
             },
             module { // Service module
-                single { UserService(get(), get()) }
-                single { ProfileService(get(), get()) }
-                single { PostService(get(), get(), get()) }
+                singleOf(::UserService)
+                singleOf(::ProfileService)
+                singleOf(::PostService)
                 singleOf(::ChatService)
                 singleOf(::FriendsService)
                 single<FirebaseApp> {
@@ -157,7 +157,7 @@ fun Application.module() {
             postRoutes()
             chatRoutes()
             friendsRoutes()
-            userConfigRoutes()
+            userAuthenticatedRoutes()
         }
     }
 }

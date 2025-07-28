@@ -12,8 +12,8 @@ class LoginScreenModel(private val loginClient: LoginClient) : ScreenModel {
 
     private val _uiState = MutableStateFlow(
         LoginUiState(
-            email = "lucas@eti.com",
-            password = "@Pass123",
+            email = "",
+            password = "",
             errorMsg = "",
             isLoading = false,
             event = LoginEvent.NONE,

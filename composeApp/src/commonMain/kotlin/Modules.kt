@@ -1,3 +1,4 @@
+import accountOptions.AccountOptionsClient
 import accountOptions.AccountOptionsScreenModel
 import auth.login.LoginClient
 import auth.login.LoginScreenModel
@@ -71,6 +72,7 @@ val friendsModule = module {
 
 val accountOptionsModule = module {
     factoryOf(::AccountOptionsScreenModel)
+    singleOf(::AccountOptionsClient)
 }
 
 fun initKoin(config: KoinAppDeclaration? = null) {

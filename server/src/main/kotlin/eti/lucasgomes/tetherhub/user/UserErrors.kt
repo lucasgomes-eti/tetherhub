@@ -61,4 +61,16 @@ object UserErrors {
         "TH-009",
         "Error while registering FCM token. Cause: ${cause.message}",
     )
+
+    fun ErrorWhileDeletingPosts(cause: Exception) = TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-010",
+        "Error while deleting posts. Cause: ${cause.message}"
+    )
+
+    fun ErrorWhileDeletingUser(cause: Exception) = TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-011",
+        "Error while deleting user. Cause: ${cause.message}"
+    )
 }

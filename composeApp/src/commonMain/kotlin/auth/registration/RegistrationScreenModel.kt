@@ -18,13 +18,13 @@ class RegistrationScreenModel(private val registrationClient: RegistrationClient
 
     private val _uiState = MutableStateFlow(
         RegistrationUiState(
-            email = "lucas@eti.com",
+            email = "",
             emailError = "",
-            username = "lucas_eti",
+            username = "",
             usernameError = "",
-            password = "@Pass123",
+            password = "",
             passwordError = "",
-            passwordConfirmation = "@Pass123",
+            passwordConfirmation = "",
             passwordConfirmationError = "",
             isLoading = false,
             event = RegistrationEvent.NONE,
