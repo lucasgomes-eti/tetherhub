@@ -1,7 +1,6 @@
 package accountOptions
 
 import androidx.compose.ui.text.input.TextFieldValue
-import auth.login.LoginScreen
 import cafe.adriel.voyager.core.model.ScreenModel
 import dsl.navigation.NavigationAction
 import dsl.withScreenModelScope
@@ -78,7 +77,7 @@ class AccountOptionsScreenModel(
                 )
             }
         }.onSuccess {
-            _navigationActions.send(NavigationAction.Replace(LoginScreen))
+            onLogout()
         }
     }
 

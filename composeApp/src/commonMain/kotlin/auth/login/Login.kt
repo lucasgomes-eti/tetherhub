@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -37,10 +39,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import auth.registration.RegistrationScreen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import home.HomeScreen
 import org.jetbrains.compose.resources.painterResource
 import tetherhub.composeapp.generated.resources.Res
 import tetherhub.composeapp.generated.resources.hub
@@ -50,19 +48,12 @@ fun Login(
     loginUiState: LoginUiState,
     onLoginAction: (LoginAction) -> Unit
 ) {
-
-    val navigator = LocalNavigator.currentOrThrow
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
-    when (loginUiState.event) {
-        LoginEvent.NONE -> Unit
-        LoginEvent.SUCCESS -> navigator.replace(HomeScreen())
-    }
-
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -149,7 +140,7 @@ fun Login(
             Spacer(Modifier.height(48.dp))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text("Don't have an account?", style = typography.bodyLarge)
-                OutlinedButton(onClick = { navigator.push(RegistrationScreen) }) {
+                OutlinedButton(onClick = { onLoginAction(LoginAction.Registration) }) {
                     Text(
                         "Create an account",
                         style = typography.bodyMedium,
