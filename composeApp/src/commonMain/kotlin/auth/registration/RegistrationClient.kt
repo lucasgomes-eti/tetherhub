@@ -1,4 +1,4 @@
-package auth.registration.network
+package auth.registration
 
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody

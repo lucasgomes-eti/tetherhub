@@ -45,6 +45,7 @@ fun Rooms(roomsUiState: RoomsUiState, onAction: (RoomsAction) -> Unit) {
             onRefresh = { onAction(RoomsAction.Refresh) }
         ) {
             LazyColumn(
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(16.dp)
             ) {

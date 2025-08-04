@@ -7,8 +7,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import auth.RegisterFcmToken
 import auth.login.LoginScreen
-import auth.registration.network.RegistrationClient
+import auth.registration.RegistrationClient
 import cafe.adriel.voyager.core.model.ScreenModel
 import dev.icerock.moko.permissions.DeniedAlwaysException
 import dev.icerock.moko.permissions.DeniedException
@@ -36,6 +37,13 @@ class HomeScreenModel(
     init {
         askNotificationPermissionConditionally()
         subscribeToLogout()
+        subscribeToRegisterFcmToken()
+    }
+
+    private fun subscribeToRegisterFcmToken() = withScreenModelScope {
+        eventBus.subscribe<RegisterFcmToken> {
+            registerFcmToken()
+        }
     }
 
     private val _navigationActions = Channel<NavigationAction>()
@@ -62,11 +70,15 @@ class HomeScreenModel(
             return@withScreenModelScope
         }
         if (isFcmTokenSet().not()) {
-            registrationClient.registerFcmTokenForUser(FcmTokenRequest(FcmTokenManager.getFcmToken()))
-                .onSuccess {
-                    setFcmToken(true)
-                }
+            registerFcmToken()
         }
+    }
+
+    private suspend fun registerFcmToken() {
+        registrationClient.registerFcmTokenForUser(FcmTokenRequest(FcmTokenManager.getFcmToken()))
+            .onSuccess {
+                setFcmToken(true)
+            }
     }
 
     private suspend fun userIsPersisted(): Boolean {

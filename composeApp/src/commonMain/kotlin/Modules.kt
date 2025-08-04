@@ -2,8 +2,8 @@ import accountOptions.AccountOptionsClient
 import accountOptions.AccountOptionsScreenModel
 import auth.login.LoginClient
 import auth.login.LoginScreenModel
+import auth.registration.RegistrationClient
 import auth.registration.RegistrationScreenModel
-import auth.registration.network.RegistrationClient
 import dsl.eventbus.EventBus
 import friends.FriendsClient
 import friends.FriendsScreenModel

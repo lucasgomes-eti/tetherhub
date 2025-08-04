@@ -1,7 +1,6 @@
 package auth.registration
 
 import RegexConstants
-import auth.registration.network.RegistrationClient
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.flow.MutableStateFlow

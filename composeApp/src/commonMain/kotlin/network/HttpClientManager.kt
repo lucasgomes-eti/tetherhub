@@ -1,11 +1,11 @@
 package network
 
 import DataStoreKeys
-import FcmTokenManager
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import auth.RegisterFcmToken
 import dsl.eventbus.EventBus
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -29,7 +29,6 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
-import request.FcmTokenRequest
 import request.RefreshTokenRequest
 import response.AuthResponse
 import response.TetherHubError
@@ -45,10 +44,7 @@ class HttpClientManager(
     private var _httpClient: HttpClient? = null
 
     suspend fun getClient(): HttpClient {
-        if (_httpClient == null) {
-            _httpClient = createHttpClient()
-        }
-        return _httpClient!!
+        return _httpClient ?: createHttpClient().also { _httpClient = it }
     }
 
     private suspend fun createHttpClient(): HttpClient {
@@ -90,28 +86,19 @@ class HttpClientManager(
                                 contentType(ContentType.Application.Json)
                                 setBody(RefreshTokenRequest(oldTokens?.refreshToken ?: ""))
                             }
-                            return@refreshTokens when (response.status.value) {
+                            val auth = when (response.status.value) {
                                 in 200..299 -> {
-                                    val auth = response.body<AuthResponse>()
-                                    preferences.edit { dataStore ->
-                                        dataStore[stringPreferencesKey(DataStoreKeys.USER_ID)] =
-                                            auth.userId
-                                        dataStore[stringPreferencesKey(DataStoreKeys.TOKEN)] =
-                                            auth.token
-                                        dataStore[stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN)] =
-                                            auth.refreshToken
-                                    }
-
-                                    try {
-                                        client.post("users/register_fcm_token") {
-                                            headers.append("Authorization", "Bearer ${auth.token}")
-                                            contentType(ContentType.Application.Json)
-                                            setBody(FcmTokenRequest(FcmTokenManager.getFcmToken()))
+                                    response.body<AuthResponse>().also { auth ->
+                                        preferences.edit { dataStore ->
+                                            dataStore[stringPreferencesKey(DataStoreKeys.USER_ID)] =
+                                                auth.userId
+                                            dataStore[stringPreferencesKey(DataStoreKeys.TOKEN)] =
+                                                auth.token
+                                            dataStore[stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN)] =
+                                                auth.refreshToken
                                         }
-                                    } catch (_: Exception) {
+                                        eventBus.publish(RegisterFcmToken)
                                     }
-
-                                    BearerTokens(auth.token, auth.refreshToken)
                                 }
 
                                 else -> {
@@ -120,6 +107,9 @@ class HttpClientManager(
                                 }
                             }
 
+                            auth?.let {
+                                BearerTokens(it.token, it.refreshToken)
+                            }
                         }
                     }
                 }

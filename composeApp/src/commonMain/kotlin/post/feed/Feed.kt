@@ -70,6 +70,7 @@ fun Feed(feedUiState: FeedUiState, onFeedAction: (FeedAction) -> Unit) {
             onRefresh = { onFeedAction(FeedAction.Refresh) }
         ) {
             LazyColumn(
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(
                     start = 16.dp,

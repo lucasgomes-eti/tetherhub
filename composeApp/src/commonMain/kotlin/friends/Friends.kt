@@ -59,6 +59,7 @@ fun Friends(uiState: FriendsUiState, onAction: (FriendsAction) -> Unit) {
             onRefresh = { onAction(FriendsAction.Refresh) }
         ) {
             LazyColumn(
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {

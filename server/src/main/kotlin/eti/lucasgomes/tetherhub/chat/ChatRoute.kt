@@ -138,7 +138,6 @@ fun Route.chatRoutes() {
                 } else {
                     serverRooms.removeAt(roomIndex)
                 }
-                // TODO: there's a possible bug where the client disconnects from the socket without closing the receive channel, in this case the room is never cleared.
             }
         }
     }
