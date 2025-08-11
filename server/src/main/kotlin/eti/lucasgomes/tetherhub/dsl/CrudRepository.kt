@@ -54,3 +54,7 @@ suspend inline fun <reified E : Any> MongoDatabase.find(filter: Bson) =
             .find(filter)
             .toList()
     }
+
+infix fun Long.numberOfPagesFor(pageSize: Int): Int {
+    return if (this > 0) ((this + pageSize - 1) / pageSize).toInt() else 0
+}

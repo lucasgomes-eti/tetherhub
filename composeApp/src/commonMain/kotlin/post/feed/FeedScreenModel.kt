@@ -14,11 +14,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import network.Resource
+import network.onError
+import network.onSuccess
 import post.PostClient
 import post.detail.CreatePostScreen
 import post.detail.PostUpdated
 import profile.search.SearchProfileScreen
+import response.PageResponse
 
 class FeedScreenModel(
     private var deepLink: DeepLink? = null,
@@ -29,7 +31,13 @@ class FeedScreenModel(
     private val _uiState =
         MutableStateFlow(
             FeedUiState(
-                posts = emptyList(),
+                posts = PageResponse(
+                    items = emptyList(),
+                    totalPages = 0,
+                    totalItems = 0,
+                    currentPage = 1,
+                    lastPage = true
+                ),
                 isLoading = false,
                 errorMsg = "",
                 searchQuery = ""
@@ -41,7 +49,7 @@ class FeedScreenModel(
     val navigationActions = _navigationActions.receiveAsFlow()
 
     init {
-        fetchPosts()
+        fetchPosts(1)
         subscribeToPostUpdates()
     }
 
@@ -56,33 +64,35 @@ class FeedScreenModel(
     private fun subscribeToPostUpdates() {
         screenModelScope.launch {
             eventBus.subscribe<PostUpdated> {
-                fetchPosts()
+                fetchPosts(1)
             }
         }
     }
 
-    private fun fetchPosts() {
-        screenModelScope.launch {
-            _uiState.update { state -> state.copy(isLoading = true) }
-            when (val response = postClient.getPosts()) {
-                is Resource.Success -> {
-                    _uiState.update { state ->
-                        state.copy(
-                            posts = response.data,
-                            isLoading = false,
-                            errorMsg = ""
-                        )
-                    }
-                }
+    private fun onFetchMore() {
+        if (_uiState.value.posts.lastPage.not()) {
+            val page = _uiState.value.posts.currentPage + 1
+            fetchPosts(page)
+        }
+    }
 
-                is Resource.Error -> {
-                    _uiState.update { state ->
-                        state.copy(
-                            isLoading = false,
-                            errorMsg = "${response.error.internalCode} - ${response.error.message}"
-                        )
-                    }
-                }
+    private fun fetchPosts(page: Int) = withScreenModelScope {
+        _uiState.update { state -> state.copy(isLoading = true) }
+        postClient.getPosts(page).onError {
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    errorMsg = it.formatedMessage
+                )
+            }
+        }.onSuccess {
+            val posts = if (page > 1) _uiState.value.posts.items.toMutableList() else emptyList()
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    errorMsg = "",
+                    posts = it.copy(items = posts + it.items)
+                )
             }
         }
     }
@@ -91,13 +101,14 @@ class FeedScreenModel(
         when (feedAction) {
             is FeedAction.Like -> onPostLiked(feedAction.postId)
             is FeedAction.DismissError -> onDismissError()
-            is FeedAction.Refresh -> fetchPosts()
+            is FeedAction.Refresh -> fetchPosts(1)
             FeedAction.CancelSearch -> onCancelSearch()
             FeedAction.Search -> onSearch()
             is FeedAction.SearchQueryChanged -> onSearchQueryChanged(feedAction.query)
             FeedAction.CreatePost -> onCreatePost()
             FeedAction.NavigateToFriends -> onNavigateToFriends()
             FeedAction.Created -> onCreated()
+            FeedAction.FetchMore -> onFetchMore()
         }
     }
 
@@ -128,25 +139,18 @@ class FeedScreenModel(
         _uiState.update { state -> state.copy(searchQuery = "") }
     }
 
-    private fun onPostLiked(postId: String) {
-        screenModelScope.launch {
-            when (val result = postClient.toggleLike(postId)) {
-                is Resource.Success -> {
-                    _uiState.update { state ->
-                        val postIndex = state.posts.indexOfFirst { it.id == postId }
-                        state.copy(posts = state.posts.toMutableList().apply {
-                            set(postIndex, result.data)
-                        }.toList())
-                    }
+    private fun onPostLiked(postId: String) = withScreenModelScope {
+        postClient.toggleLike(postId).onError {
+            _uiState.update { state -> state.copy(errorMsg = it.formatedMessage) }
+        }.onSuccess {
+            _uiState.update { state ->
+                val postIndex = state.posts.items.indexOfFirst { it.id == postId }
+                val posts = state.posts.items.toMutableList().apply {
+                    set(postIndex, it)
                 }
-
-                is Resource.Error -> {
-                    _uiState.update { state ->
-                        state.copy(
-                            errorMsg = "${result.error.internalCode} - ${result.error.message}"
-                        )
-                    }
-                }
+                state.copy(
+                    posts = state.posts.copy(items = posts)
+                )
             }
         }
     }

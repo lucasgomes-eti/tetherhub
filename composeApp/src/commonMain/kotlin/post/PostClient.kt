@@ -12,12 +12,14 @@ import network.HttpClientManager
 import network.Resource
 import request.CreatePostRequest
 import request.PatchPostContentRequest
+import response.PageResponse
 import response.PostResponse
 
 class PostClient(private val httpClientManager: HttpClientManager) {
-    suspend fun getPosts(): Resource<List<PostResponse>> = httpClientManager.withApiResource {
-        get("/posts")
-    }
+    suspend fun getPosts(page: Int, size: Int = 50): Resource<PageResponse<PostResponse>> =
+        httpClientManager.withApiResource {
+            get("/posts?page=$page&size=$size")
+        }
 
     suspend fun getPostById(postId: String): Resource<PostResponse> =
         httpClientManager.withApiResource {

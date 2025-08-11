@@ -8,6 +8,7 @@ import eti.lucasgomes.tetherhub.user.UserErrors
 import eti.lucasgomes.tetherhub.user.UserRepository
 import org.bson.types.ObjectId
 import request.CreatePostRequest
+import response.PageResponse
 import response.PostResponse
 import response.TetherHubError
 
@@ -39,8 +40,26 @@ class PostService(
             }
         }
 
-    suspend fun findAll(userId: ObjectId): List<PostResponse> {
-        return postRepository.findAll().map { postMapper.fromEntityToPostResponse(it, userId) }
+    suspend fun findAll(
+        userId: ObjectId,
+        page: Int,
+        size: Int
+    ): Either<TetherHubError, PageResponse<PostResponse>> = either {
+        postRepository.findAll(page = page, size = size)
+            .mapLeft { PostErrors.ErrorWhileFetchingPosts(it) }.map { pageEntity ->
+            PageResponse(
+                items = pageEntity.items.map { entity ->
+                    postMapper.fromEntityToPostResponse(
+                        entity,
+                        userId
+                    )
+                },
+                totalPages = pageEntity.totalPages,
+                totalItems = pageEntity.totalItems,
+                currentPage = pageEntity.currentPage,
+                lastPage = pageEntity.lastPage
+            )
+        }.bind()
     }
 
     suspend fun findById(postId: ObjectId, userId: ObjectId): Either<TetherHubError, PostResponse> =

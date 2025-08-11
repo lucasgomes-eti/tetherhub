@@ -38,7 +38,9 @@ fun Route.postRoutes() {
             }
         }
         get {
-            call.respond(postService.findAll(userId))
+            val page = call.request.queryParameters["page"]?.toInt() ?: 1
+            val size = call.request.queryParameters["size"]?.toInt() ?: 20
+            call.respond(postService.findAll(userId = userId, page = page, size = size))
         }
         get("{postId}") {
             val postId = try {

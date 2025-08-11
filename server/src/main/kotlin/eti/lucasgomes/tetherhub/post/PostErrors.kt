@@ -60,4 +60,10 @@ object PostErrors {
         "TH-209",
         "You can only delete your own post!"
     )
+
+    fun ErrorWhileFetchingPosts(cause: Exception) = TetherHubError(
+        HttpStatusCode.InternalServerError.value,
+        "TH-210",
+        "Error while fetching posts from the database. Cause: ${cause.message}"
+    )
 }

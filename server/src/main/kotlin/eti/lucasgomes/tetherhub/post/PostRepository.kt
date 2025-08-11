@@ -4,15 +4,17 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import com.mongodb.MongoException
-import com.mongodb.client.model.DeleteOptions
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
+import eti.lucasgomes.tetherhub.dsl.numberOfPagesFor
+import eti.lucasgomes.tetherhub.dsl.withCollection
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import org.bson.BsonObjectId
 import org.bson.types.ObjectId
+import response.PageResponse
 
 class PostRepository(private val mongoDatabase: MongoDatabase) {
     companion object {
@@ -27,6 +29,22 @@ class PostRepository(private val mongoDatabase: MongoDatabase) {
             e.left()
         }
     }
+
+    suspend fun findAll(page: Int, size: Int): Either<Exception, PageResponse<PostEntity>> =
+        mongoDatabase.withCollection<PostEntity, PageResponse<PostEntity>> {
+            val totalItems = countDocuments()
+            val totalPages = totalItems numberOfPagesFor size
+            val skip = (page - 1) * size
+
+            PageResponse(
+                items = find().sort(Sorts.descending(PostEntity::createdAt.name)).skip(skip)
+                    .limit(size).toList(),
+                totalPages = totalPages,
+                totalItems = totalItems,
+                currentPage = page,
+                lastPage = page >= totalPages
+            )
+        }
 
     suspend fun findAll(): List<PostEntity> {
         return try {

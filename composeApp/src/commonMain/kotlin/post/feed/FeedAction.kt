@@ -10,4 +10,5 @@ sealed class FeedAction {
     data object CreatePost : FeedAction()
     data object NavigateToFriends : FeedAction()
     data object Created : FeedAction()
+    data object FetchMore : FeedAction()
 }
