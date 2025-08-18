@@ -1,12 +1,15 @@
 package messages.chat
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,7 +30,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -36,7 +38,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import home.LocalNavigationAppBar
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
 
@@ -79,7 +81,7 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
                 })
         },
         bottomBar = {
-            Box(
+            Column(
                 modifier = Modifier.fillMaxWidth().background(colorScheme.surfaceContainerLow),
             ) {
                 Row(
@@ -88,7 +90,8 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     OutlinedTextField(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f),
                         value = chatUiState.draft,
                         onValueChange = { onChatAction(ChatAction.DraftChanged(it)) },
                         placeholder = { Text("Type something") },
@@ -106,23 +109,19 @@ fun Chat(chatUiState: ChatUiState, onChatAction: (ChatAction) -> Unit) {
                         )
                     }
                 }
+                Spacer(modifier = Modifier.imePadding())
             }
         }) { innerPadding ->
-        val lazyListState =
-            rememberLazyListState(if (chatUiState.messages.isNotEmpty()) chatUiState.messages.lastIndex else 0)
-
-        LaunchedEffect(chatUiState.messages) {
-            if (lazyListState.canScrollForward) {
-                lazyListState.scrollToItem(chatUiState.messages.lastIndex)
-            }
-        }
+        val lazyListState = rememberLazyListState()
 
         LazyColumn(
             state = lazyListState,
+            reverseLayout = true,
             modifier = Modifier.fillMaxHeight().padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.Bottom),
             contentPadding = PaddingValues(16.dp),
         ) {
+
             items(chatUiState.messages) {
                 ChatItem(it)
             }
