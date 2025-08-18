@@ -28,6 +28,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import response.FriendshipSolicitationResponse
 import response.PublicProfileResponse
+import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,6 +96,7 @@ fun Friends(uiState: FriendsUiState, onAction: (FriendsAction) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun FriendRequest(friendRequest: FriendshipSolicitationResponse, onAccept: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package post.detail
 
 import DATE_TIME_PRESENTATION_FORMAT
@@ -38,6 +40,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import response.PostResponse
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun Post(post: PostResponse, onLikeClicked: () -> Unit) {

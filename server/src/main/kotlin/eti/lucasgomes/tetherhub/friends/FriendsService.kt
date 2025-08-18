@@ -19,7 +19,9 @@ import request.FriendshipSolicitationRequest
 import response.FriendshipSolicitationResponse
 import response.PublicProfileResponse
 import response.TetherHubError
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class FriendsService(
     private val friendsRepository: FriendsRepository,
     private val friendsMapper: FriendsMapper,

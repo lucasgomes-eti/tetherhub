@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import network.HttpClientManager
 import network.Resource
 import request.CreateChatRequest
@@ -26,6 +25,7 @@ import request.MessageRequest
 import response.ChatResponse
 import response.MessageResponse
 import response.MessageType
+import kotlin.time.ExperimentalTime
 
 class ChatClient(private val httpClientManager: HttpClientManager) {
 
@@ -47,6 +47,7 @@ class ChatClient(private val httpClientManager: HttpClientManager) {
         outgoingMessageRequest.send(messageRequest)
     }
 
+    @OptIn(ExperimentalTime::class)
     fun connectToChat(chatId: String): Flow<MessageResponse> = flow {
         try {
             httpClientManager.getClient().webSocket(
@@ -70,7 +71,7 @@ class ChatClient(private val httpClientManager: HttpClientManager) {
                     senderId = "tetherhub",
                     senderUsername = "tetherhub",
                     content = "Disconnected from server. Cause: ${e.message}",
-                    at = Clock.System.now(),
+                    at = kotlin.time.Clock.System.now(),
                     type = MessageType.SYSTEM
                 )
             )

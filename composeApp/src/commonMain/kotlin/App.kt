@@ -6,7 +6,6 @@ import dev.icerock.moko.permissions.compose.BindEffect
 import dsl.eventbus.EventBus
 import dsl.eventbus.LocalEventBus
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import splash.SplashScreen
 import theme.TetherHubTheme
@@ -15,13 +14,11 @@ import theme.TetherHubTheme
 @Preview
 fun App(deepLink: DeepLink? = null) {
     TetherHubTheme {
-        KoinContext {
-            val eventBus = koinInject<EventBus>()
-            val permissionsController = koinInject<PermissionsController>()
-            BindEffect(permissionsController)
-            CompositionLocalProvider(LocalEventBus provides eventBus) {
-                Navigator(SplashScreen(deepLink))
-            }
+        val eventBus = koinInject<EventBus>()
+        val permissionsController = koinInject<PermissionsController>()
+        BindEffect(permissionsController)
+        CompositionLocalProvider(LocalEventBus provides eventBus) {
+            Navigator(SplashScreen(deepLink))
         }
     }
 }

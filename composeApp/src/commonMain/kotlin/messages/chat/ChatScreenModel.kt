@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
@@ -25,7 +24,10 @@ import messages.chat.data.MessageRepository
 import network.onSuccess
 import request.MessageRequest
 import response.MessageType
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 class ChatScreenModel(
     private val chatId: String,
     private val chatClient: ChatClient,
@@ -89,6 +91,7 @@ class ChatScreenModel(
             chatClient.connectToChat(chatId).collect {
                 val messages = _uiState.value.messages.toMutableList().apply {
                     add(
+                        index = 0,
                         LocalMessage(
                             content = it.content,
                             timeStamp = it.at.toLocalDateTime(TimeZone.currentSystemDefault())

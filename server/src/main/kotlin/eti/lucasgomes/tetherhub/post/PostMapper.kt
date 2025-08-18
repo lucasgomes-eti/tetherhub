@@ -1,10 +1,12 @@
 package eti.lucasgomes.tetherhub.post
 
-import kotlinx.datetime.Clock
 import org.bson.types.ObjectId
 import request.CreatePostRequest
 import response.PostResponse
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class PostMapper {
     fun buildPost(request: CreatePostRequest, author: String) =
         PostEntity(

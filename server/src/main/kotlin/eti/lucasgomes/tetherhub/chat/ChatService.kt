@@ -10,14 +10,17 @@ import com.google.firebase.messaging.Message
 import eti.lucasgomes.tetherhub.user.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.bson.types.ObjectId
 import request.CreateChatRequest
 import response.ChatResponse
 import response.MessageResponse
 import response.TetherHubError
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 class ChatService(
     private val chatRepository: ChatRepository,
     private val userRepository: UserRepository,

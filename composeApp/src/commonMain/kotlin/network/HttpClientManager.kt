@@ -90,8 +90,6 @@ class HttpClientManager(
                                 in 200..299 -> {
                                     response.body<AuthResponse>().also { auth ->
                                         preferences.edit { dataStore ->
-                                            dataStore[stringPreferencesKey(DataStoreKeys.USER_ID)] =
-                                                auth.userId
                                             dataStore[stringPreferencesKey(DataStoreKeys.TOKEN)] =
                                                 auth.token
                                             dataStore[stringPreferencesKey(DataStoreKeys.REFRESH_TOKEN)] =

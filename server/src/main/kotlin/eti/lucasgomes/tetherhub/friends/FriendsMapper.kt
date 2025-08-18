@@ -1,11 +1,13 @@
 package eti.lucasgomes.tetherhub.friends
 
 import eti.lucasgomes.tetherhub.user.UserEntity
-import kotlinx.datetime.Clock
 import org.bson.types.ObjectId
 import request.FriendshipSolicitationRequest
 import response.FriendshipSolicitationResponse
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class FriendsMapper {
     fun buildEntity(
         friendshipSolicitation: FriendshipSolicitationRequest,

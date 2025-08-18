@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package eti.lucasgomes.tetherhub.chat
 
 import co.touchlab.stately.collections.ConcurrentMutableList
@@ -19,7 +21,6 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.bson.types.ObjectId
 import org.koin.ktor.ext.inject
@@ -28,6 +29,8 @@ import request.MessageRequest
 import response.ChatResponse
 import response.MessageResponse
 import response.MessageType
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 data class ServerRooms(
     val chat: ChatResponse,

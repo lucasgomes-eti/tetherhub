@@ -8,14 +8,16 @@ import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
-import eti.lucasgomes.tetherhub.dsl.numberOfPagesFor
 import eti.lucasgomes.tetherhub.dsl.withCollection
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
+import numberOfPagesFor
 import org.bson.BsonObjectId
 import org.bson.types.ObjectId
 import response.PageResponse
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class PostRepository(private val mongoDatabase: MongoDatabase) {
     companion object {
         const val POST_COLLECTION = "post"
@@ -45,17 +47,6 @@ class PostRepository(private val mongoDatabase: MongoDatabase) {
                 lastPage = page >= totalPages
             )
         }
-
-    suspend fun findAll(): List<PostEntity> {
-        return try {
-            mongoDatabase.getCollection<PostEntity>(POST_COLLECTION).withDocumentClass<PostEntity>()
-                .find()
-                .sort(Sorts.descending(PostEntity::createdAt.name))
-                .toList()
-        } catch (e: MongoException) {
-            emptyList()
-        }
-    }
 
     suspend fun findById(postId: BsonObjectId): PostEntity? {
         return try {
