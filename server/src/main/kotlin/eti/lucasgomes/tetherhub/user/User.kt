@@ -2,7 +2,6 @@ package eti.lucasgomes.tetherhub.user
 
 import eti.lucasgomes.tetherhub.dsl.MongoEntity
 import eti.lucasgomes.tetherhub.user.UserRepository.Companion.USER_COLLECTION
-import io.ktor.server.auth.Principal
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import org.bson.codecs.pojo.annotations.BsonId
@@ -27,7 +26,7 @@ data class User(
     val email: Email,
     val username: Username,
     val passwordHash: PasswordHash
-) : Principal
+)
 
 //db
 @MongoEntity(USER_COLLECTION)

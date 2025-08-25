@@ -14,7 +14,7 @@ val DATE_TIME_PRESENTATION_FORMAT = LocalDateTime.Format {
         dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
         chars(", ")
     }
-    dayOfMonth(Padding.NONE)
+    day(padding = Padding.NONE)
     char(' ')
     monthName(MonthNames.ENGLISH_ABBREVIATED)
     char(' ')

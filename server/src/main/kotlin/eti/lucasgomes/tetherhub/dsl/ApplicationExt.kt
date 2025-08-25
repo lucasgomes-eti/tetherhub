@@ -6,6 +6,7 @@ import eti.lucasgomes.tetherhub.user.User
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.principal
+import io.ktor.server.routing.RoutingContext
 import io.ktor.util.pipeline.PipelineContext
 import org.bson.types.ObjectId
 import javax.naming.AuthenticationException
@@ -28,18 +29,22 @@ val PipelineContext<*, ApplicationCall>.userEmail: String
 val PipelineContext<*, ApplicationCall>.username: String
     get() = call.username
 
-suspend fun ApplicationCall.getParameterAsObjectIdOrRespond(
+val RoutingContext.userId: ObjectId
+    get() = call.userId
+
+val RoutingContext.userEmail: String
+    get() = call.userEmail
+
+val RoutingContext.username: String
+    get() = call.username
+
+suspend fun RoutingContext.getParameterAsObjectIdOrRespond(
     key: String,
     response: suspend ApplicationCall.(Exception) -> Unit
 ): Either<Unit, ObjectId> = either {
     try {
-        ObjectId(parameters[key])
+        ObjectId(call.parameters[key])
     } catch (e: Exception) {
-        raise(response(e))
+        raise(call.response(e))
     }
 }
-
-suspend fun PipelineContext<*, ApplicationCall>.getParameterAsObjectIdOrRespond(
-    key: String,
-    response: suspend ApplicationCall.(Exception) -> Unit
-) = call.getParameterAsObjectIdOrRespond(key, response)
