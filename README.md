@@ -24,7 +24,7 @@ This is a Kotlin Multiplatform project targeting Android, iOS, Server.
 ## Features
 
 |                |                                    |                                           |                                           |                                |
-| -------------- | ---------------------------------- | ----------------------------------------- | ----------------------------------------- | ------------------------------ |
+|----------------|------------------------------------|-------------------------------------------|-------------------------------------------|--------------------------------|
 | Authentication | ![image](screenshots/login.png)    | ![image](screenshots/registration.png)    |                                           |                                |
 | Posts          | ![image](screenshots/feed.png)     | ![image](screenshots/new_post.png)        |                                           |                                |
 | Chat           | ![image](screenshots/messages.png) | ![image](screenshots/new_chat.png)        | ![image](screenshots/new_chat_filled.png) | ![image](screenshots/chat.png) |
