@@ -24,9 +24,27 @@ This is a Kotlin Multiplatform project targeting Android, iOS, Server.
 ## Features
 
 |                |                                    |                                           |                                           |                                |
-|----------------|------------------------------------|-------------------------------------------|-------------------------------------------|--------------------------------|
+| -------------- | ---------------------------------- | ----------------------------------------- | ----------------------------------------- | ------------------------------ |
 | Authentication | ![image](screenshots/login.png)    | ![image](screenshots/registration.png)    |                                           |                                |
 | Posts          | ![image](screenshots/feed.png)     | ![image](screenshots/new_post.png)        |                                           |                                |
 | Chat           | ![image](screenshots/messages.png) | ![image](screenshots/new_chat.png)        | ![image](screenshots/new_chat_filled.png) | ![image](screenshots/chat.png) |
 | Friends        | ![image](screenshots/friends.png)  | ![image](screenshots/friends_search.png)  | ![image](screenshots/friend_request.png)  |                                |
 | Profile        | ![image](screenshots/profile.png)  | ![image](screenshots/account_options.png) |                                           |                                |
+
+## Tecnologies and core concepts
+
+### Feature based architecture
+
+The project is divided by features and inside each feature package you'll find a MVVM like architecture. Screens are stateless, the state is managed in `ScreenModel` files. Network requests are made in `Client` files. Request and Response models are in the `shared` module, so consistency between server and client is guaranteed.
+
+### Coroutines & Flow
+
+Both the Ktor backend and the multiplaftorm app are using `Flow` and `suspended` functions all over the place.
+
+### Arrow
+
+The `Either` and `Raise` api are used a lot in the server, so errors are returned as values and not thown as exceptions.
+
+### WebSocket and FirebaseMessaging
+
+The chat feature is achieved using WebSockets, every active room is a socket and sockets are created and deleted based on if there's an user connected. If an user from the room is not connected to the socket when a message is sent(very common scenario) the message is sent through FirebaseMessaging and is received as a push notification in the user's device.
